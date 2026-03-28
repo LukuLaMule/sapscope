@@ -1,0 +1,36 @@
+# Environment files — never commit secrets
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Node (if added later)
+node_modules/
+
+# Certificates
+certbot/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Agent SDK (nwrfcsdk — proprietary, never commit)
+nwrfcsdk/
+*.so
