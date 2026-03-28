@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAPscope</title>
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self';
+                 style-src 'self' https://fonts.googleapis.com;
+                 font-src https://fonts.gstatic.com;
+                 connect-src 'self' https:;
+                 img-src 'none';">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Login screen ────────────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <form id="login-form" class="login-box">
+    <div class="login-logo">SAP<span>scope</span></div>
+
+    <input
+      id="login-url"
+      type="url"
+      placeholder="https://app.sapscope.io"
+      autocomplete="url"
+      spellcheck="false"
+      required
+    >
+    <input
+      id="login-email"
+      type="email"
+      placeholder="email"
+      autocomplete="email"
+      required
+    >
+    <input
+      id="login-pass"
+      type="password"
+      placeholder="password"
+      autocomplete="current-password"
+      required
+    >
+
+    <div id="login-error" class="login-error"></div>
+
+    <button id="login-btn" type="submit">connect</button>
+  </form>
+</div>
+
+<!-- ── App screen ──────────────────────────────────────────────────────────── -->
+<div id="app-screen" style="display:none">
+  <div id="app">
+
+    <div id="topbar">
+      <div class="logo">SAP<span>scope</span></div>
+      <div id="status-dot"></div>
+      <select id="client-select"></select>
+      <div class="spacer"></div>
+      <button id="logout-btn">logout</button>
+    </div>
+
+    <div id="main">
+      <div id="sidebar">
+        <div id="sidebar-header">Systems</div>
+        <div id="system-list"></div>
+      </div>
+      <div id="content">
+        <div class="placeholder">Select a system.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
