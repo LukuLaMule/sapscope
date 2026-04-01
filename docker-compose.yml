@@ -38,6 +38,12 @@ services:
       REGISTRATION_ENABLED:   ${REGISTRATION_ENABLED:-true}
       # Self-hosted uniquement : clé de licence générée par generate_license.py
       LICENSE_KEY:            ${LICENSE_KEY:-}
+      # Stripe (SaaS billing)
+      STRIPE_SECRET_KEY:       ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET:   ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_SOLO:       ${STRIPE_PRICE_SOLO:-}
+      STRIPE_PRICE_TEAM:       ${STRIPE_PRICE_TEAM:-}
+      STRIPE_PRICE_ENTERPRISE: ${STRIPE_PRICE_ENTERPRISE:-}
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')\" || exit 1"]
       interval: 10s
