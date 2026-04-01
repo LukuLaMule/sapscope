@@ -1,68 +1,68 @@
-# Administration — Utilisateurs
+# Administration — Users
 
-**Accès :** Compte admin uniquement
-
----
-
-## Ouvrir le panneau d'administration
-
-1. Se connecter avec un compte admin
-2. Cliquer **⚙ admin** dans la barre du haut
-3. Onglet **Utilisateurs** sélectionné par défaut
+**Access:** Admin account only
 
 ---
 
-## Créer un utilisateur
+## Open the administration panel
 
-1. Dans l'onglet **Utilisateurs** → cliquer **Nouvel utilisateur**
-2. Saisir l'**email** du consultant
-3. Saisir un **mot de passe temporaire**
-4. Valider → l'utilisateur apparaît dans la liste
-
-> L'utilisateur peut changer son mot de passe depuis son profil.
+1. Log in with an admin account
+2. Click **⚙ admin** in the top bar
+3. The **Users** tab is selected by default
 
 ---
 
-## Assigner un client à un utilisateur
+## Create a user
 
-1. Dans la liste des utilisateurs, cliquer sur l'utilisateur concerné
-2. Dans la section **Clients assignés** → cliquer **Assigner**
-3. Sélectionner le client dans la liste → confirmer
+1. In the **Users** tab → click **New user**
+2. Enter the consultant's **email**
+3. Enter a **temporary password**
+4. Confirm → the user appears in the list
 
-L'utilisateur voit désormais ce client dans son menu déroulant.
-
----
-
-## Retirer l'accès à un client
-
-1. Dans la fiche de l'utilisateur → section **Clients assignés**
-2. Cliquer **✕** à côté du client concerné → confirmer
+> The user can change their password from their profile.
 
 ---
 
-## Supprimer un utilisateur
+## Assign a client to a user
 
-1. Dans la liste des utilisateurs → cliquer **Supprimer** à côté de l'utilisateur
-2. Confirmer la suppression
+1. In the user list, click the relevant user
+2. In the **Assigned clients** section → click **Assign**
+3. Select the client from the list → confirm
 
-> La suppression est immédiate et irréversible. Les snapshots du client ne sont pas affectés.
+The user can now see this client in their dropdown menu.
 
 ---
 
-## API directe (pour automatisation)
+## Remove access to a client
+
+1. In the user profile → **Assigned clients** section
+2. Click **✕** next to the relevant client → confirm
+
+---
+
+## Delete a user
+
+1. In the user list → click **Delete** next to the user
+2. Confirm deletion
+
+> Deletion is immediate and irreversible. The client's snapshots are not affected.
+
+---
+
+## Direct API (for automation)
 
 ```bash
-# Créer un utilisateur
+# Create a user
 curl -X POST https://sapscope.luku.fr/api/v1/admin/users \
-  -H "Authorization: Bearer <token_admin>" \
+  -H "Authorization: Bearer <admin_token>" \
   -H "Content-Type: application/json" \
-  -d '{"email": "consultant@cabinet.fr", "password": "motdepasse123"}'
+  -d '{"email": "consultant@firm.com", "password": "password123"}'
 
-# Assigner un client à un utilisateur
+# Assign a client to a user
 curl -X POST https://sapscope.luku.fr/api/v1/admin/users/<user_id>/clients/<client_id> \
-  -H "Authorization: Bearer <token_admin>"
+  -H "Authorization: Bearer <admin_token>"
 
-# Retirer un client d'un utilisateur
+# Remove a client from a user
 curl -X DELETE https://sapscope.luku.fr/api/v1/admin/users/<user_id>/clients/<client_id> \
-  -H "Authorization: Bearer <token_admin>"
+  -H "Authorization: Bearer <admin_token>"
 ```

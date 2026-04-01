@@ -1,53 +1,53 @@
-# Diagnostic IA
+# AI Diagnostic
 
-**Durée :** 10 à 30 secondes (génération)
-
----
-
-## Lancer un diagnostic
-
-1. Ouvrir le **détail d'un système** (cliquer sur un SID dans la sidebar)
-2. La section **Diagnostic IA** est affichée en haut de la vue
-3. Si aucun diagnostic n'existe encore → cliquer **Générer le diagnostic**
-4. Choisir la **langue** souhaitée dans le sélecteur (Français, English, Deutsch…)
-5. Patienter pendant la génération (10 à 30 secondes)
+**Duration:** 10 to 30 seconds (generation)
 
 ---
 
-## Relancer un diagnostic
+## Run a diagnostic
 
-Un diagnostic est mis en cache. Pour forcer une nouvelle analyse :
-- Cliquer **Regénérer** (remplace le diagnostic existant)
-
-> Utile après une collecte fraîche ou un changement de kernel/SP.
-
----
-
-## Ce que le diagnostic contient
-
-- **Résumé de l'état du système** (kernel, composants principaux, niveau de patch)
-- **Points d'attention** identifiés (composants en retard de SP, kernel ancien, etc.)
-- **Recommandations** actionnables pour le consultant Basis
-- **Analyse des objets custom** si présents (volume, types)
+1. Open a **system detail** (click a SID in the sidebar)
+2. The **AI Diagnostic** section is displayed at the top of the view
+3. If no diagnostic exists yet → click **Generate diagnostic**
+4. Choose the desired **language** from the selector (English, Français, Deutsch…)
+5. Wait for generation (10 to 30 seconds)
 
 ---
 
-## Exporter le diagnostic
+## Re-run a diagnostic
 
-Cliquer **Imprimer / Exporter PDF** pour générer un rapport PDF complet incluant :
-- Informations système
-- Tableau des composants
-- Tableau des support packages
-- Diagnostic IA
-- Objets custom ABAP
+A diagnostic is cached. To force a new analysis:
+- Click **Regenerate** (replaces the existing diagnostic)
 
-> Le PDF s'ouvre dans un nouvel onglet → utiliser **Ctrl+P** / **Cmd+P** pour imprimer ou sauvegarder.
+> Useful after a fresh collection or a kernel/SP change.
 
 ---
 
-## Problèmes courants
+## What the diagnostic contains
 
-| Symptôme | Cause | Solution |
+- **System health summary** (kernel, main components, patch level)
+- **Identified issues** (components behind on SPs, outdated kernel, etc.)
+- **Actionable recommendations** for the Basis consultant
+- **Custom object analysis** if present (volume, types)
+
+---
+
+## Export the diagnostic
+
+Click **Print / Export PDF** to generate a full PDF report including:
+- System information
+- Components table
+- Support Packages table
+- AI diagnostic
+- Custom ABAP objects
+
+> The PDF opens in a new tab → use **Ctrl+P** / **Cmd+P** to print or save.
+
+---
+
+## Common issues
+
+| Symptom | Cause | Solution |
 |---|---|---|
-| Génération bloquée | Timeout API Claude | Réessayer dans quelques secondes |
-| Diagnostic en anglais malgré choix Français | Langue non sauvegardée | Sélectionner à nouveau et regénérer |
+| Generation stuck | Claude API timeout | Retry in a few seconds |
+| Diagnostic in English despite French selection | Language not saved | Re-select and regenerate |

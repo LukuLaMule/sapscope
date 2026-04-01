@@ -1,37 +1,37 @@
-# Vue Landscape — Vue d'ensemble du paysage SAP
+# Landscape View — SAP System Overview
 
-**Durée :** 30 secondes
-
----
-
-## Accéder à la vue Landscape
-
-1. Se connecter à SAPscope
-2. Sélectionner un **client** dans le menu déroulant (barre du haut)
-3. Cliquer **⊞ LANDSCAPE** en haut de la sidebar gauche
+**Duration:** 30 seconds
 
 ---
 
-## Ce que la vue affiche
+## Access the Landscape view
 
-- **Tous les systèmes SAP** du client sur une seule page (une carte par SID)
-- Pour chaque système :
-  - SID + hôte
-  - Nombre de composants
-  - Date du dernier snapshot
-  - Badge **⚠ agent inactif** si la dernière collecte date de plus de 24h
+1. Log in to SAPscope
+2. Select a **client** from the dropdown (top bar)
+3. Click **⊞ LANDSCAPE** at the top of the left sidebar
 
 ---
 
-## Changer de client
+## What the view shows
 
-Utiliser le **menu déroulant** dans la barre du haut — la liste des systèmes se met à jour automatiquement.
+- **All SAP systems** for the client on a single page (one card per SID)
+- For each system:
+  - SID + host
+  - Number of components
+  - Date of the last snapshot
+  - **⚠ agent inactive** badge if the last collection is more than 24h old
 
 ---
 
-## Indicateurs à surveiller
+## Switch client
 
-| Indicateur | Signification | Action |
+Use the **dropdown menu** in the top bar — the system list updates automatically.
+
+---
+
+## Indicators to watch
+
+| Indicator | Meaning | Action |
 |---|---|---|
-| Badge **⚠ agent inactif** | L'agent n'a pas collecté depuis >24h | Vérifier que le service agent tourne sur le serveur client |
-| Aucun système affiché | Client sans snapshot | Lancer une première collecte via l'agent |
+| **⚠ agent inactive** badge | Agent has not collected in >24h | Check that the agent service is running on the client server |
+| No systems displayed | Client has no snapshot yet | Run a first collection via the agent |

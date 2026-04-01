@@ -1,53 +1,53 @@
-# Vue détail d'un système SAP
+# System Detail View
 
-**Durée :** 1 à 2 minutes
-
----
-
-## Accéder au détail d'un système
-
-1. Dans la sidebar, cliquer sur le **SID** du système souhaité
-2. La zone principale affiche le snapshot le plus récent
+**Duration:** 1 to 2 minutes
 
 ---
 
-## Contenu affiché
+## Access a system's detail
 
-### Informations système
-- SID, hôte, kernel, base de données
-- Date et heure de la collecte
+1. In the sidebar, click the **SID** of the desired system
+2. The main area displays the most recent snapshot
 
-### Composants installés
-Tableau complet des composants SAP avec :
-- Nom du composant
+---
+
+## Contents
+
+### System information
+- SID, host, kernel, database
+- Collection date and time
+
+### Installed components
+Full table of SAP components with:
+- Component name
 - Release
-- SP Level (niveau Support Package)
+- SP Level (Support Package level)
 - Description
 
-> Utiliser la **barre de recherche** au-dessus du tableau pour filtrer.
+> Use the **search bar** above the table to filter results.
 
-### Support Packages appliqués
-Liste des patches appliqués avec :
-- Composant concerné
-- Numéro de patch
+### Applied Support Packages
+List of applied patches with:
+- Affected component
+- Patch number
 - Type
-- Date d'application
+- Application date
 
-### Objets custom ABAP
-Graphique donut + tableau des développements Z/Y :
-- Répartition par type (programme, fonction, classe, table, etc.)
-- Nombre total d'objets custom
-
----
-
-## Filtrer les données
-
-Chaque tableau dispose d'une barre de recherche : taper un terme filtre les résultats en temps réel.
+### Custom ABAP objects
+Donut chart + table of Z/Y developments:
+- Breakdown by type (program, function, class, table, etc.)
+- Total number of custom objects
 
 ---
 
-## Naviguer dans l'historique
+## Filter data
 
-Si le système a plusieurs snapshots, une **ligne Historique** apparaît sous le titre :
-- Cliquer sur une **date** pour charger ce snapshot
-- Cliquer sur **↔** pour comparer deux snapshots (voir guide Diff)
+Each table has a search bar — typing a term filters results in real time.
+
+---
+
+## Navigate history
+
+If the system has multiple snapshots, a **History row** appears below the title:
+- Click a **date** to load that snapshot
+- Click **↔** to compare two snapshots (see Diff guide)
