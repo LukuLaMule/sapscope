@@ -1,50 +1,50 @@
-# Comparaison de snapshots (Diff)
+# Snapshot Comparison (Diff)
 
-**Durée :** quelques secondes
-
----
-
-## Quand utiliser le diff ?
-
-- Après une mise à jour kernel ou application de Support Packages → vérifier ce qui a changé
-- Avant/après une migration → documenter l'état
-- Audit de changements non planifiés
+**Duration:** a few seconds
 
 ---
 
-## Lancer un diff
+## When to use the diff?
 
-1. Ouvrir le **détail d'un système**
-2. La **ligne Historique** apparaît si le système a plusieurs snapshots
-3. Cliquer sur **↔** à côté d'un snapshot ancien
-4. Le diff se calcule et s'affiche immédiatement
-
-> Le snapshot actif (affiché) est comparé au snapshot de la date cliquée.
+- After a kernel update or Support Package application → verify what changed
+- Before/after a migration → document the state
+- Audit of unplanned changes
 
 ---
 
-## Ce que le diff affiche
+## Run a diff
 
-### Changements système
-Modifications des paramètres globaux (kernel, base de données, hôte…)
+1. Open a **system detail**
+2. The **History row** appears if the system has multiple snapshots
+3. Click **↔** next to an older snapshot
+4. The diff is calculated and displayed immediately
 
-| Paramètre | Avant | Après |
+> The active snapshot (currently displayed) is compared to the snapshot of the clicked date.
+
+---
+
+## What the diff shows
+
+### System changes
+Modifications to global parameters (kernel, database, host…)
+
+| Parameter | Before | After |
 |---|---|---|
 | Kernel | 7.53 | 7.54 |
 
-### Composants
-- **Ajoutés** (en vert) — nouveaux composants installés
-- **Supprimés** (en rouge) — composants désinstallés
-- **Modifiés** — changement de SP Level
+### Components
+- **Added** (green) — newly installed components
+- **Removed** (red) — uninstalled components
+- **Changed** — SP Level change
 
 ### Support Packages
-- Patches ajoutés, supprimés ou modifiés entre les deux snapshots
+- Patches added, removed, or modified between the two snapshots
 
-### Objets custom ABAP
-- Delta du nombre total d'objets (ex : +12 programmes Z)
+### Custom ABAP objects
+- Delta of the total object count (e.g. +12 Z programs)
 
 ---
 
-## Revenir à la vue normale
+## Return to normal view
 
-Cliquer sur le système dans la sidebar pour recharger la vue détail standard.
+Click the system in the sidebar to reload the standard detail view.

@@ -1,40 +1,40 @@
-# Export PDF
+# PDF Export
 
-**Durée :** 5 secondes
-
----
-
-## Générer un rapport PDF
-
-1. Ouvrir le **détail d'un système**
-2. Cliquer **Imprimer / Exporter PDF** (bouton en bas de la vue)
-3. Un nouvel onglet s'ouvre avec le rapport formaté
-4. **Ctrl+P** (Windows/Linux) ou **Cmd+P** (Mac) → choisir **Enregistrer en PDF**
+**Duration:** 5 seconds
 
 ---
 
-## Contenu du rapport
+## Generate a PDF report
 
-| Section | Contenu |
+1. Open a **system detail**
+2. Click **Print / Export PDF** (button at the bottom of the view)
+3. A new tab opens with the formatted report
+4. **Ctrl+P** (Windows/Linux) or **Cmd+P** (Mac) → choose **Save as PDF**
+
+---
+
+## Report contents
+
+| Section | Content |
 |---|---|
-| En-tête | SID, hôte, date du snapshot, date du rapport |
-| Diagnostic IA | Analyse complète générée par l'IA |
-| Composants | Tableau complet (composant, release, SP level) |
-| Support Packages | Liste des patches appliqués |
-| Objets custom ABAP | Répartition par type si présents |
+| Header | SID, host, snapshot date, report date |
+| AI Diagnostic | Full AI-generated analysis |
+| Components | Full table (component, release, SP level) |
+| Support Packages | List of applied patches |
+| Custom ABAP objects | Breakdown by type if present |
 
 ---
 
-## Conseils d'impression
+## Print tips
 
-- Format **A4 portrait** recommandé
-- Cocher **Graphiques d'arrière-plan** dans les options d'impression pour conserver les couleurs
-- Désactiver les **en-têtes et pieds de page** du navigateur pour un rendu plus propre
+- **A4 portrait** format recommended
+- Check **Background graphics** in print options to preserve colors
+- Disable browser **headers and footers** for a cleaner output
 
 ---
 
-## Cas d'usage typiques
+## Typical use cases
 
-- Rapport de fin de mission à remettre au client
-- Document de référence avant une mise à jour SAP
-- Archivage de l'état d'un système à une date donnée
+- End-of-mission report to hand over to the client
+- Reference document before an SAP update
+- Archiving the state of a system at a given date

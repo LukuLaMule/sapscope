@@ -1,23 +1,23 @@
-# Documentation SAPscope
+# SAPscope Documentation
 
-## Guides utilisateur
+## User Guides
 
-| # | Guide | Public |
+| # | Guide | Audience |
 |---|---|---|
-| 01 | [Connexion](guide-01-connexion.md) | Tous |
-| 02 | [Vue Landscape](guide-02-landscape.md) | Tous |
-| 03 | [Détail d'un système](guide-03-detail-systeme.md) | Tous |
-| 04 | [Diagnostic IA](guide-04-diagnostic-ia.md) | Tous |
-| 05 | [Comparaison de snapshots (Diff)](guide-05-diff.md) | Tous |
-| 06 | [Export PDF](guide-06-export-pdf.md) | Tous |
-| 07 | [Admin — Utilisateurs](guide-07-admin-utilisateurs.md) | Admin |
-| 08 | [Admin — Clients & tokens](guide-08-admin-clients-tokens.md) | Admin |
+| 01 | [Login](guide-01-connexion.md) | All |
+| 02 | [Landscape View](guide-02-landscape.md) | All |
+| 03 | [System Detail](guide-03-detail-systeme.md) | All |
+| 04 | [AI Diagnostic](guide-04-diagnostic-ia.md) | All |
+| 05 | [Snapshot Comparison (Diff)](guide-05-diff.md) | All |
+| 06 | [PDF Export](guide-06-export-pdf.md) | All |
+| 07 | [Admin — Users](guide-07-admin-utilisateurs.md) | Admin |
+| 08 | [Admin — Clients & Tokens](guide-08-admin-clients-tokens.md) | Admin |
 
-## Documentation technique
+## Technical Documentation
 
-| Fichier | Description |
+| File | Description |
 |---|---|
-| [sap-rfc-user-setup.md](sap-rfc-user-setup.md) | Création de l'utilisateur RFC `SAPSCOPE` côté SAP |
-| [ZSAPSCOPE_SETUP.abap](ZSAPSCOPE_SETUP.abap) | Script ABAP — installation standard |
-| [ZSAPSCOPE_SETUP_CUA.abap](ZSAPSCOPE_SETUP_CUA.abap) | Script ABAP — installation avec CUA |
-| [ZSAPSCOPE_SETUP_SOLMAN.abap](ZSAPSCOPE_SETUP_SOLMAN.abap) | Script ABAP — installation via Solution Manager |
+| [sap-rfc-user-setup.md](sap-rfc-user-setup.md) | Creating the `SAPSCOPE` RFC user on the SAP side |
+| [ZSAPSCOPE_SETUP.abap](ZSAPSCOPE_SETUP.abap) | ABAP script — standard installation |
+| [ZSAPSCOPE_SETUP_CUA.abap](ZSAPSCOPE_SETUP_CUA.abap) | ABAP script — installation with CUA |
+| [ZSAPSCOPE_SETUP_SOLMAN.abap](ZSAPSCOPE_SETUP_SOLMAN.abap) | ABAP script — installation via Solution Manager |

@@ -1,87 +1,87 @@
-# Administration — Clients et tokens d'ingestion
+# Administration — Clients and Ingestion Tokens
 
-**Accès :** Compte admin uniquement
+**Access:** Admin account only
 
 ---
 
 ## Concepts
 
-- **Client** = une entreprise (ex : ACME Industries). Regroupe tous ses systèmes SAP.
-- **Token** = clé d'authentification utilisée par l'agent de collecte pour envoyer des snapshots à SAPscope.
+- **Client** = a company (e.g. ACME Industries). Groups all its SAP systems.
+- **Token** = authentication key used by the collection agent to send snapshots to SAPscope.
 
 ---
 
-## Créer un client
+## Create a client
 
-1. **⚙ admin** → onglet **Clients**
-2. Cliquer **Nouveau client**
-3. Saisir le **nom du client** → valider
+1. **⚙ admin** → **Clients** tab
+2. Click **New client**
+3. Enter the **client name** → confirm
 
-Le client apparaît dans la liste. Il est vide tant qu'aucun snapshot n'a été envoyé.
+The client appears in the list. It stays empty until the first snapshot is sent.
 
 ```bash
-# API directe
+# Direct API
 curl -X POST "https://sapscope.luku.fr/api/v1/admin/clients?name=ACME%20Industries" \
-  -H "Authorization: Bearer <token_admin>"
+  -H "Authorization: Bearer <admin_token>"
 ```
 
 ---
 
-## Générer un token d'ingestion
+## Generate an ingestion token
 
-1. Dans la liste des clients → cliquer sur le client concerné
-2. Section **Tokens** → cliquer **Nouveau token**
-3. Saisir un **libellé** (ex : `agent-prd`, `agent-dev`) → valider
-4. **Copier le token immédiatement** — il n'est affiché qu'une seule fois
+1. In the client list → click the relevant client
+2. **Tokens** section → click **New token**
+3. Enter a **label** (e.g. `agent-prd`, `agent-dev`) → confirm
+4. **Copy the token immediately** — it is only shown once
 
 ```bash
-# API directe
+# Direct API
 curl -X POST "https://sapscope.luku.fr/api/v1/admin/clients/<client_id>/tokens?label=agent-prd" \
-  -H "Authorization: Bearer <token_admin>"
+  -H "Authorization: Bearer <admin_token>"
 ```
 
-> Ce token est ensuite transmis à l'agent de collecte lors de son installation côté client.
+> This token is then passed to the collection agent during installation on the client side.
 
 ---
 
-## Utiliser le token dans l'agent
+## Use the token in the agent
 
-Lors de l'installation de l'agent sur le serveur client :
+When installing the agent on the client server:
 
 ```bash
-sudo bash install.sh --token <token_ingestion> --sap-pass <mot-de-passe-SAPSCOPE>
+sudo bash install.sh --token <ingestion_token> --sap-pass <SAPSCOPE-password>
 ```
 
 ---
 
-## Lister les tokens d'un client
+## List tokens for a client
 
 ```bash
 curl https://sapscope.luku.fr/api/v1/admin/clients/<client_id>/tokens \
-  -H "Authorization: Bearer <token_admin>"
+  -H "Authorization: Bearer <admin_token>"
 ```
 
 ---
 
-## Révoquer un token
+## Revoke a token
 
-1. Dans la fiche client → section **Tokens**
-2. Cliquer **Révoquer** à côté du token concerné → confirmer
+1. In the client profile → **Tokens** section
+2. Click **Revoke** next to the relevant token → confirm
 
-L'agent utilisant ce token ne pourra plus envoyer de snapshots. Générer un nouveau token et reconfigurer l'agent si nécessaire.
+The agent using this token will no longer be able to send snapshots. Generate a new token and reconfigure the agent if needed.
 
 ```bash
-# API directe
+# Direct API
 curl -X DELETE https://sapscope.luku.fr/api/v1/admin/clients/<client_id>/tokens/<token_id> \
-  -H "Authorization: Bearer <token_admin>"
+  -H "Authorization: Bearer <admin_token>"
 ```
 
 ---
 
-## Bonne pratique
+## Best practices
 
-| Situation | Recommandation |
+| Situation | Recommendation |
 |---|---|
-| Un token par environnement | `agent-dev`, `agent-qas`, `agent-prd` — facilite la traçabilité |
-| Fin de mission | Révoquer le token dès la fin du contrat |
-| Token compromis | Révoquer immédiatement et en générer un nouveau |
+| One token per environment | `agent-dev`, `agent-qas`, `agent-prd` — easier to track |
+| End of engagement | Revoke the token as soon as the contract ends |
+| Compromised token | Revoke immediately and generate a new one |
