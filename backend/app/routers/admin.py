@@ -6,14 +6,14 @@ All endpoints require an authenticated admin user (is_admin=True).
 import secrets
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import get_current_user, hash_password
 from ..database import get_db
 from ..models import AgentToken, Client, User, UserClient
-from ..schemas import ClientOut, PasswordReset, TokenCreated, TokenOut, UserCreate, UserOut
+from ..schemas import AdminToggle, ClientOut, PasswordReset, TokenCreated, TokenOut, UserCreate, UserOut
 from ..settings import settings
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -180,6 +180,51 @@ async def reset_user_password(
     if user.id == admin.id:
         raise HTTPException(status_code=400, detail="Use your profile to change your own password")
     user.password_hash = hash_password(body.password)
+    await db.commit()
+
+
+@router.patch("/users/{user_id}/admin", status_code=status.HTTP_204_NO_CONTENT)
+async def set_admin(
+    user_id: str,
+    body: AdminToggle,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(_require_admin),
+):
+    row = await db.execute(select(User).where(User.id == user_id))
+    user = row.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot change your own admin status")
+    if not body.is_admin:
+        count = await db.execute(
+            select(func.count()).select_from(User).where(User.is_admin == True, User.id != user_id)
+        )
+        if count.scalar() == 0:
+            raise HTTPException(status_code=400, detail="Cannot demote the last admin")
+    user.is_admin = body.is_admin
+    await db.commit()
+
+
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(
+    user_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(_require_admin),
+):
+    row = await db.execute(select(User).where(User.id == user_id))
+    user = row.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    if user.is_admin:
+        count = await db.execute(
+            select(func.count()).select_from(User).where(User.is_admin == True, User.id != user_id)
+        )
+        if count.scalar() == 0:
+            raise HTTPException(status_code=400, detail="Cannot delete the last admin")
+    await db.delete(user)
     await db.commit()
 
 

@@ -12,6 +12,7 @@
 | 06 | PDF Export | [EN](guide-06-export-pdf.md) | [FR](guide-06-export-pdf.fr.md) |
 | 07 | Admin — Users | [EN](guide-07-admin-utilisateurs.md) | [FR](guide-07-admin-utilisateurs.fr.md) |
 | 08 | Admin — Clients & Tokens | [EN](guide-08-admin-clients-tokens.md) | [FR](guide-08-admin-clients-tokens.fr.md) |
+| 09 | Account Recovery & Edge Cases | [EN](guide-09-recovery.md) | [FR](guide-09-recovery.fr.md) |
 
 ## Technical Documentation
 

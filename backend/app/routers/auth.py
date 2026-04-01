@@ -7,7 +7,7 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..auth import create_jwt, hash_password, verify_password
+from ..auth import create_jwt, get_current_user, hash_password, verify_password
 from ..database import get_db
 from ..limiter import limiter
 from ..models import User
@@ -31,6 +31,11 @@ class LoginResponse(BaseModel):
     user_id: str
     email: str
     is_admin: bool
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=12)
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -81,3 +86,15 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
         email=user.email,
         is_admin=False,
     )
+
+
+@router.patch("/me/password", status_code=status.HTTP_204_NO_CONTENT)
+async def change_own_password(
+    body: ChangePasswordRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(body.current_password, current_user.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is incorrect")
+    current_user.password_hash = hash_password(body.new_password)
+    await db.commit()
