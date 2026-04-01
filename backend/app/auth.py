@@ -19,6 +19,7 @@ from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from .database import get_db
 from .models import AgentToken, Client, User, UserClient
@@ -44,13 +45,15 @@ async def get_client_for_agent(
     """Validates an agent token. Returns the associated Client."""
     token_hash = AgentToken.hash(credentials.credentials)
     row = await db.execute(
-        select(AgentToken).where(AgentToken.token_hash == token_hash)
+        select(AgentToken)
+        .options(selectinload(AgentToken.client))
+        .where(AgentToken.token_hash == token_hash)
     )
     agent_token = row.scalar_one_or_none()
-    if agent_token is None:
+    if agent_token is None or agent_token.is_revoked:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid agent token",
+            detail="Invalid or revoked agent token",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return agent_token.client

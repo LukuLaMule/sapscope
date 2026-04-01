@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 # ── Inbound snapshot (posted by the agent) ────────────────────────────────────
@@ -33,6 +33,8 @@ class SnapshotSummary(BaseModel):
     components_count: int
     support_packages_count: int
     custom_objects_count: int
+    system_release: str | None = None
+    db_type: str | None = None
 
 
 class SnapshotDetail(SnapshotSummary):
@@ -45,8 +47,29 @@ class ClientOut(BaseModel):
     created_at: datetime
 
 
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=12)
+    is_admin: bool = False
+
+
+class UserOut(BaseModel):
+    id: str
+    email: str
+    is_admin: bool
+    created_at: datetime
+    client_ids: list[str] = []
+
+
 class TokenCreated(BaseModel):
     id: str
     label: str
     token: str = Field(description="Plaintext token — shown once, store securely")
+    created_at: datetime
+
+
+class TokenOut(BaseModel):
+    id: str
+    label: str
+    is_revoked: bool
     created_at: datetime

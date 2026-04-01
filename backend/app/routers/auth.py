@@ -1,16 +1,17 @@
 """
-/api/v1/auth  — consultant login.
+/api/v1/auth  — login + self-registration.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..auth import create_jwt, verify_password
+from ..auth import create_jwt, hash_password, verify_password
 from ..database import get_db
-from ..main import limiter
+from ..limiter import limiter
 from ..models import User
+from ..settings import settings
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -20,10 +21,16 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=12)
+
+
 class LoginResponse(BaseModel):
     token: str
     user_id: str
     email: str
+    is_admin: bool
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -42,4 +49,35 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
         token=create_jwt(user.id),
         user_id=user.id,
         email=user.email,
+        is_admin=user.is_admin,
+    )
+
+
+@router.post("/register", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")
+async def register(request: Request, body: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    if not settings.registration_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Self-registration is disabled on this instance",
+        )
+
+    existing = await db.execute(select(User).where(User.email == body.email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already in use")
+
+    user = User(
+        email=body.email,
+        password_hash=hash_password(body.password),
+        is_admin=False,
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+
+    return LoginResponse(
+        token=create_jwt(user.id),
+        user_id=user.id,
+        email=user.email,
+        is_admin=False,
     )

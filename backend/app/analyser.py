@@ -4,6 +4,7 @@ Builds a compact summary of the snapshot and calls Claude
 to produce a structured technical assessment.
 """
 
+import asyncio
 import logging
 import os
 
@@ -114,7 +115,7 @@ def _fmt_sap_date(s: str) -> str:
     return s or "?"
 
 
-def analyse(payload: dict, language: str = "English") -> tuple[str, int, int]:
+async def analyse(payload: dict, language: str = "English") -> tuple[str, int, int]:
     """
     Call Claude and return (analysis_text, input_tokens, output_tokens).
     Raises ValueError if ANTHROPIC_API_KEY is not set.
@@ -123,18 +124,20 @@ def analyse(payload: dict, language: str = "English") -> tuple[str, int, int]:
     if not _ANTHROPIC_KEY:
         raise ValueError("ANTHROPIC_API_KEY is not configured")
 
-    client = anthropic.Anthropic(api_key=_ANTHROPIC_KEY)
-
     user_prompt = _build_prompt(payload)
     if language.lower() != "english":
         user_prompt = f"(Respond in {_sanitize(language, 30)}.)\n\n" + user_prompt
 
-    message = client.messages.create(
-        model=MODEL,
-        max_tokens=1024,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_prompt}],
-    )
+    def _call() -> anthropic.types.Message:
+        client = anthropic.Anthropic(api_key=_ANTHROPIC_KEY)
+        return client.messages.create(
+            model=MODEL,
+            max_tokens=4096,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": user_prompt}],
+        )
+
+    message = await asyncio.to_thread(_call)
 
     text = message.content[0].text
     return text, message.usage.input_tokens, message.usage.output_tokens

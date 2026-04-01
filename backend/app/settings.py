@@ -10,5 +10,13 @@ class Settings(BaseSettings):
     allowed_origins: list[str] = ["https://app.sapscope.io"]
     env: str = "production"   # "development" active le SQL echo
 
+    # SaaS : True (anyone can self-register)
+    # Self-hosted : False (admin creates accounts manually)
+    registration_enabled: bool = True
+
+    # Self-hosted license key (JWT signed by Sapscope)
+    # Absent → SaaS mode (no license check)
+    license_key: str | None = None
+
 
 settings = Settings()

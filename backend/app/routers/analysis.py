@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ router = APIRouter(tags=["analysis"])
 class AnalysisOut(BaseModel):
     id: str
     model: str
+    language: str
     input_tokens: int
     output_tokens: int
     content: str
@@ -44,7 +46,9 @@ async def run_analysis(
 ):
     client = await get_client_for_user(client_id, user, db)
     row = await db.execute(
-        select(Snapshot).where(
+        select(Snapshot)
+        .options(selectinload(Snapshot.analysis))
+        .where(
             Snapshot.id == snapshot_id,
             Snapshot.client_id == client.id,
         )
@@ -59,15 +63,15 @@ async def run_analysis(
         return AnalysisOut(
             id=a.id,
             model=a.model,
+            language=a.language,
             input_tokens=a.input_tokens,
             output_tokens=a.output_tokens,
             content=a.content,
             created_at=a.created_at.isoformat(),
         )
 
-    # Call Claude (synchronous — acceptable for a consultant-triggered action)
     try:
-        text, in_tok, out_tok = analyse(snap.payload, language=language)
+        text, in_tok, out_tok = await analyse(snap.payload, language=language)
     except Exception as exc:
         logger.error("Claude API error for snapshot %s: %s", snapshot_id, exc)
         raise HTTPException(status_code=502, detail="Analysis service unavailable")
@@ -75,6 +79,7 @@ async def run_analysis(
     # Upsert analysis
     if snap.analysis:
         snap.analysis.model         = MODEL
+        snap.analysis.language      = language
         snap.analysis.input_tokens  = in_tok
         snap.analysis.output_tokens = out_tok
         snap.analysis.content       = text
@@ -83,6 +88,7 @@ async def run_analysis(
         a = Analysis(
             snapshot_id=snap.id,
             model=MODEL,
+            language=language,
             input_tokens=in_tok,
             output_tokens=out_tok,
             content=text,
@@ -95,6 +101,7 @@ async def run_analysis(
     return AnalysisOut(
         id=a.id,
         model=a.model,
+        language=a.language,
         input_tokens=a.input_tokens,
         output_tokens=a.output_tokens,
         content=a.content,
@@ -115,7 +122,9 @@ async def get_analysis(
 ):
     client = await get_client_for_user(client_id, user, db)
     row = await db.execute(
-        select(Snapshot).where(
+        select(Snapshot)
+        .options(selectinload(Snapshot.analysis))
+        .where(
             Snapshot.id == snapshot_id,
             Snapshot.client_id == client.id,
         )
@@ -130,6 +139,7 @@ async def get_analysis(
     return AnalysisOut(
         id=a.id,
         model=a.model,
+        language=a.language,
         input_tokens=a.input_tokens,
         output_tokens=a.output_tokens,
         content=a.content,
