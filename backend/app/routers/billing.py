@@ -27,8 +27,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/billing", tags=["billing"])
 
 TIERS = {
-    "solo": {"label": "Solo",  "max_clients": 3,  "max_users": 1},
-    "team": {"label": "Team",  "max_clients": 20, "max_users": 5},
+    "solo":       {"label": "Solo",       "max_clients": 3,   "max_users": 1},
+    "team":       {"label": "Team",       "max_clients": 20,  "max_users": 5},
+    "enterprise": {"label": "Enterprise", "max_clients": 999, "max_users": 999},
 }
 
 
@@ -39,7 +40,11 @@ def _stripe_client() -> stripe.Stripe:
 
 
 def _price_id(tier: str) -> str:
-    mapping = {"solo": settings.stripe_price_solo, "team": settings.stripe_price_team}
+    mapping = {
+        "solo":       settings.stripe_price_solo,
+        "team":       settings.stripe_price_team,
+        "enterprise": settings.stripe_price_enterprise,
+    }
     price = mapping.get(tier)
     if not price:
         raise HTTPException(status_code=400, detail=f"Unknown tier: {tier}")
@@ -50,7 +55,7 @@ def _price_id(tier: str) -> str:
 
 @router.post("/checkout")
 async def create_checkout(
-    tier: str = Query(..., pattern="^(solo|team)$"),
+    tier: str = Query(..., pattern="^(solo|team|enterprise)$"),
     current_user: User = Depends(get_current_user),
 ):
     """Create a Stripe checkout session and return the redirect URL."""
