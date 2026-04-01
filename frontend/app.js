@@ -180,6 +180,11 @@ async function loadAndRenderSnapshots() {
   state.snapshots = [...bySystem.values()].sort((a, b) => a.system_sid.localeCompare(b.system_sid));
   renderSidebar(state.snapshots);
 
+  const staleCount = state.snapshots.filter(s => isStale(s.collected_at)).length;
+  if (staleCount === 0) setStatus("ok");
+  else if (staleCount < state.snapshots.length) setStatus("warn");
+  else setStatus("err");
+
   if (!state.snapshots.length) {
     renderOnboarding("no-snapshots");
   } else {
@@ -198,18 +203,17 @@ function renderSidebar(snapshots) {
     const theme  = sidTheme(snap.system_sid);
     const stale  = isStale(snap.collected_at);
     const el = document.createElement("div");
-    el.className  = "system-item";
+    el.className  = stale ? "system-item stale" : "system-item";
     el.dataset.id = snap.id;
     el.style.setProperty("--sys-color", theme.color);
     el.style.setProperty("--sys-dim",   theme.dim);
     el.innerHTML = `
-      <div class="sid-badge">${esc(snap.system_sid)}</div>
+      <div class="sid-badge">${esc(snap.system_sid)}${stale ? '<span class="stale-dot"></span>' : ''}</div>
       <div class="host">${esc(snap.system_host)}</div>
       <div class="meta">
         <span class="pill">${snap.components_count} comp</span>
         <span class="${stale ? 'stale-time' : ''}">${relativeTime(snap.collected_at)}</span>
-      </div>
-      ${stale ? `<div class="stale-badge" title="Dernière collecte il y a plus de 24h — vérifier l'agent">⚠ agent inactif</div>` : ''}`;
+      </div>`;
     el.addEventListener("click", () => selectSnapshot(snap.id, el, theme));
     list.appendChild(el);
   }
@@ -562,8 +566,16 @@ function renderDetail(snap, theme) {
   const dbKey    = classifyDb(sys.rfcdbsys);
   const dbMeta   = DB_THEMES[dbKey];
   const historyHtml = buildHistoryRow(snap);
+  const staleBanner = isStale(snap.collected_at)
+    ? `<div class="stale-banner">
+        <span class="stale-banner-dot"></span>
+        <span>Agent unreachable — last collection ${relativeTime(snap.collected_at)}. Check the agent service on the SAP server.</span>
+       </div>`
+    : '';
 
   content.innerHTML = `
+
+    ${staleBanner}
 
     <!-- Hero header -->
     <div class="sys-hero">
@@ -1053,8 +1065,8 @@ function relativeTime(iso) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-function setStatus(ok) {
-  document.getElementById("status-dot").className = ok ? "ok" : "err";
+function setStatus(state) {
+  document.getElementById("status-dot").className = state; // "ok" | "warn" | "err"
 }
 
 // ── Auth helpers ──────────────────────────────────────────────────────────────
@@ -1065,7 +1077,7 @@ function _applySession(data) {
   sessionStorage.setItem("sapscope_token",    data.token);
   sessionStorage.setItem("sapscope_is_admin", state.isAdmin ? "1" : "0");
   if (state.isAdmin) document.getElementById("admin-btn").style.display = "";
-  setStatus(true);
+  setStatus("ok");
   showAppScreen();
 }
 
@@ -1088,7 +1100,7 @@ async function handleLogin(e) {
   } catch (err) {
     console.error("[sapscope] login error:", err);
     errEl.textContent = err.message;
-    setStatus(false);
+    setStatus("err");
   } finally {
     btn.disabled = false;
     btn.textContent = "Connexion →";
@@ -1847,7 +1859,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (state.token && state.baseUrl) {
     if (state.isAdmin) document.getElementById("admin-btn").style.display = "";
     showAppScreen();
-    setStatus(true);
+    setStatus("ok");
     initApp().catch(() => logout());
   } else {
     showLoginScreen();

@@ -12,7 +12,7 @@ import anthropic
 
 logger = logging.getLogger(__name__)
 
-MODEL = "claude-opus-4-6"
+MODEL = "claude-sonnet-4-6"
 
 _ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
