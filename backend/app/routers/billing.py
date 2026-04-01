@@ -33,10 +33,10 @@ TIERS = {
 }
 
 
-def _stripe_client() -> stripe.Stripe:
+def _stripe_client() -> stripe.StripeClient:
     if not settings.stripe_secret_key:
         raise HTTPException(status_code=503, detail="Billing not configured on this instance")
-    return stripe.Stripe(settings.stripe_secret_key)
+    return stripe.StripeClient(settings.stripe_secret_key)
 
 
 def _price_id(tier: str) -> str:
@@ -62,16 +62,16 @@ async def create_checkout(
     sc = _stripe_client()
     base_url = "https://sapscope.luku.fr"
 
-    session = sc.checkout.sessions.create(
-        mode="subscription",
-        line_items=[{"price": _price_id(tier), "quantity": 1}],
-        client_reference_id=current_user.id,
-        customer_email=current_user.email,
-        metadata={"tier": tier, "user_id": current_user.id},
-        success_url=f"{base_url}/app?activated=1",
-        cancel_url=f"{base_url}/app?activated=0",
-        allow_promotion_codes=True,
-    )
+    session = sc.checkout.sessions.create({
+        "mode": "subscription",
+        "line_items": [{"price": _price_id(tier), "quantity": 1}],
+        "client_reference_id": current_user.id,
+        "customer_email": current_user.email,
+        "metadata": {"tier": tier, "user_id": current_user.id},
+        "success_url": f"{base_url}/app?activated=1",
+        "cancel_url": f"{base_url}/app?activated=0",
+        "allow_promotion_codes": True,
+    })
     return {"url": session.url}
 
 
@@ -90,7 +90,7 @@ async def stripe_webhook(
     payload = await request.body()
     try:
         sc = _stripe_client()
-        event = sc.webhooks.construct_event(payload, stripe_signature, settings.stripe_webhook_secret)
+        event = sc.construct_event(payload, stripe_signature, settings.stripe_webhook_secret)
     except stripe.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid signature")
 
