@@ -2,16 +2,16 @@
 
 ## User Guides
 
-| # | Guide | Audience |
-|---|---|---|
-| 01 | [Login](guide-01-connexion.md) | All |
-| 02 | [Landscape View](guide-02-landscape.md) | All |
-| 03 | [System Detail](guide-03-detail-systeme.md) | All |
-| 04 | [AI Diagnostic](guide-04-diagnostic-ia.md) | All |
-| 05 | [Snapshot Comparison (Diff)](guide-05-diff.md) | All |
-| 06 | [PDF Export](guide-06-export-pdf.md) | All |
-| 07 | [Admin — Users](guide-07-admin-utilisateurs.md) | Admin |
-| 08 | [Admin — Clients & Tokens](guide-08-admin-clients-tokens.md) | Admin |
+| # | Guide | 🇬🇧 English | 🇫🇷 Français |
+|---|---|---|---|
+| 01 | Login | [EN](guide-01-connexion.md) | [FR](guide-01-connexion.fr.md) |
+| 02 | Landscape View | [EN](guide-02-landscape.md) | [FR](guide-02-landscape.fr.md) |
+| 03 | System Detail | [EN](guide-03-detail-systeme.md) | [FR](guide-03-detail-systeme.fr.md) |
+| 04 | AI Diagnostic | [EN](guide-04-diagnostic-ia.md) | [FR](guide-04-diagnostic-ia.fr.md) |
+| 05 | Snapshot Comparison (Diff) | [EN](guide-05-diff.md) | [FR](guide-05-diff.fr.md) |
+| 06 | PDF Export | [EN](guide-06-export-pdf.md) | [FR](guide-06-export-pdf.fr.md) |
+| 07 | Admin — Users | [EN](guide-07-admin-utilisateurs.md) | [FR](guide-07-admin-utilisateurs.fr.md) |
+| 08 | Admin — Clients & Tokens | [EN](guide-08-admin-clients-tokens.md) | [FR](guide-08-admin-clients-tokens.fr.md) |
 
 ## Technical Documentation
 

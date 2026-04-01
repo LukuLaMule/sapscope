@@ -1,3 +1,5 @@
+🇬🇧 English | 🇫🇷 [Français](guide-02-landscape.fr.md)
+
 # Landscape View — SAP System Overview
 
 **Duration:** 30 seconds

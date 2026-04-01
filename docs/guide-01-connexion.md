@@ -1,3 +1,5 @@
+🇬🇧 English | 🇫🇷 [Français](guide-01-connexion.fr.md)
+
 # Login
 
 **Duration:** 1 minute

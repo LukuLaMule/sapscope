@@ -1,3 +1,5 @@
+🇬🇧 English | 🇫🇷 [Français](guide-03-detail-systeme.fr.md)
+
 # System Detail View
 
 **Duration:** 1 to 2 minutes

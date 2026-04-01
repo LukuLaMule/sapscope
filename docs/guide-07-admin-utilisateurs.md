@@ -1,3 +1,5 @@
+🇬🇧 English | 🇫🇷 [Français](guide-07-admin-utilisateurs.fr.md)
+
 # Administration — Users
 
 **Access:** Admin account only
