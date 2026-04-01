@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..auth import get_current_user, hash_password
 from ..database import get_db
 from ..models import AgentToken, Client, User, UserClient
-from ..schemas import ClientOut, TokenCreated, TokenOut, UserCreate, UserOut
+from ..schemas import ClientOut, PasswordReset, TokenCreated, TokenOut, UserCreate, UserOut
 from ..settings import settings
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -164,6 +164,23 @@ async def create_user(
     await db.commit()
     await db.refresh(user)
     return UserOut(id=user.id, email=user.email, is_admin=user.is_admin, created_at=user.created_at)
+
+
+@router.patch("/users/{user_id}/password", status_code=status.HTTP_204_NO_CONTENT)
+async def reset_user_password(
+    user_id: str,
+    body: PasswordReset,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(_require_admin),
+):
+    row = await db.execute(select(User).where(User.id == user_id))
+    user = row.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Use your profile to change your own password")
+    user.password_hash = hash_password(body.password)
+    await db.commit()
 
 
 @router.post(
