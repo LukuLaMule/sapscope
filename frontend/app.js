@@ -114,6 +114,7 @@ const loadTokens            = (cid)       => apiFetch(`/api/v1/admin/clients/${c
 const revokeToken           = (cid, tid)  => apiFetch(`/api/v1/admin/clients/${cid}/tokens/${tid}`, { method: "DELETE" });
 const assignClientToUser    = (uid, cid)  => apiFetch(`/api/v1/admin/users/${uid}/clients/${cid}`, { method: "POST" });
 const unassignClientFromUser = (uid, cid) => apiFetch(`/api/v1/admin/users/${uid}/clients/${cid}`, { method: "DELETE" });
+const resetUserPassword      = (uid, pwd) => apiFetch(`/api/v1/admin/users/${uid}/password`, { method: "PATCH", body: JSON.stringify({ password: pwd }) });
 const loadDiff              = (cid, snapId, baseId) => apiFetch(`/api/v1/clients/${cid}/snapshots/${snapId}/diff?base=${baseId}`);
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -1641,6 +1642,32 @@ function _renderUsersTab(users, clients) {
     } catch (err) { errEl.textContent = err.message; }
   };
 
+  content.querySelectorAll('.admin-reset-btn').forEach(btn => {
+    const uid = btn.dataset.uid;
+    btn.onclick = () => {
+      document.getElementById(`rf-${uid}`).style.display = "flex";
+      btn.style.display = "none";
+    };
+    document.getElementById(`rc-${uid}`).onclick = () => {
+      document.getElementById(`rf-${uid}`).style.display = "none";
+      btn.style.display = "";
+      document.getElementById(`rp-${uid}`).value = "";
+      document.getElementById(`re-${uid}`).textContent = "";
+    };
+    document.getElementById(`rs-${uid}`).onclick = async () => {
+      const pwd  = document.getElementById(`rp-${uid}`).value;
+      const errEl = document.getElementById(`re-${uid}`);
+      errEl.textContent = "";
+      if (pwd.length < 12) { errEl.textContent = "12 characters minimum."; return; }
+      try {
+        await resetUserPassword(uid, pwd);
+        document.getElementById(`rf-${uid}`).style.display = "none";
+        btn.style.display = "";
+        document.getElementById(`rp-${uid}`).value = "";
+      } catch (err) { errEl.textContent = err.message; }
+    };
+  });
+
   content.querySelectorAll('.uc-toggle').forEach(btn => {
     btn.onclick = async () => {
       const { uid, cid, assigned } = btn.dataset;
@@ -1663,11 +1690,19 @@ function _userRow(user, clients) {
       data-uid="${esc(user.id)}" data-cid="${esc(c.id)}" data-assigned="${on}">
       ${esc(c.name)}</button>`;
   }).join('');
+  const uid = esc(user.id);
   return `
-    <div class="admin-user-row">
+    <div class="admin-user-row" data-uid="${uid}">
       <div class="admin-user-meta">
         <span class="admin-user-email">${esc(user.email)}</span>
         ${user.is_admin ? '<span class="admin-badge">admin</span>' : ''}
+        ${!user.is_admin ? `<button class="admin-reset-btn" data-uid="${uid}" title="Reset password">↺ reset pwd</button>` : ''}
+      </div>
+      <div class="admin-reset-form" id="rf-${uid}" style="display:none">
+        <input type="password" class="admin-input admin-input--sm" placeholder="new password (12+ chars)" id="rp-${uid}">
+        <button class="admin-submit-btn admin-submit-btn--sm" id="rs-${uid}">Save</button>
+        <button class="admin-cancel-btn admin-cancel-btn--sm" id="rc-${uid}">✕</button>
+        <span class="admin-error" id="re-${uid}"></span>
       </div>
       <div class="admin-user-clients">${chips || '<span class="no-clients">aucun client</span>'}</div>
     </div>`;

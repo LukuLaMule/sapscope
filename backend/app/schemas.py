@@ -53,6 +53,10 @@ class UserCreate(BaseModel):
     is_admin: bool = False
 
 
+class PasswordReset(BaseModel):
+    password: str = Field(min_length=12)
+
+
 class UserOut(BaseModel):
     id: str
     email: str

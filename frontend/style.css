@@ -2102,6 +2102,29 @@ html, body {
   font-weight: 700;
 }
 
+.admin-reset-btn {
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  font-family: var(--font-mono);
+  background: none;
+  border: 1px solid var(--border-light);
+  color: var(--text-label);
+  padding: 2px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.admin-reset-btn:hover { color: #fb923c; border-color: #fb923c55; }
+
+.admin-reset-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.admin-input--sm  { padding: 4px 8px; font-size: var(--fs-xs); flex: 1; max-width: 220px; }
+.admin-submit-btn--sm, .admin-cancel-btn--sm { padding: 4px 10px; font-size: var(--fs-xs); }
+
 .admin-user-clients {
   display: flex;
   flex-wrap: wrap;
