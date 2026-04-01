@@ -119,6 +119,9 @@ const setUserAdmin           = (uid, is_admin)   => apiFetch(`/api/v1/admin/user
 const deleteUser             = (uid)             => apiFetch(`/api/v1/admin/users/${uid}`,          { method: "DELETE" });
 const changeOwnPassword      = (cur, pwd)        => apiFetch(`/api/v1/auth/me/password`,            { method: "PATCH", body: JSON.stringify({ current_password: cur, new_password: pwd }) });
 const loadDiff              = (cid, snapId, baseId) => apiFetch(`/api/v1/clients/${cid}/snapshots/${snapId}/diff?base=${baseId}`);
+const createCheckout        = (tier)             => apiFetch(`/api/v1/billing/checkout?tier=${tier}`, { method: "POST" });
+const getOnboardingToken    = ()                 => apiFetch(`/api/v1/billing/onboarding`);
+const getBillingStatus      = ()                 => apiFetch(`/api/v1/billing/status`);
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -1149,9 +1152,91 @@ async function handleRegister(e) {
   }
 }
 
+// ── Post-Stripe activation ────────────────────────────────────────────────────
+
+async function _handleActivationReturn() {
+  const content = document.getElementById("content");
+  content.innerHTML = `<div class="onboarding"><div class="onboarding-title">Activating your account…</div><div class="onboarding-text">Please wait a few seconds while we set up your workspace.</div></div>`;
+
+  // Poll for the onboarding token (webhook may take a few seconds)
+  let result = null;
+  for (let i = 0; i < 15; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const r = await getOnboardingToken();
+      if (r.token) { result = r; break; }
+    } catch { /* keep polling */ }
+  }
+
+  if (!result) {
+    content.innerHTML = `
+      <div class="onboarding">
+        <div class="onboarding-title">Almost there!</div>
+        <div class="onboarding-text">
+          Payment confirmed. Your account is being activated — this usually takes less than a minute.
+          Refresh this page in a moment, or contact <a href="mailto:contact@luku.fr" style="color:var(--accent)">contact@luku.fr</a> if the issue persists.
+        </div>
+      </div>`;
+    return;
+  }
+
+  const origin = window.location.origin;
+  content.innerHTML = `
+    <div class="onboarding">
+      <div class="onboarding-title">🎉 Account activated!</div>
+      <div class="onboarding-text">
+        Your SAP client <strong>${esc(result.client_name)}</strong> is ready.
+        Copy your agent token below — <strong>it will not be shown again.</strong>
+      </div>
+      <div class="activation-token-box">
+        <code id="act-token">${esc(result.token)}</code>
+        <button id="act-copy-btn" class="ob-btn">Copy</button>
+      </div>
+      <div class="ob-steps" style="margin-top:24px">
+        <div class="ob-step">
+          <div class="ob-step-num">1</div>
+          <div class="ob-step-body">
+            <div class="ob-step-title">Set up the RFC user on SAP</div>
+            <p class="ob-hint">Run the ABAP setup script on your SAP system — see <a href="/docs/sap-rfc-user-setup.md" style="color:var(--accent)" target="_blank">sap-rfc-user-setup.md</a></p>
+          </div>
+        </div>
+        <div class="ob-step">
+          <div class="ob-step-num">2</div>
+          <div class="ob-step-body">
+            <div class="ob-step-title">Install the agent on your SAP server</div>
+            <div class="ob-code">curl -O ${esc(origin)}/dist/agent.tar.gz<br>tar xzf agent.tar.gz<br>sudo ./install.sh --token ${esc(result.token)} --host &lt;SAP_HOST&gt; --sysnr 00 --client 100</div>
+          </div>
+        </div>
+        <div class="ob-step">
+          <div class="ob-step-num">3</div>
+          <div class="ob-step-body">
+            <div class="ob-step-title">Wait for first collection</div>
+            <p class="ob-hint">The agent collects every 6 hours. Your systems will appear in the sidebar within the hour.</p>
+          </div>
+        </div>
+      </div>
+      <button class="ob-btn" id="act-done-btn" style="margin-top:16px">Done — go to dashboard →</button>
+    </div>`;
+
+  document.getElementById("act-copy-btn").addEventListener("click", () => {
+    navigator.clipboard.writeText(result.token).then(() => {
+      document.getElementById("act-copy-btn").textContent = "Copied ✓";
+    });
+  });
+  document.getElementById("act-done-btn").addEventListener("click", () => initApp());
+}
+
 // ── App init ──────────────────────────────────────────────────────────────────
 
 async function initApp() {
+  // Handle Stripe redirect
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("activated") === "1") {
+    history.replaceState({}, "", "/app");
+    await _handleActivationReturn();
+    return;
+  }
+
   try {
     const clients = await loadClients();
     if (!clients.length) {
@@ -1175,13 +1260,57 @@ function renderOnboarding(reason) {
   if (reason === "no-clients" && !state.isAdmin) {
     content.innerHTML = `
       <div class="onboarding">
-        <div class="onboarding-title">Compte créé</div>
-        <div class="onboarding-text">
-          Votre compte est prêt. Pour connecter votre premier système SAP,
-          écrivez-nous à <a href="mailto:contact@luku.fr" style="color:var(--accent)">contact@luku.fr</a>
-          en indiquant votre adresse email — nous vous configurons votre périmètre et vous guidons pour l'installation de l'agent.
+        <div class="onboarding-title">Activate your account</div>
+        <div class="onboarding-text">Choose a plan to connect your first SAP system. Your agent token is generated instantly after payment.</div>
+        <div class="pricing-cards">
+          <div class="pricing-card">
+            <div class="pricing-tier">Solo</div>
+            <div class="pricing-price">€29<span>/month</span></div>
+            <ul class="pricing-features">
+              <li>1 consultant</li>
+              <li>Up to 3 SAP systems</li>
+              <li>AI diagnostics</li>
+              <li>Snapshot history &amp; diff</li>
+              <li>PDF export</li>
+            </ul>
+            <button class="pricing-btn" data-tier="solo">Subscribe →</button>
+          </div>
+          <div class="pricing-card pricing-card--highlight">
+            <div class="pricing-badge">Most popular</div>
+            <div class="pricing-tier">Team</div>
+            <div class="pricing-price">€79<span>/month</span></div>
+            <ul class="pricing-features">
+              <li>Up to 5 consultants</li>
+              <li>Up to 20 SAP systems</li>
+              <li>AI diagnostics</li>
+              <li>Snapshot history &amp; diff</li>
+              <li>PDF export</li>
+            </ul>
+            <button class="pricing-btn" data-tier="team">Subscribe →</button>
+          </div>
         </div>
+        <div class="pricing-enterprise">
+          Large landscape or compliance requirements?
+          <a href="mailto:contact@luku.fr">Contact us for self-hosted Enterprise</a>
+        </div>
+        <div id="pricing-error" class="admin-error" style="text-align:center;margin-top:12px"></div>
       </div>`;
+
+    content.querySelectorAll('.pricing-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const tier = btn.dataset.tier;
+        btn.disabled = true;
+        btn.textContent = "Redirecting…";
+        try {
+          const { url } = await createCheckout(tier);
+          window.location.href = url;
+        } catch (err) {
+          document.getElementById('pricing-error').textContent = err.message;
+          btn.disabled = false;
+          btn.textContent = "Subscribe →";
+        }
+      });
+    });
     return;
   }
 

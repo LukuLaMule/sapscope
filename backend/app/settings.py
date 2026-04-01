@@ -18,5 +18,11 @@ class Settings(BaseSettings):
     # Absent → SaaS mode (no license check)
     license_key: str | None = None
 
+    # Stripe (SaaS billing)
+    stripe_secret_key: str | None = None
+    stripe_webhook_secret: str | None = None
+    stripe_price_solo: str | None = None   # price_xxx
+    stripe_price_team: str | None = None   # price_xxx
+
 
 settings = Settings()

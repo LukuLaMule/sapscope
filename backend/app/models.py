@@ -127,3 +127,46 @@ class UserClient(Base):
 
     user: Mapped["User"] = relationship(back_populates="client_links")
     client: Mapped["Client"] = relationship(back_populates="user_links")
+
+
+class Subscription(Base):
+    """Stripe subscription linked to a user (SaaS only)."""
+    __tablename__ = "subscriptions"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    stripe_customer_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    stripe_subscription_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    tier: Mapped[str] = mapped_column(String(50), nullable=False)   # solo | team
+    status: Mapped[str] = mapped_column(String(50), nullable=False)  # active | canceled | past_due
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class OnboardingToken(Base):
+    """Plaintext agent token stored temporarily after a successful Stripe checkout.
+    Retrieved once by the frontend, then deleted.
+    """
+    __tablename__ = "onboarding_tokens"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    client_id: Mapped[str] = mapped_column(
+        ForeignKey("clients.id", ondelete="CASCADE"), nullable=False
+    )
+    token_plaintext: Mapped[str] = mapped_column(String(512), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
