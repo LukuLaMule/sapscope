@@ -1265,7 +1265,7 @@ function renderOnboarding(reason) {
         <div class="pricing-cards">
           <div class="pricing-card">
             <div class="pricing-tier">Solo</div>
-            <div class="pricing-price">€29<span>/month</span></div>
+            <div class="pricing-price">€49<span>/month</span></div>
             <ul class="pricing-features">
               <li>1 consultant</li>
               <li>Up to 3 SAP systems</li>
@@ -1278,7 +1278,7 @@ function renderOnboarding(reason) {
           <div class="pricing-card pricing-card--highlight">
             <div class="pricing-badge">Most popular</div>
             <div class="pricing-tier">Team</div>
-            <div class="pricing-price">€79<span>/month</span></div>
+            <div class="pricing-price">€199<span>/month</span></div>
             <ul class="pricing-features">
               <li>Up to 5 consultants</li>
               <li>Up to 20 SAP systems</li>
@@ -1288,10 +1288,23 @@ function renderOnboarding(reason) {
             </ul>
             <button class="pricing-btn" data-tier="team">Subscribe →</button>
           </div>
+          <div class="pricing-card">
+            <div class="pricing-tier">Enterprise</div>
+            <div class="pricing-price">€799<span>/month</span></div>
+            <ul class="pricing-features">
+              <li>Unlimited consultants</li>
+              <li>Unlimited SAP systems</li>
+              <li>AI diagnostics</li>
+              <li>Snapshot history &amp; diff</li>
+              <li>PDF export</li>
+              <li>Priority support</li>
+            </ul>
+            <button class="pricing-btn" data-tier="enterprise">Subscribe →</button>
+          </div>
         </div>
         <div class="pricing-enterprise">
-          Large landscape or compliance requirements?
-          <a href="mailto:contact@luku.fr">Contact us for self-hosted Enterprise</a>
+          On-premise deployment?
+          <a href="mailto:contact@luku.fr">Contact us for self-hosted licensing</a>
         </div>
         <div id="pricing-error" class="admin-error" style="text-align:center;margin-top:12px"></div>
       </div>`;
