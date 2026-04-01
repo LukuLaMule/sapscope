@@ -1,28 +1,30 @@
+🇬🇧 English | 🇫🇷 [Français](README.fr.md)
+
 # SAPscope
 
-Outil de surveillance et de diagnostic de paysages SAP. Collecte automatiquement les métadonnées de vos systèmes (composants, support packages, kernel, objets custom) et génère des analyses par intelligence artificielle.
+SAP landscape monitoring and diagnostic tool. Automatically collects metadata from your systems (components, support packages, kernel, custom objects) and generates AI-powered analyses.
 
-Deux modes de déploiement : **SaaS** (hébergé sur sapscope.luku.fr) et **self-hosted** (sur votre infrastructure).
-
----
-
-## SaaS — Démarrage rapide
-
-1. Créez un compte sur [sapscope.luku.fr/app](https://sapscope.luku.fr/app)
-2. Contactez [contact@luku.fr](mailto:contact@luku.fr) pour activer votre périmètre
-3. Un administrateur crée votre client SAP, génère un token agent et vous l'envoie
-4. Installez l'agent sur votre serveur SAP (voir section Agent ci-dessous)
+Two deployment modes: **SaaS** (hosted at sapscope.luku.fr) and **self-hosted** (on your own infrastructure).
 
 ---
 
-## Self-hosted — Déploiement
+## SaaS — Quick start
 
-### Prérequis
+1. Create an account at [sapscope.luku.fr/app](https://sapscope.luku.fr/app)
+2. Contact [contact@luku.fr](mailto:contact@luku.fr) to activate your scope
+3. An administrator creates your SAP client, generates an agent token and sends it to you
+4. Install the agent on your SAP server (see Agent section below)
+
+---
+
+## Self-hosted — Deployment
+
+### Prerequisites
 
 - Docker + Docker Compose
-- Une clé de licence SAPscope (contactez [contact@luku.fr](mailto:contact@luku.fr))
-- Une clé API Anthropic
-- Un reverse proxy avec TLS (Traefik, nginx, Caddy…)
+- A SAPscope licence key (contact [contact@luku.fr](mailto:contact@luku.fr))
+- An Anthropic API key
+- A reverse proxy with TLS (Traefik, nginx, Caddy…)
 
 ### Installation
 
@@ -32,64 +34,64 @@ cd sapscope
 cp .env.example .env
 ```
 
-Remplissez `.env` :
+Fill in `.env`:
 
 ```env
 POSTGRES_PASSWORD=changeme
-SAPSCOPE_JWT_SECRET=une-chaine-aleatoire-de-32-caracteres-minimum
+SAPSCOPE_JWT_SECRET=a-random-string-of-at-least-32-characters
 ANTHROPIC_API_KEY=sk-ant-...
-LICENSE_KEY=<votre-cle-de-licence>
+LICENSE_KEY=<your-licence-key>
 REGISTRATION_ENABLED=false
-ALLOWED_ORIGINS=https://votre-domaine.com
+ALLOWED_ORIGINS=https://your-domain.com
 ```
 
-Démarrez :
+Start:
 
 ```bash
 docker compose up -d
 ```
 
-### Premier démarrage
+### First start
 
-Créez le compte administrateur via l'API (une seule fois) :
+Create the administrator account via the API (one-time):
 
 ```bash
-# Activez temporairement l'inscription
-# REGISTRATION_ENABLED=true dans .env, puis redémarrez le backend
+# Temporarily enable registration
+# Set REGISTRATION_ENABLED=true in .env, then restart the backend
 
-curl -X POST https://votre-domaine.com/api/v1/auth/register \
+curl -X POST https://your-domain.com/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@votre-entreprise.com","password":"motdepasse-securise"}'
+  -d '{"email":"admin@your-company.com","password":"secure-password"}'
 
-# Récupérez l'ID utilisateur dans la réponse, puis passez-le admin en base :
+# Retrieve the user ID from the response, then grant admin rights:
 docker compose exec db psql -U sapscope -c \
-  "UPDATE users SET is_admin = true WHERE email = 'admin@votre-entreprise.com';"
+  "UPDATE users SET is_admin = true WHERE email = 'admin@your-company.com';"
 
-# Remettez REGISTRATION_ENABLED=false et redémarrez
+# Set REGISTRATION_ENABLED=false again and restart
 ```
 
-### Générer une licence (vendeurs uniquement)
+### Generate a licence (vendors only)
 
 ```bash
 cd backend
-python generate_license.py --org "Nom du client" --tier enterprise --months 12
+python generate_license.py --org "Client name" --tier enterprise --months 12
 ```
 
-La clé privée doit être dans `backend/sapscope_license.pem` (non versionnée, à conserver en lieu sûr).
+The private key must be in `backend/sapscope_license.pem` (not versioned — keep it safe).
 
-Tiers disponibles :
+Available tiers:
 
-| Tier       | Utilisateurs | Clients SAP |
-|------------|-------------|-------------|
-| solo       | 1           | 3           |
-| team       | 5           | 20          |
-| enterprise | illimité    | illimité    |
+| Tier       | Users    | SAP Clients |
+|------------|----------|-------------|
+| solo       | 1        | 3           |
+| team       | 5        | 20          |
+| enterprise | unlimited | unlimited  |
 
 ---
 
-## Agent SAP
+## SAP Agent
 
-L'agent se déploie sur le serveur d'application SAP. Il se connecte en RFC local et envoie un snapshot toutes les 24h.
+The agent is deployed on the SAP application server. It connects via local RFC and sends a snapshot every 24 hours.
 
 ### Installation
 
@@ -99,69 +101,69 @@ tar xzf agent.tar.gz && cd sap-agent
 pip install -r requirements.txt
 ```
 
-Créez un fichier `.env` dans le dossier agent :
+Create a `.env` file in the agent folder:
 
 ```env
-SAPSCOPE_TOKEN=<token-genere-depuis-le-panel-admin>
+SAPSCOPE_TOKEN=<token-generated-from-admin-panel>
 SAPSCOPE_URL=https://sapscope.luku.fr
 SAP_HOST=localhost
 SAP_SYSNR=00
 SAP_CLIENT=100
 SAP_USER=SAPSCOPE_RFC
-SAP_PASSWORD=<mot-de-passe>
+SAP_PASSWORD=<password>
 ```
 
-Testez la connexion :
+Test the connection:
 
 ```bash
 python agent.py --once
 ```
 
-Automatisez avec un timer systemd ou un cron :
+Automate with a systemd timer or cron:
 
 ```bash
-# cron — tous les jours à 2h
+# cron — every day at 2am
 0 2 * * * cd /opt/sap-agent && python agent.py --once >> /var/log/sapscope-agent.log 2>&1
 ```
 
-### Utilisateur RFC requis côté SAP
+### Required RFC user on the SAP side
 
-Voir [docs/sap-rfc-user-setup.md](docs/sap-rfc-user-setup.md) pour la création de l'utilisateur de communication et les autorisations minimales requises.
+See [docs/sap-rfc-user-setup.md](docs/sap-rfc-user-setup.md) for creating the communication user and the minimum required authorisations.
 
 ---
 
 ## Administration
 
-Depuis l'interface web (onglet Admin, visible uniquement pour les comptes `is_admin`) :
+From the web interface (Admin tab, visible only for `is_admin` accounts):
 
-- **Clients** : créer un périmètre SAP, générer des tokens agent, révoquer des tokens
-- **Utilisateurs** : créer des comptes consultants, assigner les clients visibles par chaque consultant
+- **Clients**: create an SAP scope, generate agent tokens, revoke tokens
+- **Users**: create consultant accounts, assign the clients visible to each consultant
 
 ---
 
-## Variables d'environnement
+## Environment variables
 
-| Variable              | Requis | Description                                                  |
-|-----------------------|--------|--------------------------------------------------------------|
-| `DATABASE_URL`        | oui    | URL PostgreSQL asyncpg                                       |
-| `SAPSCOPE_JWT_SECRET` | oui    | Secret JWT (min. 32 caractères)                              |
-| `ANTHROPIC_API_KEY`   | oui    | Clé API Anthropic pour les analyses                          |
-| `LICENSE_KEY`         | self-hosted | JWT de licence signé par Sapscope                       |
-| `REGISTRATION_ENABLED`| non    | `true` (SaaS) / `false` (self-hosted). Défaut : `true`       |
-| `ALLOWED_ORIGINS`     | non    | Origines CORS autorisées. Défaut : `https://app.sapscope.io` |
-| `ENV`                 | non    | `development` active les logs SQL et `/docs`. Défaut : `production` |
+| Variable              | Required | Description                                                  |
+|-----------------------|----------|--------------------------------------------------------------|
+| `DATABASE_URL`        | yes      | asyncpg PostgreSQL URL                                       |
+| `SAPSCOPE_JWT_SECRET` | yes      | JWT secret (min. 32 characters)                              |
+| `ANTHROPIC_API_KEY`   | yes      | Anthropic API key for analyses                               |
+| `LICENSE_KEY`         | self-hosted | Licence JWT signed by SAPscope                           |
+| `REGISTRATION_ENABLED`| no       | `true` (SaaS) / `false` (self-hosted). Default: `true`       |
+| `ALLOWED_ORIGINS`     | no       | Allowed CORS origins. Default: `https://app.sapscope.io`     |
+| `ENV`                 | no       | `development` enables SQL logs and `/docs`. Default: `production` |
 
 ---
 
 ## Healthcheck
 
 ```bash
-curl https://votre-domaine.com/healthz
+curl https://your-domain.com/healthz
 ```
 
 ---
 
 ## Licence
 
-Logiciel propriétaire — © 2026 SAPscope. Tous droits réservés.
-Toute redistribution ou modification sans autorisation écrite est interdite.
+Proprietary software — © 2026 SAPscope. All rights reserved.
+Any redistribution or modification without written permission is prohibited.
