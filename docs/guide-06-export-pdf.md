@@ -1,3 +1,5 @@
+🇬🇧 English | 🇫🇷 [Français](guide-06-export-pdf.fr.md)
+
 # PDF Export
 
 **Duration:** 5 seconds

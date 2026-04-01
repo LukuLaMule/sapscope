@@ -1,3 +1,5 @@
+🇬🇧 English | 🇫🇷 [Français](guide-04-diagnostic-ia.fr.md)
+
 # AI Diagnostic
 
 **Duration:** 10 to 30 seconds (generation)

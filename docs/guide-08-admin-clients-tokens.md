@@ -1,3 +1,5 @@
+🇬🇧 English | 🇫🇷 [Français](guide-08-admin-clients-tokens.fr.md)
+
 # Administration — Clients and Ingestion Tokens
 
 **Access:** Admin account only

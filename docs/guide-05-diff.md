@@ -1,3 +1,5 @@
+🇬🇧 English | 🇫🇷 [Français](guide-05-diff.fr.md)
+
 # Snapshot Comparison (Diff)
 
 **Duration:** a few seconds
