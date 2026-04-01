@@ -34,3 +34,8 @@ Thumbs.db
 # Agent SDK (nwrfcsdk — proprietary, never commit)
 nwrfcsdk/
 *.so
+
+# License private key — NEVER commit this
+backend/sapscope_license.pem
+sapscope_license.pem
+*.pem

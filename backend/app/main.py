@@ -1,26 +1,40 @@
 """SAPscope backend — FastAPI application entry point."""
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 from .database import engine
+from .license import validate as validate_license
+from .limiter import limiter
 from .models import Base
-from .routers import admin, analysis, auth, snapshots
+from .routers import admin, analysis, auth, diff, snapshots
 from .settings import settings
 
-limiter = Limiter(key_func=get_remote_address)
+logger = logging.getLogger(__name__)
+
+# Validate license at import time so it appears in startup logs
+license_info = validate_license(settings.license_key)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    if license_info.mode == "self-hosted":
+        if not license_info.is_valid:
+            logger.error("INVALID LICENSE: %s", license_info.warning)
+        elif license_info.warning:
+            logger.warning("LICENSE WARNING: %s", license_info.warning)
+        else:
+            logger.info(
+                "Self-hosted license OK — org=%s tier=%s", license_info.org, license_info.tier
+            )
     yield
 
 
@@ -39,7 +53,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -59,9 +73,19 @@ async def https_redirect(request: Request, call_next):
 app.include_router(auth.router)
 app.include_router(snapshots.router)
 app.include_router(analysis.router)
+app.include_router(diff.router)
 app.include_router(admin.router)
 
 
 @app.get("/healthz", tags=["ops"])
 async def healthz():
-    return {"status": "ok"}
+    info: dict = {"status": "ok", "mode": license_info.mode}
+    if license_info.mode == "self-hosted":
+        info["license"] = {
+            "org":   license_info.org,
+            "tier":  license_info.tier,
+            "valid": license_info.is_valid,
+        }
+        if license_info.warning:
+            info["license"]["warning"] = license_info.warning
+    return info

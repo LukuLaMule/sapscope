@@ -14,10 +14,32 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import get_client_for_agent, get_client_for_user, get_current_user
 from ..database import get_db
-from ..models import Client, Snapshot, User
-from ..schemas import SnapshotCreated, SnapshotDetail, SnapshotIn, SnapshotSummary
+from ..models import Client, Snapshot, User, UserClient
+from ..schemas import ClientOut, SnapshotCreated, SnapshotDetail, SnapshotIn, SnapshotSummary
 
 router = APIRouter(tags=["snapshots"])
+
+
+# ── Client list (consultant-accessible) ──────────────────────────────────────
+
+@router.get("/api/v1/clients", response_model=list[ClientOut])
+async def list_my_clients(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    limit: Annotated[int, Query(ge=1, le=500)] = 200,
+):
+    """Returns clients visible to the current user (all for admins, assigned only for consultants)."""
+    if user.is_admin:
+        rows = await db.execute(select(Client).order_by(Client.name).limit(limit))
+    else:
+        rows = await db.execute(
+            select(Client)
+            .join(UserClient, UserClient.client_id == Client.id)
+            .where(UserClient.user_id == user.id)
+            .order_by(Client.name)
+            .limit(limit)
+        )
+    return [ClientOut(id=c.id, name=c.name, created_at=c.created_at) for c in rows.scalars()]
 
 
 # ── Agent write ───────────────────────────────────────────────────────────────
@@ -39,7 +61,7 @@ async def ingest_snapshot(
         system_host=host[:255],
         schema_version=str(body.schema_version)[:10],
         collected_at=body.collected_at,
-        payload=body.model_dump(),
+        payload=body.model_dump(mode="json"),
     )
     db.add(snap)
     await db.commit()
@@ -93,7 +115,8 @@ async def get_snapshot(
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _to_summary(s: Snapshot) -> SnapshotSummary:
-    co = s.payload.get("custom_objects", {})
+    co  = s.payload.get("custom_objects", {})
+    sys = s.payload.get("system", {})
     return SnapshotSummary(
         id=s.id,
         system_sid=s.system_sid,
@@ -103,6 +126,8 @@ def _to_summary(s: Snapshot) -> SnapshotSummary:
         components_count=len(s.payload.get("components", [])),
         support_packages_count=len(s.payload.get("support_packages", [])),
         custom_objects_count=co.get("total", 0),
+        system_release=sys.get("rfcsaprl") or None,
+        db_type=sys.get("rfcdbsys") or None,
     )
 
 
