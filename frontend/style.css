@@ -2102,8 +2102,15 @@ html, body {
   font-weight: 700;
 }
 
-.admin-reset-btn {
+.admin-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin-left: auto;
+}
+.admin-reset-btn,
+.admin-toggle-admin-btn,
+.admin-delete-btn {
   font-size: var(--fs-xs);
   font-family: var(--font-mono);
   background: none;
@@ -2114,7 +2121,33 @@ html, body {
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
 }
-.admin-reset-btn:hover { color: #fb923c; border-color: #fb923c55; }
+.admin-reset-btn:hover        { color: #fb923c; border-color: #fb923c55; }
+.admin-toggle-admin-btn:hover { color: #818cf8; border-color: #818cf855; }
+.admin-delete-btn:hover       { color: #f87171; border-color: #f8717155; }
+
+/* Change password modal */
+.changepwd-panel {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 380px;
+  padding: 0;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.changepwd-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+.admin-ok {
+  font-size: var(--fs-sm);
+  color: #34d399;
+}
 
 .admin-reset-form {
   display: flex;

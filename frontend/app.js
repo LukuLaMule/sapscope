@@ -114,7 +114,10 @@ const loadTokens            = (cid)       => apiFetch(`/api/v1/admin/clients/${c
 const revokeToken           = (cid, tid)  => apiFetch(`/api/v1/admin/clients/${cid}/tokens/${tid}`, { method: "DELETE" });
 const assignClientToUser    = (uid, cid)  => apiFetch(`/api/v1/admin/users/${uid}/clients/${cid}`, { method: "POST" });
 const unassignClientFromUser = (uid, cid) => apiFetch(`/api/v1/admin/users/${uid}/clients/${cid}`, { method: "DELETE" });
-const resetUserPassword      = (uid, pwd) => apiFetch(`/api/v1/admin/users/${uid}/password`, { method: "PATCH", body: JSON.stringify({ password: pwd }) });
+const resetUserPassword      = (uid, pwd)        => apiFetch(`/api/v1/admin/users/${uid}/password`, { method: "PATCH", body: JSON.stringify({ password: pwd }) });
+const setUserAdmin           = (uid, is_admin)   => apiFetch(`/api/v1/admin/users/${uid}/admin`,    { method: "PATCH", body: JSON.stringify({ is_admin }) });
+const deleteUser             = (uid)             => apiFetch(`/api/v1/admin/users/${uid}`,          { method: "DELETE" });
+const changeOwnPassword      = (cur, pwd)        => apiFetch(`/api/v1/auth/me/password`,            { method: "PATCH", body: JSON.stringify({ current_password: cur, new_password: pwd }) });
 const loadDiff              = (cid, snapId, baseId) => apiFetch(`/api/v1/clients/${cid}/snapshots/${snapId}/diff?base=${baseId}`);
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -1642,6 +1645,35 @@ function _renderUsersTab(users, clients) {
     } catch (err) { errEl.textContent = err.message; }
   };
 
+  content.querySelectorAll('.admin-toggle-admin-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const uid     = btn.dataset.uid;
+      const isAdmin = btn.dataset.isAdmin === 'true';
+      const action  = isAdmin ? 'demote to consultant' : 'promote to admin';
+      if (!confirm(`${action} this user?`)) return;
+      btn.disabled = true;
+      try {
+        await setUserAdmin(uid, !isAdmin);
+        const [u, c] = await Promise.all([loadUsers(), loadAdminClients()]);
+        _renderAdminTabs(u, c, 'users');
+      } catch (err) { alert(err.message); btn.disabled = false; }
+    };
+  });
+
+  content.querySelectorAll('.admin-delete-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const uid   = btn.dataset.uid;
+      const email = btn.dataset.email;
+      if (!confirm(`Delete ${email}? This is irreversible.`)) return;
+      btn.disabled = true;
+      try {
+        await deleteUser(uid);
+        const [u, c] = await Promise.all([loadUsers(), loadAdminClients()]);
+        _renderAdminTabs(u, c, 'users');
+      } catch (err) { alert(err.message); btn.disabled = false; }
+    };
+  });
+
   content.querySelectorAll('.admin-reset-btn').forEach(btn => {
     const uid = btn.dataset.uid;
     btn.onclick = () => {
@@ -1696,7 +1728,13 @@ function _userRow(user, clients) {
       <div class="admin-user-meta">
         <span class="admin-user-email">${esc(user.email)}</span>
         ${user.is_admin ? '<span class="admin-badge">admin</span>' : ''}
-        ${!user.is_admin ? `<button class="admin-reset-btn" data-uid="${uid}" title="Reset password">↺ reset pwd</button>` : ''}
+        <div class="admin-user-actions">
+          ${!user.is_admin ? `<button class="admin-reset-btn" data-uid="${uid}" title="Reset password">↺ pwd</button>` : ''}
+          <button class="admin-toggle-admin-btn" data-uid="${uid}" data-is-admin="${user.is_admin}" title="${user.is_admin ? 'Demote to consultant' : 'Promote to admin'}">
+            ${user.is_admin ? '↓ demote' : '↑ admin'}
+          </button>
+          <button class="admin-delete-btn" data-uid="${uid}" data-email="${esc(user.email)}" title="Delete user">✕ delete</button>
+        </div>
       </div>
       <div class="admin-reset-form" id="rf-${uid}" style="display:none">
         <input type="password" class="admin-input admin-input--sm" placeholder="new password (12+ chars)" id="rp-${uid}">
@@ -1877,6 +1915,39 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("admin-overlay").addEventListener("click", () => {
     document.getElementById("admin-modal").style.display = "none";
+  });
+
+  // ── Change own password modal ──────────────────────────────────────────────
+  const closePwdModal = () => {
+    document.getElementById("changepwd-modal").style.display = "none";
+    document.getElementById("cp-current").value = "";
+    document.getElementById("cp-new").value     = "";
+    document.getElementById("cp-confirm").value = "";
+    document.getElementById("cp-error").textContent = "";
+    document.getElementById("cp-ok").style.display = "none";
+  };
+  document.getElementById("changepwd-btn").addEventListener("click", () => {
+    document.getElementById("changepwd-modal").style.display = "flex";
+  });
+  document.getElementById("changepwd-close-btn").addEventListener("click", closePwdModal);
+  document.getElementById("changepwd-overlay").addEventListener("click", closePwdModal);
+  document.getElementById("cp-submit").addEventListener("click", async () => {
+    const errEl   = document.getElementById("cp-error");
+    const okEl    = document.getElementById("cp-ok");
+    errEl.textContent = "";
+    okEl.style.display = "none";
+    const cur  = document.getElementById("cp-current").value;
+    const pwd  = document.getElementById("cp-new").value;
+    const conf = document.getElementById("cp-confirm").value;
+    if (pwd.length < 12) { errEl.textContent = "New password must be at least 12 characters."; return; }
+    if (pwd !== conf)    { errEl.textContent = "Passwords do not match."; return; }
+    try {
+      await changeOwnPassword(cur, pwd);
+      okEl.style.display = "";
+      document.getElementById("cp-current").value = "";
+      document.getElementById("cp-new").value     = "";
+      document.getElementById("cp-confirm").value = "";
+    } catch (err) { errEl.textContent = err.message; }
   });
 
   document.getElementById("overview-btn").addEventListener("click", () => {

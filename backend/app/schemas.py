@@ -57,6 +57,10 @@ class PasswordReset(BaseModel):
     password: str = Field(min_length=12)
 
 
+class AdminToggle(BaseModel):
+    is_admin: bool
+
+
 class UserOut(BaseModel):
     id: str
     email: str

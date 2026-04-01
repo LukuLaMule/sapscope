@@ -59,6 +59,7 @@
       <select id="client-select"></select>
       <div class="spacer"></div>
       <button id="admin-btn" style="display:none">⚙ admin</button>
+      <button id="changepwd-btn" title="Change my password">🔑</button>
       <button id="logout-btn">logout</button>
     </div>
     <div id="main">
@@ -95,6 +96,25 @@
       <button class="admin-tab" data-tab="clients">Clients</button>
     </div>
     <div id="admin-tab-content" class="admin-tab-content"></div>
+  </div>
+</div>
+
+<!-- ── Change password modal ────────────────────────────────────────────────── -->
+<div id="changepwd-modal" style="display:none">
+  <div class="admin-overlay" id="changepwd-overlay"></div>
+  <div class="changepwd-panel">
+    <div class="admin-panel-hdr">
+      <div class="admin-panel-title">Change my password</div>
+      <button id="changepwd-close-btn">✕</button>
+    </div>
+    <div class="changepwd-body">
+      <input id="cp-current" type="password" placeholder="Current password" class="admin-input">
+      <input id="cp-new"     type="password" placeholder="New password (12+ chars)" class="admin-input">
+      <input id="cp-confirm" type="password" placeholder="Confirm new password" class="admin-input">
+      <div id="cp-error" class="admin-error"></div>
+      <div id="cp-ok" class="admin-ok" style="display:none">Password updated.</div>
+      <button id="cp-submit" class="admin-submit-btn">Update password</button>
+    </div>
   </div>
 </div>
 
