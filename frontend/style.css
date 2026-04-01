@@ -290,6 +290,95 @@ html, body {
 .onboarding-icon  { font-size: 32px; margin-bottom: 12px; }
 .onboarding-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
 .onboarding-text  { font-size: var(--fs-sm); color: var(--text-dim); margin-bottom: 32px; line-height: 1.6; }
+
+/* ── Pricing cards ─────────────────────────────────────────────────────────── */
+.pricing-cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.pricing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.pricing-card--highlight {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(129,140,248,0.12);
+}
+.pricing-badge {
+  position: absolute;
+  top: -10px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.pricing-tier  { font-weight: 700; font-size: 16px; color: var(--text); }
+.pricing-price { font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: var(--text); }
+.pricing-price span { font-size: 13px; color: var(--text-dim); font-weight: 400; }
+.pricing-features {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.pricing-features li::before { content: "✓  "; color: #34d399; font-weight: 700; }
+.pricing-btn {
+  margin-top: auto;
+  padding: 8px 0;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.pricing-btn:hover { opacity: 0.85; }
+.pricing-btn:disabled { opacity: 0.5; cursor: wait; }
+.pricing-enterprise {
+  font-size: var(--fs-xs);
+  color: var(--text-label);
+  text-align: center;
+}
+.pricing-enterprise a { color: var(--text-dim); }
+
+/* ── Activation token box ──────────────────────────────────────────────────── */
+.activation-token-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid #34d39955;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+.activation-token-box code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: #34d399;
+  word-break: break-all;
+  flex: 1;
+}
 .ob-steps { display: flex; flex-direction: column; gap: 20px; text-align: left; }
 .ob-step  {
   display: flex; gap: 16px; align-items: flex-start;

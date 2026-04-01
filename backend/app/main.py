@@ -13,7 +13,7 @@ from .database import engine
 from .license import validate as validate_license
 from .limiter import limiter
 from .models import Base
-from .routers import admin, analysis, auth, diff, snapshots
+from .routers import admin, analysis, auth, billing, diff, snapshots
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -75,6 +75,7 @@ app.include_router(snapshots.router)
 app.include_router(analysis.router)
 app.include_router(diff.router)
 app.include_router(admin.router)
+app.include_router(billing.router)
 
 
 @app.get("/healthz", tags=["ops"])
