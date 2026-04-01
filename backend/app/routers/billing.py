@@ -103,12 +103,22 @@ async def stripe_webhook(
     return {"received": True}
 
 
-async def _handle_checkout_completed(session: dict, db: AsyncSession) -> None:
-    user_id = session.get("client_reference_id") or session.get("metadata", {}).get("user_id")
-    tier    = session.get("metadata", {}).get("tier", "solo")
+def _attr(obj, *keys, default=None):
+    """Safely get nested attribute from a Stripe object or dict."""
+    for key in keys:
+        try:
+            obj = obj[key] if isinstance(obj, dict) else getattr(obj, key)
+        except (KeyError, AttributeError):
+            return default
+    return obj if obj is not None else default
+
+
+async def _handle_checkout_completed(session, db: AsyncSession) -> None:
+    user_id = _attr(session, "client_reference_id") or _attr(session, "metadata", "user_id")
+    tier    = _attr(session, "metadata", "tier", default="solo")
 
     if not user_id:
-        logger.error("checkout.session.completed missing user_id: %s", session.get("id"))
+        logger.error("checkout.session.completed missing user_id: %s", _attr(session, "id"))
         return
 
     row = await db.execute(select(User).where(User.id == user_id))
@@ -124,10 +134,10 @@ async def _handle_checkout_completed(session: dict, db: AsyncSession) -> None:
         return
 
     # Create SAP client for this user
-    client_name = f"{TIERS[tier]['label']} — {user.email}"
+    client_name = f"{TIERS.get(tier, TIERS['solo'])['label']} — {user.email}"
     client = Client(name=client_name)
     db.add(client)
-    await db.flush()  # get client.id
+    await db.flush()
 
     # Generate agent token
     plaintext = secrets.token_urlsafe(settings.token_min_length)
@@ -151,8 +161,8 @@ async def _handle_checkout_completed(session: dict, db: AsyncSession) -> None:
     # Record subscription
     db.add(Subscription(
         user_id=user_id,
-        stripe_customer_id=session.get("customer", ""),
-        stripe_subscription_id=session.get("subscription"),
+        stripe_customer_id=_attr(session, "customer", default=""),
+        stripe_subscription_id=_attr(session, "subscription"),
         tier=tier,
         status="active",
     ))
@@ -161,9 +171,9 @@ async def _handle_checkout_completed(session: dict, db: AsyncSession) -> None:
     logger.info("User %s activated on tier %s, client %s", user_id, tier, client.id)
 
 
-async def _handle_subscription_change(sub: dict, db: AsyncSession) -> None:
-    stripe_sub_id = sub.get("id")
-    new_status    = sub.get("status", "canceled")
+async def _handle_subscription_change(sub, db: AsyncSession) -> None:
+    stripe_sub_id = _attr(sub, "id")
+    new_status    = _attr(sub, "status", default="canceled")
 
     row = await db.execute(
         select(Subscription).where(Subscription.stripe_subscription_id == stripe_sub_id)
