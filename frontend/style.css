@@ -76,8 +76,9 @@ html, body {
   flex-shrink: 0;
   transition: background 0.3s, box-shadow 0.3s;
 }
-#status-dot.ok  { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,0.5); }
-#status-dot.err { background: #f87171; box-shadow: 0 0 8px rgba(248,113,113,0.5); }
+#status-dot.ok   { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,0.5); }
+#status-dot.warn { background: #fb923c; box-shadow: 0 0 8px rgba(251,146,60,0.5); }
+#status-dot.err  { background: #f87171; box-shadow: 0 0 8px rgba(248,113,113,0.5); }
 
 #topbar select {
   background: var(--bg-card);
@@ -180,14 +181,46 @@ html, body {
   font-family: var(--font-mono);
 }
 .system-item .meta .stale-time { color: #f87171; }
-.system-item .stale-badge {
-  display: inline-flex;
+
+/* stale system-item — red left border */
+.system-item.stale {
+  border-left: 2px solid #f8717155;
+}
+
+/* pulsing dot on SID badge */
+.stale-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: #f87171;
+  border-radius: 50%;
+  margin-left: 5px;
+  vertical-align: middle;
+  animation: stale-pulse 1.8s ease-in-out infinite;
+}
+@keyframes stale-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* stale banner in detail view */
+.stale-banner {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-  font-size: var(--fs-xs);
+  gap: 10px;
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.25);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: var(--fs-sm);
   color: #f87171;
-  opacity: 0.85;
+}
+.stale-banner-dot {
+  flex-shrink: 0;
+  width: 8px; height: 8px;
+  background: #f87171;
+  border-radius: 50%;
+  animation: stale-pulse 1.8s ease-in-out infinite;
 }
 
 /* ── Snapshot history row ─────────────────────────────────────────────────── */
