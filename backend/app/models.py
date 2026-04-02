@@ -151,6 +151,25 @@ class Subscription(Base):
     )
 
 
+class PasswordResetToken(Base):
+    """Token à usage unique pour le reset de mot de passe.
+    Expire après 1h, supprimé dès qu'il est utilisé.
+    """
+    __tablename__ = "password_reset_tokens"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
 class OnboardingToken(Base):
     """Plaintext agent token stored temporarily after a successful Stripe checkout.
     Retrieved once by the frontend, then deleted.

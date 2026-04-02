@@ -25,5 +25,13 @@ class Settings(BaseSettings):
     stripe_price_team: str | None = None        # price_xxx
     stripe_price_enterprise: str | None = None  # price_xxx
 
+    # SMTP (reset de mot de passe)
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_from: str = "noreply@sapscope.com"
+    app_url: str = "https://app.sapscope.com"
+
 
 settings = Settings()

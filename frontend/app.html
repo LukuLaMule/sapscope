@@ -34,7 +34,33 @@
     <input id="login-pass"  type="password" placeholder="mot de passe"    autocomplete="current-password" required>
     <div id="login-error" class="login-error"></div>
     <button id="login-btn" type="submit">Connexion →</button>
-    <div class="login-switch">Pas encore de compte ? <a id="show-register">S'inscrire</a></div>
+    <div class="login-switch">
+      Pas encore de compte ? <a id="show-register">S'inscrire</a>
+      &nbsp;·&nbsp;
+      <a id="show-forgot">Mot de passe oublié ?</a>
+    </div>
+  </form>
+
+  <!-- Forgot password form -->
+  <form id="forgot-form" class="login-box" style="display:none">
+    <div class="login-logo">SAP<span>scope</span></div>
+    <div class="login-subtitle">Réinitialiser le mot de passe</div>
+    <input id="forgot-email" type="email" placeholder="votre email" autocomplete="email" required>
+    <div id="forgot-error" class="login-error"></div>
+    <div id="forgot-ok" class="login-ok" style="display:none"></div>
+    <button id="forgot-btn" type="submit">Envoyer le lien →</button>
+    <div class="login-switch">Retour à la <a id="show-login-from-forgot">connexion</a></div>
+  </form>
+
+  <!-- Reset password form (affiché quand ?reset_token= est dans l'URL) -->
+  <form id="reset-form" class="login-box" style="display:none">
+    <div class="login-logo">SAP<span>scope</span></div>
+    <div class="login-subtitle">Nouveau mot de passe</div>
+    <input id="reset-pass"    type="password" placeholder="nouveau mot de passe (12 car. min)" autocomplete="new-password" required>
+    <input id="reset-pass2"   type="password" placeholder="confirmer le mot de passe"          autocomplete="new-password" required>
+    <div id="reset-error" class="login-error"></div>
+    <div id="reset-ok" class="login-ok" style="display:none"></div>
+    <button id="reset-btn" type="submit">Enregistrer →</button>
   </form>
 
   <!-- Register form -->

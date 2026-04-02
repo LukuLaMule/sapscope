@@ -1244,6 +1244,13 @@ html, body {
   font-family: var(--font-mono);
 }
 
+.login-ok {
+  color: #30d158;
+  font-size: var(--fs-sm);
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
 .demo-hint {
   font-size: var(--fs-xs);
   color: var(--text-label);
