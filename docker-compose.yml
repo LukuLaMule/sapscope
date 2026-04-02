@@ -44,6 +44,13 @@ services:
       STRIPE_PRICE_SOLO:       ${STRIPE_PRICE_SOLO:-}
       STRIPE_PRICE_TEAM:       ${STRIPE_PRICE_TEAM:-}
       STRIPE_PRICE_ENTERPRISE: ${STRIPE_PRICE_ENTERPRISE:-}
+      # SMTP (reset de mot de passe)
+      SMTP_HOST:     ${SMTP_HOST:-}
+      SMTP_PORT:     ${SMTP_PORT:-587}
+      SMTP_USER:     ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM:     ${SMTP_FROM:-noreply@sapscope.com}
+      APP_URL:       ${APP_URL:-https://app.sapscope.com}
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')\" || exit 1"]
       interval: 10s
