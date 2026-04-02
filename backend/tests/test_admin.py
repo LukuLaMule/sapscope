@@ -94,3 +94,37 @@ async def test_duplicate_email_rejected(client: AsyncClient, admin_user):
     await client.post("/api/v1/admin/users", json=payload, headers={"Authorization": f"Bearer {token}"})
     resp = await client.post("/api/v1/admin/users", json=payload, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 409
+
+
+async def test_delete_client(client: AsyncClient, admin_user, test_client_obj):
+    token = await login(client, "admin@example.com", "AdminPass123!")
+    cid = test_client_obj.id
+
+    resp = await client.delete(
+        f"/api/v1/admin/clients/{cid}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 204
+
+    # Ne doit plus apparaître dans la liste
+    resp = await client.get("/api/v1/admin/clients", headers={"Authorization": f"Bearer {token}"})
+    ids = [c["id"] for c in resp.json()]
+    assert cid not in ids
+
+
+async def test_delete_client_not_found(client: AsyncClient, admin_user):
+    token = await login(client, "admin@example.com", "AdminPass123!")
+    resp = await client.delete(
+        "/api/v1/admin/clients/00000000-0000-0000-0000-000000000000",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 404
+
+
+async def test_delete_client_non_admin_forbidden(client: AsyncClient, regular_user, test_client_obj):
+    token = await login(client, "consultant@example.com", "ConsultPass123!")
+    resp = await client.delete(
+        f"/api/v1/admin/clients/{test_client_obj.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 403

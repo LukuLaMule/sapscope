@@ -55,3 +55,21 @@ async def test_regular_user_cannot_access_admin(client: AsyncClient, regular_use
         headers={"Authorization": f"Bearer {token}"},
     )
     assert resp.status_code == 403
+
+
+async def test_get_me(client: AsyncClient, admin_user):
+    token = await login(client, "admin@example.com", "AdminPass123!")
+    resp = await client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["email"] == "admin@example.com"
+    assert data["is_admin"] is True
+    assert "user_id" in data
+
+
+async def test_get_me_without_token(client: AsyncClient):
+    resp = await client.get("/api/v1/auth/me")
+    assert resp.status_code == 401
