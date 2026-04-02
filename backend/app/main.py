@@ -2,17 +2,19 @@
 
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy import delete
 
 from .database import engine
 from .license import validate as validate_license
 from .limiter import limiter
-from .models import Base
+from .models import Base, OnboardingToken, PasswordResetToken
 from .routers import admin, analysis, auth, billing, diff, snapshots
 from .settings import settings
 
@@ -22,10 +24,31 @@ logger = logging.getLogger(__name__)
 license_info = validate_license(settings.license_key)
 
 
+async def _purge_expired_tokens() -> None:
+    """Supprime les tokens expirés au démarrage pour garder la base propre."""
+    from .database import SessionLocal
+    async with SessionLocal() as db:
+        now = datetime.now(timezone.utc)
+        r1 = await db.execute(
+            delete(PasswordResetToken).where(PasswordResetToken.expires_at < now)
+        )
+        # Les onboarding tokens n'ont pas d'expiry explicite — on purge ceux de plus de 24h
+        from datetime import timedelta
+        cutoff = now - timedelta(hours=24)
+        r2 = await db.execute(
+            delete(OnboardingToken).where(OnboardingToken.created_at < cutoff)
+        )
+        await db.commit()
+        total = r1.rowcount + r2.rowcount
+        if total:
+            logger.info("Purged %d expired token(s) at startup", total)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    await _purge_expired_tokens()
     if license_info.mode == "self-hosted":
         if not license_info.is_valid:
             logger.error("INVALID LICENSE: %s", license_info.warning)
