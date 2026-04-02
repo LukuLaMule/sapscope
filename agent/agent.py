@@ -7,7 +7,7 @@ Usage:
     python -m agent --dry-run  # print JSON, don't send
 
 Environment variables (required):
-    SAPSCOPE_BACKEND_URL    e.g. https://app.sapscope.io
+    SAPSCOPE_BACKEND_URL    e.g. https://app.sapscope.com
     SAPSCOPE_TOKEN          Bearer token issued by the backend
     SAP_USER                RFC username
     SAP_PASSWD              RFC password
