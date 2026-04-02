@@ -10,8 +10,8 @@ Quick reference for all authentication and user management scenarios.
 
 | Situation | Solution | Where |
 |---|---|---|
-| Consultant forgets password | Admin resets it | Admin panel → Users → ↺ pwd |
-| Admin forgets password (SaaS) | Contact `contact@sapscope.com` | — |
+| Consultant forgets password | Self-service email reset | "Forgot password?" link on login |
+| Admin forgets password (SaaS) | Self-service email reset | "Forgot password?" link on login |
 | Admin forgets password (self-hosted) | CLI `manage.py reset-password` | Server shell |
 | User wants to change own password | Change password modal | 🔑 button in top bar |
 | Consultant leaves | Delete user | Admin panel → Users → ✕ delete |

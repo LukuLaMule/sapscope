@@ -10,8 +10,8 @@ Référence rapide pour tous les scénarios d'authentification et de gestion des
 
 | Situation | Solution | Où |
 |---|---|---|
-| Consultant oublie son mdp | L'admin le reset | Panel admin → Utilisateurs → ↺ pwd |
-| Admin oublie son mdp (SaaS) | Contacter `contact@sapscope.com` | — |
+| Consultant oublie son mdp | Reset autonome par email | Lien "Mot de passe oublié ?" sur le login |
+| Admin oublie son mdp (SaaS) | Reset autonome par email | Lien "Mot de passe oublié ?" sur le login |
 | Admin oublie son mdp (self-hosted) | CLI `manage.py reset-password` | Shell serveur |
 | User veut changer son propre mdp | Modal changement de mdp | Bouton 🔑 dans la barre du haut |
 | Consultant quitte l'entreprise | Supprimer l'user | Panel admin → Utilisateurs → ✕ delete |
