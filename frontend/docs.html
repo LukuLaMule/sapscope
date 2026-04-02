@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — SAPscope</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0a0a;
+      --bg-2:     #111111;
+      --card:     #161616;
+      --border:   rgba(255,255,255,.08);
+      --border-2: rgba(255,255,255,.06);
+      --fg:       #f0f0f0;
+      --fg-2:     rgba(240,240,240,.65);
+      --fg-3:     rgba(240,240,240,.35);
+      --accent:   #2997ff;
+      --green:    #34d399;
+      --orange:   #fb923c;
+      --r:        14px;
+      --sidebar:  260px;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 52px;
+      background: rgba(10,10,10,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-2);
+    }
+    .nav-logo { font-size: 15px; font-weight: 700; color: var(--fg); text-decoration: none; }
+    .nav-logo span { color: var(--accent); }
+    .nav-right { display: flex; gap: 20px; align-items: center; }
+    .nav-right a { font-size: 13px; color: var(--fg-3); text-decoration: none; transition: color .2s; }
+    .nav-right a:hover { color: var(--fg); }
+    .nav-right .btn-nav {
+      background: var(--accent); color: #fff; padding: 6px 16px;
+      border-radius: 8px; font-weight: 600; font-size: 13px;
+    }
+    .nav-right .btn-nav:hover { opacity: .88; color: #fff; }
+
+    /* ── LAYOUT ── */
+    .docs-layout {
+      display: flex; min-height: calc(100vh - 52px);
+    }
+
+    /* ── SIDEBAR ── */
+    .docs-sidebar {
+      width: var(--sidebar); flex-shrink: 0;
+      background: var(--bg-2);
+      border-right: 1px solid var(--border-2);
+      padding: 24px 0;
+      position: sticky; top: 52px; height: calc(100vh - 52px);
+      overflow-y: auto;
+    }
+    .sidebar-section { margin-bottom: 8px; }
+    .sidebar-section-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--fg-3); padding: 8px 20px 6px;
+    }
+    .sidebar-link {
+      display: block; padding: 8px 20px;
+      font-size: 13px; color: var(--fg-2);
+      text-decoration: none; cursor: pointer;
+      transition: background .15s, color .15s;
+      border-left: 2px solid transparent;
+    }
+    .sidebar-link:hover { background: rgba(255,255,255,.04); color: var(--fg); }
+    .sidebar-link.active {
+      background: rgba(41,151,255,.08);
+      border-left-color: var(--accent);
+      color: var(--fg);
+    }
+
+    /* ── LANG TOGGLE ── */
+    .lang-toggle {
+      display: flex; margin: 0 16px 16px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .lang-btn {
+      flex: 1; padding: 7px 0; text-align: center;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      color: var(--fg-3); transition: background .15s, color .15s;
+      border: none; background: transparent;
+    }
+    .lang-btn.active { background: var(--accent); color: #fff; }
+
+    /* ── MAIN CONTENT ── */
+    .docs-content {
+      flex: 1; padding: 48px 64px; max-width: 860px;
+      min-width: 0;
+    }
+
+    /* ── MARKDOWN STYLES ── */
+    .md-body h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; line-height: 1.2; }
+    .md-body h2 { font-size: 20px; font-weight: 700; margin: 36px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-2); }
+    .md-body h3 { font-size: 16px; font-weight: 600; margin: 24px 0 8px; color: var(--fg); }
+    .md-body p { font-size: 15px; color: var(--fg-2); line-height: 1.75; margin-bottom: 14px; }
+    .md-body ul, .md-body ol { padding-left: 20px; margin-bottom: 14px; }
+    .md-body li { font-size: 15px; color: var(--fg-2); line-height: 1.75; margin-bottom: 4px; }
+    .md-body strong { color: var(--fg); font-weight: 600; }
+    .md-body em { color: var(--fg-2); font-style: italic; }
+    .md-body code {
+      font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px;
+      background: rgba(255,255,255,.07); border: 1px solid var(--border);
+      border-radius: 5px; padding: 2px 6px; color: #a78bfa;
+    }
+    .md-body pre {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 20px; overflow-x: auto;
+      margin: 16px 0;
+    }
+    .md-body pre code {
+      background: none; border: none; padding: 0;
+      font-size: 13px; color: var(--fg-2);
+    }
+    .md-body blockquote {
+      border-left: 3px solid var(--accent); padding: 10px 16px;
+      background: rgba(41,151,255,.06); border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .md-body blockquote p { margin: 0; color: var(--fg-2); }
+    .md-body table {
+      width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;
+    }
+    .md-body th, .md-body td {
+      padding: 10px 14px; border: 1px solid var(--border);
+      text-align: left; color: var(--fg-2);
+    }
+    .md-body th { background: var(--card); font-weight: 600; color: var(--fg); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+    .md-body tr:hover td { background: rgba(255,255,255,.02); }
+    .md-body a { color: var(--accent); text-decoration: none; }
+    .md-body a:hover { text-decoration: underline; }
+    .md-body hr { border: none; border-top: 1px solid var(--border-2); margin: 28px 0; }
+    .md-body img { max-width: 100%; border-radius: 10px; }
+
+    /* ── LOADING STATE ── */
+    .docs-loading {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--fg-3); font-size: 14px; padding: 40px 0;
+    }
+    .docs-loading::before {
+      content: ''; width: 16px; height: 16px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MOBILE ── */
+    .sidebar-toggle {
+      display: none; padding: 6px 10px; background: var(--card);
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+      font-size: 13px; color: var(--fg-2);
+    }
+    @media (max-width: 768px) {
+      .docs-sidebar {
+        position: fixed; left: -100%; top: 52px; z-index: 50;
+        height: calc(100vh - 52px); transition: left .25s;
+      }
+      .docs-sidebar.open { left: 0; }
+      .docs-content { padding: 28px 20px; }
+      .sidebar-toggle { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">SAP<span>scope</span></a>
+  <div class="nav-right">
+    <button class="sidebar-toggle" id="sidebarToggle">☰ Guides</button>
+    <a href="/#pricing">Tarifs</a>
+    <a href="/app" class="btn-nav">Accéder à l'app →</a>
+  </div>
+</nav>
+
+<div class="docs-layout">
+  <!-- Sidebar -->
+  <aside class="docs-sidebar" id="sidebar">
+
+    <!-- Language toggle -->
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
+      <button class="lang-btn" id="btn-fr" onclick="setLang('fr')">🇫🇷 FR</button>
+    </div>
+
+    <!-- Guides list -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Guides utilisateur</div>
+      <a class="sidebar-link" data-guide="guide-01-connexion" onclick="loadGuide(this)">01 — Connexion</a>
+      <a class="sidebar-link" data-guide="guide-02-landscape" onclick="loadGuide(this)">02 — Vue Landscape</a>
+      <a class="sidebar-link" data-guide="guide-03-detail-systeme" onclick="loadGuide(this)">03 — Détail système</a>
+      <a class="sidebar-link" data-guide="guide-04-diagnostic-ia" onclick="loadGuide(this)">04 — Diagnostic IA</a>
+      <a class="sidebar-link" data-guide="guide-05-diff" onclick="loadGuide(this)">05 — Comparaison snapshots</a>
+      <a class="sidebar-link" data-guide="guide-06-export-pdf" onclick="loadGuide(this)">06 — Export PDF</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Administration</div>
+      <a class="sidebar-link" data-guide="guide-07-admin-utilisateurs" onclick="loadGuide(this)">07 — Utilisateurs</a>
+      <a class="sidebar-link" data-guide="guide-08-admin-clients-tokens" onclick="loadGuide(this)">08 — Clients &amp; Tokens</a>
+      <a class="sidebar-link" data-guide="guide-09-recovery" onclick="loadGuide(this)">09 — Récupération &amp; edge cases</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Installation SAP</div>
+      <a class="sidebar-link" data-guide="sap-rfc-user-setup" onclick="loadGuide(this)">Utilisateur RFC SAP</a>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main class="docs-content">
+    <div id="md-output" class="md-body"></div>
+  </main>
+</div>
+
+<script>
+  let currentLang = 'en';
+  let currentGuide = 'guide-01-connexion';
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+    renderGuide(currentGuide);
+  }
+
+  function loadGuide(el) {
+    // Update active state
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    el.classList.add('active');
+    currentGuide = el.dataset.guide;
+    renderGuide(currentGuide);
+    // Close sidebar on mobile
+    document.getElementById('sidebar').classList.remove('open');
+    // Update URL hash
+    history.replaceState(null, '', '#' + currentGuide);
+  }
+
+  async function renderGuide(guide) {
+    const output = document.getElementById('md-output');
+    output.innerHTML = '<div class="docs-loading">Chargement…</div>';
+
+    // Build file path: sap-rfc-user-setup has no lang variant
+    let path;
+    if (guide === 'sap-rfc-user-setup') {
+      path = '/docs/' + guide + '.md';
+    } else {
+      path = currentLang === 'fr'
+        ? '/docs/' + guide + '.fr.md'
+        : '/docs/' + guide + '.md';
+    }
+
+    try {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error('Not found');
+      const text = await res.text();
+
+      // Strip the language badge line (first line if it contains 🇬🇧 or 🇫🇷)
+      const lines = text.split('\n');
+      const cleaned = (lines[0].includes('🇬🇧') || lines[0].includes('🇫🇷'))
+        ? lines.slice(1).join('\n').trimStart()
+        : text;
+
+      output.innerHTML = marked.parse(cleaned);
+    } catch (e) {
+      output.innerHTML = '<p style="color:var(--fg-3)">Guide introuvable.</p>';
+    }
+  }
+
+  // Mobile sidebar toggle
+  document.getElementById('sidebarToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  // Load from URL hash or default to first guide
+  const hash = location.hash.replace('#', '');
+  const guideNames = Array.from(document.querySelectorAll('.sidebar-link')).map(l => l.dataset.guide);
+  const initial = guideNames.includes(hash) ? hash : 'guide-01-connexion';
+  const initialLink = document.querySelector(`[data-guide="${initial}"]`);
+  if (initialLink) {
+    initialLink.classList.add('active');
+    currentGuide = initial;
+  }
+  renderGuide(currentGuide);
+</script>
+</body>
+</html>

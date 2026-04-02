@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Ne pas indexer l'application (login requis)
+Disallow: /app
+Disallow: /api/
+
+Sitemap: https://sapscope.com/sitemap.xml
