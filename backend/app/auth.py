@@ -61,12 +61,13 @@ async def get_client_for_agent(
 
 # ── Consultant auth (read-only) ───────────────────────────────────────────────
 
-def create_jwt(user_id: str) -> str:
+def create_jwt(user_id: str, expires_in_seconds: int | None = None) -> str:
+    ttl = timedelta(seconds=expires_in_seconds) if expires_in_seconds is not None else timedelta(hours=JWT_TTL_HOURS)
     payload = {
         "sub": user_id,
         "jti": str(uuid.uuid4()),
         "iat": datetime.now(timezone.utc),
-        "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_TTL_HOURS),
+        "exp": datetime.now(timezone.utc) + ttl,
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
