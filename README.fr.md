@@ -95,35 +95,44 @@ L'agent se déploie sur le serveur d'application SAP. Il se connecte en RFC loca
 
 ### Installation
 
+Exécutez l'installeur sur le serveur d'application SAP (Linux, nécessite root) :
+
+```bash
+curl -sSL https://app.sapscope.com/install.sh | sudo bash -s -- \
+  --token <token-depuis-le-panel-admin>
+```
+
+L'installeur va :
+- Détecter Python (l'installer si nécessaire)
+- Découvrir automatiquement les systèmes SAP depuis `/usr/sap/`
+- Créer un timer systemd pour la collecte automatique
+- Lancer une première collecte immédiatement
+
+#### Installation manuelle (sans l'installeur)
+
 ```bash
 curl -O https://app.sapscope.com/dist/agent.tar.gz
-tar xzf agent.tar.gz && cd sap-agent
+curl -O https://app.sapscope.com/dist/agent.tar.gz.sha256
+sha256sum --check agent.tar.gz.sha256
+tar xzf agent.tar.gz && cd agent
 pip install -r requirements.txt
 ```
 
-Créez un fichier `.env` dans le dossier agent :
+Créez un fichier `.env` :
 
 ```env
-SAPSCOPE_TOKEN=<token-genere-depuis-le-panel-admin>
-SAPSCOPE_URL=https://app.sapscope.com
-SAP_HOST=localhost
-SAP_SYSNR=00
-SAP_CLIENT=100
+SAPSCOPE_BACKEND_URL=https://app.sapscope.com
+SAPSCOPE_TOKEN=<token-depuis-le-panel-admin>
 SAP_USER=SAPSCOPE_RFC
-SAP_PASSWORD=<mot-de-passe>
+SAP_PASSWD=<mot-de-passe>
+SAP_CLIENT=100
 ```
 
-Testez la connexion :
+Testez et lancez :
 
 ```bash
-python agent.py --once
-```
-
-Automatisez avec un timer systemd ou un cron :
-
-```bash
-# cron — tous les jours à 2h
-0 2 * * * cd /opt/sap-agent && python agent.py --once >> /var/log/sapscope-agent.log 2>&1
+python -m agent --dry-run   # vérifie la connexion RFC, affiche le JSON
+python -m agent             # collecte et envoie
 ```
 
 ### Utilisateur RFC requis côté SAP
