@@ -10,6 +10,7 @@ Flow:
   6. GET /onboarding returns { token, client_name } and deletes the OnboardingToken row
 """
 
+import asyncio
 import logging
 import secrets
 
@@ -20,6 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import get_current_user
 from ..database import get_db
+from ..mailer import send_welcome_email
 from ..models import AgentToken, Client, OnboardingToken, Subscription, User, UserClient
 from ..settings import settings
 
@@ -169,6 +171,16 @@ async def _handle_checkout_completed(session, db: AsyncSession) -> None:
 
     await db.commit()
     logger.info("User %s activated on tier %s, client %s", user_id, tier, client.id)
+
+    # Email de bienvenue — en tâche de fond pour ne pas bloquer la réponse au webhook
+    asyncio.create_task(
+        send_welcome_email(
+            to_email=user.email,
+            tier=tier,
+            client_name=client_name,
+            agent_token=plaintext,
+        )
+    )
 
 
 async def _handle_subscription_change(sub, db: AsyncSession) -> None:

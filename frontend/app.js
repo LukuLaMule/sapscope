@@ -38,14 +38,15 @@ function applyTheme(theme) {
 // ── State ─────────────────────────────────────────────────────────────────────
 
 const state = {
-  token:        sessionStorage.getItem("sapscope_token") || "",
-  baseUrl:      window.location.origin,
-  clientId:     sessionStorage.getItem("sapscope_client") || "",
-  snapshots:    [],   // deduplicated — 1 per SID, latest only
-  allSnapshots: [],   // full list, used for per-SID history
-  selected:     null,
-  isAdmin:      sessionStorage.getItem("sapscope_is_admin") === "1",
-  lang:         localStorage.getItem("sapscope_lang") || "English",
+  token:           sessionStorage.getItem("sapscope_token") || "",
+  baseUrl:         window.location.origin,
+  clientId:        sessionStorage.getItem("sapscope_client") || "",
+  snapshots:       [],   // deduplicated — 1 per SID, latest only
+  allSnapshots:    [],   // full list, used for per-SID history
+  selected:        null,
+  isAdmin:         sessionStorage.getItem("sapscope_is_admin") === "1",
+  lang:            localStorage.getItem("sapscope_lang") || "English",
+  historyExpanded: {},   // { [sid]: true } — which SID history rows are expanded
 };
 
 // ── API ───────────────────────────────────────────────────────────────────────
@@ -98,7 +99,8 @@ async function apiRegister(email, password) {
 }
 
 const loadClients   = ()           => apiFetch("/api/v1/clients?limit=200");
-const loadSnapshots = (cid)        => apiFetch(`/api/v1/clients/${cid}/snapshots?limit=200`);
+const loadSnapshots      = (cid, offset = 0) => apiFetch(`/api/v1/clients/${cid}/snapshots?limit=200&offset=${offset}`);
+const loadSnapshotsMore  = (cid, offset)     => loadSnapshots(cid, offset);
 const loadDetail    = (cid, sid)   => apiFetch(`/api/v1/clients/${cid}/snapshots/${sid}`);
 const loadAnalysis  = (cid, sid)   => apiFetch(`/api/v1/clients/${cid}/snapshots/${sid}/analysis`);
 const requestAnalysis = (cid, sid, force=false, lang="English") =>
@@ -250,7 +252,11 @@ function buildHistoryRow(currentSnap) {
     .sort((a, b) => new Date(b.collected_at) - new Date(a.collected_at));
   if (history.length <= 1) return '';
 
-  const chips = history.slice(0, 10).map(s => {
+  // Decide how many chips to show — expanded state stored per SID
+  const expanded = state.historyExpanded && state.historyExpanded[currentSnap.system_sid];
+  const visible  = expanded ? history : history.slice(0, 10);
+
+  const chips = visible.map(s => {
     if (s.id === currentSnap.id) {
       return `<button class="history-item active" data-snap-id="${esc(s.id)}" title="${fmtDate(s.collected_at)}">${fmtDateShort(s.collected_at)}</button>`;
     }
@@ -260,12 +266,21 @@ function buildHistoryRow(currentSnap) {
         <button class="diff-btn" data-snap-id="${esc(s.id)}" title="Comparer avec le snapshot actuel">↔</button>
       </span>`;
   }).join('');
-  const more = history.length > 10
-    ? `<span class="history-more">+${history.length - 10}</span>` : '';
+
+  // +N badge: click to expand in-memory, "charger plus" if we've hit the server limit
+  let extra = '';
+  if (!expanded && history.length > 10) {
+    extra = `<button class="history-more history-more-btn" data-sid="${esc(currentSnap.system_sid)}">+${history.length - 10}</button>`;
+  }
+  // If we loaded exactly 200 snapshots, there might be more on the server
+  const mayHaveMore = state.allSnapshots.length >= 200;
+  const loadMoreBtn = mayHaveMore
+    ? `<button class="history-load-more" id="history-load-more-btn">Charger plus</button>` : '';
+
   return `
     <div class="history-row">
       <span class="history-label">Historique</span>
-      ${chips}${more}
+      ${chips}${extra}${loadMoreBtn}
     </div>`;
 }
 
@@ -307,6 +322,36 @@ function initHistoryRow(container, currentSid) {
       triggerDiff(state.selected.id, btn.dataset.snapId, currentSid);
     });
   });
+
+  // +N badge: expand in-memory history
+  const expandBtn = container.querySelector('.history-more-btn');
+  if (expandBtn) {
+    expandBtn.addEventListener('click', () => {
+      if (!state.historyExpanded) state.historyExpanded = {};
+      state.historyExpanded[currentSid] = true;
+      if (state.selected) renderDetail(state.selected, sidTheme(currentSid));
+    });
+  }
+
+  // "Charger plus" — fetch next batch from the server
+  const loadMoreBtn = document.getElementById('history-load-more-btn');
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', async () => {
+      loadMoreBtn.textContent = 'Chargement…';
+      loadMoreBtn.disabled = true;
+      try {
+        const next = await loadSnapshotsMore(state.clientId, state.allSnapshots.length);
+        if (next.length === 0) { loadMoreBtn.remove(); return; }
+        // Merge without duplicates
+        const existingIds = new Set(state.allSnapshots.map(s => s.id));
+        state.allSnapshots = state.allSnapshots.concat(next.filter(s => !existingIds.has(s.id)));
+        if (state.selected) renderDetail(state.selected, sidTheme(currentSid));
+      } catch (err) {
+        loadMoreBtn.textContent = 'Erreur — réessayer';
+        loadMoreBtn.disabled = false;
+      }
+    });
+  }
 }
 
 async function triggerDiff(snapIdA, snapIdB, sid) {
