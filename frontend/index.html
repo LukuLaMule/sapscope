@@ -330,44 +330,98 @@
     .analysis-preview-line.good { color: var(--green); }
     .analysis-preview-line.warn { color: var(--orange); }
 
+    /* ── FAQ ─────────────────────────────────────────────────────────────── */
+    .faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; }
+    .faq-item {
+      border: 1px solid var(--border-2); border-radius: 12px;
+      overflow: hidden; transition: border-color .2s;
+    }
+    .faq-item.open { border-color: rgba(41,151,255,.3); }
+    .faq-q {
+      width: 100%; background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px; font-size: 15px; font-weight: 600; color: var(--fg);
+      text-align: left; gap: 16px;
+    }
+    .faq-q:hover { background: rgba(255,255,255,.03); }
+    .faq-icon {
+      flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--card); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--accent);
+      transition: transform .25s;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .3s cubic-bezier(.2,.8,.2,1), padding .3s;
+      padding: 0 22px;
+    }
+    .faq-a-inner { padding-bottom: 18px; font-size: 14px; color: var(--fg-2); line-height: 1.75; }
+    .faq-a-inner a { color: var(--accent); }
+    .faq-item.open .faq-a { max-height: 400px; }
+
     /* ── PRICING ──────────────────────────────────────────────────────────── */
     .pricing-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      align-items: start;
     }
     .pricing-card {
       background: var(--card); border: 1px solid var(--border-2);
       border-radius: var(--r); padding: 36px; position: relative;
-      transition: transform .2s;
+      transition: transform .2s, box-shadow .2s;
     }
-    .pricing-card:hover { transform: translateY(-4px); }
+    .pricing-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,.35); }
     .pricing-card.featured {
-      background: rgba(41,151,255,.06);
-      border-color: rgba(41,151,255,.35);
+      background: linear-gradient(160deg, rgba(41,151,255,.1) 0%, rgba(41,151,255,.04) 100%);
+      border-color: rgba(41,151,255,.55);
+      box-shadow: 0 0 48px rgba(41,151,255,.2), 0 20px 60px rgba(0,0,0,.35);
+      transform: scale(1.04);
     }
+    .pricing-card.featured:hover { transform: scale(1.04) translateY(-5px); }
     .pricing-popular {
       position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
       font-size: 11px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--bg);
-      background: var(--accent); padding: 4px 16px; border-radius: 980px;
+      text-transform: uppercase; color: #fff;
+      background: linear-gradient(90deg, #2997ff, #5b5bd6); padding: 5px 18px; border-radius: 980px;
+      white-space: nowrap; box-shadow: 0 4px 16px rgba(41,151,255,.4);
     }
-    .pricing-tier { font-size: 13px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .08em; color: var(--fg-2); margin-bottom: 20px; }
+    .pricing-tier { font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--fg-3); margin-bottom: 20px; }
+    .pricing-tier-featured { color: #2997ff; }
     .pricing-price { margin-bottom: 8px; }
     .pricing-amount { font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
     .pricing-amount span { font-size: 22px; font-weight: 500; color: var(--fg-2); vertical-align: top; margin-top: 10px; display: inline-block; }
-    .pricing-period { font-size: 14px; color: var(--fg-3); }
+    .pricing-amount-custom { font-size: 36px; letter-spacing: -1px; }
+    .pricing-period { font-size: 14px; color: var(--fg-3); margin-top: 4px; }
+    .pricing-save { display: inline-block; font-size: 11px; font-weight: 700;
+      color: #34d399; background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.25);
+      padding: 2px 8px; border-radius: 6px; margin-top: 6px; letter-spacing: .03em; }
     .pricing-desc { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin: 20px 0; }
+    .pricing-divider { border: none; border-top: 1px solid var(--border-2); margin: 20px 0; }
     .pricing-cta {
       display: block; width: 100%; text-align: center;
-      padding: 13px; border-radius: 12px; font-size: 15px; font-weight: 600;
+      padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600;
       transition: opacity .2s, transform .2s; margin-bottom: 28px;
     }
-    .pricing-cta-primary { background: var(--accent); color: #fff; }
-    .pricing-cta-secondary { background: var(--card); border: 1px solid var(--border); color: var(--fg); }
-    .pricing-cta:hover { opacity: .85; transform: scale(1.02); }
-    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .pricing-cta-primary {
+      background: linear-gradient(135deg, #2997ff 0%, #5b5bd6 100%);
+      color: #fff; box-shadow: 0 4px 20px rgba(41,151,255,.35);
+    }
+    .pricing-cta-secondary { background: transparent; border: 1px solid var(--border); color: var(--fg); }
+    .pricing-cta:hover { opacity: .88; transform: scale(1.02); }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 11px; }
     .pricing-features li { font-size: 14px; color: var(--fg-2); display: flex; align-items: center; gap: 10px; }
     .pricing-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+    .pricing-trust {
+      display: flex; justify-content: center; align-items: center;
+      gap: 36px; margin-top: 32px; flex-wrap: wrap;
+    }
+    .pricing-trust-item {
+      font-size: 13px; color: var(--fg-3);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .pricing-trust-item::before { content: '✓'; color: var(--green); font-weight: 700; }
 
     /* ── FINAL CTA ────────────────────────────────────────────────────────── */
     .cta-section {
@@ -436,6 +490,7 @@
       <a href="#features">Fonctionnalités</a>
       <a href="#how">Comment ça marche</a>
       <a href="#pricing">Tarifs</a>
+      <a href="/docs">Documentation</a>
     </div>
     <div class="nav-cta">
       <a href="/app" class="btn-ghost">Se connecter</a>
@@ -468,7 +523,7 @@
       <div class="dot dot-r"></div>
       <div class="dot dot-y"></div>
       <div class="dot dot-g"></div>
-      <div class="mockup-url">sapscope.luku.fr/app</div>
+      <div class="mockup-url">app.sapscope.com</div>
     </div>
     <div class="mockup-app" style="position:relative">
       <!-- Topbar -->
@@ -612,7 +667,7 @@
           <p class="step-text">L'agent pyrfc se déploie en quelques commandes sur n'importe quel serveur applicatif SAP. Il se connecte en RFC local pour lire les métadonnées système — sans accès externe entrant.</p>
         </div>
         <div class="step-visual">
-          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">curl -O https://sapscope.luku.fr/dist/agent.tar.gz</span></div>
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">curl -O https://app.sapscope.com/dist/agent.tar.gz</span></div>
           <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">tar -xzf agent.tar.gz && cd sap-agent</span></div>
           <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">pip install -r requirements.txt</span></div>
           <div class="code-line"><span class="code-prompt">$</span><span class="code-comment"># SAPSCOPE_TOKEN=your_token_here</span></div>
@@ -673,69 +728,171 @@
   </div>
 </div>
 
+<!-- ── FAQ ───────────────────────────────────────────────────────────────────── -->
+<div id="faq">
+  <div class="section">
+    <div class="section-eyebrow fade-up">FAQ</div>
+    <h2 class="section-title fade-up">Questions fréquentes</h2>
+
+    <div class="faq-list">
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          SAPscope est-il compatible avec toutes les versions de SAP ?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Oui. SAPscope est compatible avec <strong>SAP ECC 6.0, S/4HANA, BW et Solution Manager</strong>. La collecte se fait via RFC/SM59, sans modification du système SAP. Consultez notre <a href="/docs#sap-rfc-user-setup">guide de création de l'utilisateur RFC</a>.
+        </div></div>
+      </div>
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Mes données SAP quittent-elles mon infrastructure ?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Non. L'agent s'exécute <strong>sur votre infrastructure</strong> et n'envoie à SAPscope que des <strong>métriques techniques anonymisées</strong> (performances, jobs, logs système). Aucune donnée métier, aucun contenu de table n'est transmis.
+        </div></div>
+      </div>
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Combien de temps prend l'installation ?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Moins de <strong>10 minutes</strong>. Dès votre abonnement activé, vous obtenez une clé API. Il suffit de copier-coller la commande d'installation de l'agent sur le serveur SAP et de renseigner la clé. C'est tout.
+        </div></div>
+      </div>
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Quels droits SAP sont nécessaires pour l'agent ?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Un utilisateur de type <strong>Système (A)</strong> avec un profil d'autorisation minimal en lecture seule. Nous fournissons un programme ABAP <code>ZSAPSCOPE_SETUP</code> qui crée l'utilisateur et affecte exactement les autorisations requises. Voir le <a href="/docs#sap-rfc-user-setup">guide RFC</a>.
+        </div></div>
+      </div>
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          L'IA a-t-elle accès à mes données métier ?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Non. Les diagnostics IA portent <strong>uniquement sur les métriques techniques</strong> : performances système, statuts des jobs background, logs d'erreur. Aucune donnée de table (clients, commandes, comptabilité…) n'est jamais transmise au modèle.
+        </div></div>
+      </div>
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Puis-je résilier à tout moment ?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Oui, sans engagement ni frais. Vous pouvez résilier depuis votre espace client ou en nous contactant à <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. La résiliation prend effet à la fin de la période en cours. Nous proposons également une <strong>garantie satisfait ou remboursé de 14 jours</strong>.
+        </div></div>
+      </div>
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Existe-t-il une offre on-premise / self-hosted ?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Oui, notre offre <strong>Enterprise à €799/mois</strong> inclut un déploiement on-premise sur votre infrastructure, une intégration SSO/Active Directory, un SLA garanti et la possibilité d'acquérir une licence perpétuelle. <a href="mailto:contact@sapscope.com">Contactez-nous</a> pour un devis personnalisé.
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- ── PRICING ────────────────────────────────────────────────────────────────── -->
 <div id="pricing">
   <div class="section">
     <div class="section-eyebrow fade-up">Tarifs</div>
     <h2 class="section-title fade-up">Simple. Transparent. Sans surprise.</h2>
-    <p class="section-sub fade-up">Gratuit pendant la bêta. Choisissez votre formule avant le lancement officiel.</p>
+    <p class="section-sub fade-up">Activation immédiate dès le paiement. Résiliez à tout moment.</p>
 
     <div class="pricing-grid">
       <!-- Solo -->
       <div class="pricing-card fade-up">
         <div class="pricing-tier">Solo</div>
         <div class="pricing-price">
-          <div class="pricing-amount"><span>€</span>29</div>
-          <div class="pricing-period">par mois · facturation annuelle</div>
+          <div class="pricing-amount"><span>€</span>49</div>
+          <div class="pricing-period">par mois</div>
+          <div class="pricing-save">2 mois offerts en annuel</div>
         </div>
-        <p class="pricing-desc">Pour le consultant indépendant qui suit plusieurs périmètres SAP.</p>
-        <a href="/app" class="pricing-cta pricing-cta-secondary">Commencer gratuitement</a>
+        <p class="pricing-desc">Pour le consultant indépendant qui surveille plusieurs périmètres SAP en solo.</p>
+        <a href="/app" class="pricing-cta pricing-cta-secondary">Choisir Solo →</a>
+        <hr class="pricing-divider">
         <ul class="pricing-features">
-          <li>1 consultant</li>
+          <li>1 utilisateur</li>
           <li>Jusqu'à 3 systèmes SAP</li>
           <li>Analyses IA illimitées</li>
           <li>Historique 90 jours</li>
-          <li>Diff entre snapshots</li>
+          <li>Snapshots & diff</li>
+          <li>Alertes système</li>
         </ul>
       </div>
 
-      <!-- Cabinet -->
+      <!-- Team -->
       <div class="pricing-card featured fade-up delay-1">
-        <div class="pricing-popular">Le plus populaire</div>
-        <div class="pricing-tier">Cabinet</div>
+        <div class="pricing-popular">⭐ Le plus populaire</div>
+        <div class="pricing-tier pricing-tier-featured">Team</div>
         <div class="pricing-price">
-          <div class="pricing-amount"><span>€</span>99</div>
-          <div class="pricing-period">par mois · facturation annuelle</div>
+          <div class="pricing-amount"><span>€</span>199</div>
+          <div class="pricing-period">par mois</div>
+          <div class="pricing-save">2 mois offerts en annuel</div>
         </div>
-        <p class="pricing-desc">Pour les équipes Basis qui gèrent de nombreux clients.</p>
-        <a href="/app" class="pricing-cta pricing-cta-primary">Commencer gratuitement</a>
+        <p class="pricing-desc">Pour les équipes Basis et cabinets de conseil qui gèrent de nombreux clients SAP.</p>
+        <a href="/app" class="pricing-cta pricing-cta-primary">Choisir Team →</a>
+        <hr class="pricing-divider">
         <ul class="pricing-features">
-          <li>Consultants illimités</li>
-          <li>Jusqu'à 50 systèmes SAP</li>
+          <li>5 utilisateurs</li>
+          <li>Jusqu'à 20 systèmes SAP</li>
           <li>Analyses IA illimitées</li>
           <li>Historique illimité</li>
           <li>Rapports client partageables</li>
-          <li>Diff entre snapshots</li>
+          <li>Snapshots & diff</li>
+          <li>Alertes système</li>
           <li>Support prioritaire</li>
         </ul>
       </div>
 
-      <!-- Self-hosted -->
+      <!-- Enterprise -->
       <div class="pricing-card fade-up delay-2">
-        <div class="pricing-tier">Self-hosted</div>
+        <div class="pricing-tier">Enterprise</div>
         <div class="pricing-price">
-          <div class="pricing-amount" style="font-size:36px;letter-spacing:-1px">Sur mesure</div>
+          <div class="pricing-amount"><span>€</span>799</div>
+          <div class="pricing-period">par mois</div>
+          <div class="pricing-save">2 mois offerts en annuel</div>
         </div>
-        <p class="pricing-desc">Déployez SAPscope sur votre infrastructure. Idéal pour les grands comptes avec des exigences de conformité strictes.</p>
-        <a href="mailto:contact@luku.fr" class="pricing-cta pricing-cta-secondary">Nous contacter</a>
+        <p class="pricing-desc">Pour les grands comptes avec des exigences de conformité et une infrastructure dédiée.</p>
+        <a href="mailto:contact@sapscope.com" class="pricing-cta pricing-cta-secondary">Nous contacter →</a>
+        <hr class="pricing-divider">
         <ul class="pricing-features">
+          <li>Utilisateurs illimités</li>
+          <li>Systèmes SAP illimités</li>
+          <li>Analyses IA illimitées</li>
           <li>Déploiement on-premise</li>
-          <li>Systèmes illimités</li>
+          <li>Intégration SSO / Active Directory</li>
           <li>Licence perpétuelle disponible</li>
-          <li>Intégration AD / SSO</li>
-          <li>SLA et support dédié</li>
+          <li>SLA garanti</li>
+          <li>Support dédié</li>
         </ul>
       </div>
+    </div>
+
+    <!-- Trust signals -->
+    <div class="pricing-trust fade-up">
+      <span class="pricing-trust-item">Activation en 30 secondes</span>
+      <span class="pricing-trust-item">Satisfait ou remboursé 14 jours</span>
+      <span class="pricing-trust-item">Résiliez à tout moment</span>
+      <span class="pricing-trust-item">Paiement sécurisé par Stripe</span>
     </div>
   </div>
 </div>
@@ -743,8 +900,8 @@
 <!-- ── FINAL CTA ───────────────────────────────────────────────────────────────── -->
 <div class="cta-section">
   <h2 class="fade-up">Prêt à enfin voir<br>clair dans votre SAP ?</h2>
-  <p class="fade-up">Gratuit pendant toute la bêta. Aucune carte bancaire requise.</p>
-  <a href="/app" class="btn-hero-primary fade-up">Créer mon compte gratuit →</a>
+  <p class="fade-up">Activation immédiate. Vos premiers résultats en moins de 5 minutes.</p>
+  <a href="/app" class="btn-hero-primary fade-up">Créer mon compte →</a>
   <small class="fade-up">Déjà un compte ? <a href="/app" style="color:var(--accent)">Se connecter →</a></small>
 </div>
 
@@ -755,14 +912,23 @@
     <div class="footer-links">
       <a href="#features">Fonctionnalités</a>
       <a href="#pricing">Tarifs</a>
+      <a href="/docs">Documentation</a>
       <a href="/app">Application</a>
-      <a href="mailto:contact@luku.fr">Contact</a>
+      <a href="mailto:contact@sapscope.com">Contact</a>
     </div>
     <div class="footer-copy">© 2026 SAPscope. Tous droits réservés.</div>
   </div>
 </footer>
 
 <script>
+  // FAQ accordion
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
   // Scroll animations
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {

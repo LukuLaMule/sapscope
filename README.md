@@ -4,14 +4,14 @@
 
 SAP landscape monitoring and diagnostic tool. Automatically collects metadata from your systems (components, support packages, kernel, custom objects) and generates AI-powered analyses.
 
-Two deployment modes: **SaaS** (hosted at sapscope.luku.fr) and **self-hosted** (on your own infrastructure).
+Two deployment modes: **SaaS** (hosted at sapscope.com) and **self-hosted** (on your own infrastructure).
 
 ---
 
 ## SaaS — Quick start
 
-1. Create an account at [sapscope.luku.fr/app](https://sapscope.luku.fr/app)
-2. Contact [contact@luku.fr](mailto:contact@luku.fr) to activate your scope
+1. Create an account at [app.sapscope.com](https://app.sapscope.com/app)
+2. Contact [contact@sapscope.com](mailto:contact@sapscope.com) to activate your scope
 3. An administrator creates your SAP client, generates an agent token and sends it to you
 4. Install the agent on your SAP server (see Agent section below)
 
@@ -22,7 +22,7 @@ Two deployment modes: **SaaS** (hosted at sapscope.luku.fr) and **self-hosted** 
 ### Prerequisites
 
 - Docker + Docker Compose
-- A SAPscope licence key (contact [contact@luku.fr](mailto:contact@luku.fr))
+- A SAPscope licence key (contact [contact@sapscope.com](mailto:contact@sapscope.com))
 - An Anthropic API key
 - A reverse proxy with TLS (Traefik, nginx, Caddy…)
 
@@ -96,7 +96,7 @@ The agent is deployed on the SAP application server. It connects via local RFC a
 ### Installation
 
 ```bash
-curl -O https://sapscope.luku.fr/dist/agent.tar.gz
+curl -O https://app.sapscope.com/dist/agent.tar.gz
 tar xzf agent.tar.gz && cd sap-agent
 pip install -r requirements.txt
 ```
@@ -105,7 +105,7 @@ Create a `.env` file in the agent folder:
 
 ```env
 SAPSCOPE_TOKEN=<token-generated-from-admin-panel>
-SAPSCOPE_URL=https://sapscope.luku.fr
+SAPSCOPE_URL=https://app.sapscope.com
 SAP_HOST=localhost
 SAP_SYSNR=00
 SAP_CLIENT=100
@@ -150,7 +150,7 @@ From the web interface (Admin tab, visible only for `is_admin` accounts):
 | `ANTHROPIC_API_KEY`   | yes      | Anthropic API key for analyses                               |
 | `LICENSE_KEY`         | self-hosted | Licence JWT signed by SAPscope                           |
 | `REGISTRATION_ENABLED`| no       | `true` (SaaS) / `false` (self-hosted). Default: `true`       |
-| `ALLOWED_ORIGINS`     | no       | Allowed CORS origins. Default: `https://app.sapscope.io`     |
+| `ALLOWED_ORIGINS`     | no       | Allowed CORS origins. Default: `https://app.sapscope.com`     |
 | `ENV`                 | no       | `development` enables SQL logs and `/docs`. Default: `production` |
 
 ---

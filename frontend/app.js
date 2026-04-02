@@ -1174,7 +1174,7 @@ async function _handleActivationReturn() {
         <div class="onboarding-title">Almost there!</div>
         <div class="onboarding-text">
           Payment confirmed. Your account is being activated — this usually takes less than a minute.
-          Refresh this page in a moment, or contact <a href="mailto:contact@luku.fr" style="color:var(--accent)">contact@luku.fr</a> if the issue persists.
+          Refresh this page in a moment, or contact <a href="mailto:contact@sapscope.com" style="color:var(--accent)">contact@sapscope.com</a> if the issue persists.
         </div>
       </div>`;
     return;
@@ -1304,7 +1304,7 @@ function renderOnboarding(reason) {
         </div>
         <div class="pricing-enterprise">
           On-premise deployment?
-          <a href="mailto:contact@luku.fr">Contact us for self-hosted licensing</a>
+          <a href="mailto:contact@sapscope.com">Contact us for self-hosted licensing</a>
         </div>
         <div id="pricing-error" class="admin-error" style="text-align:center;margin-top:12px"></div>
       </div>`;

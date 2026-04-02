@@ -30,7 +30,7 @@ services:
       DATABASE_URL:        postgresql+asyncpg://sapscope:${POSTGRES_PASSWORD}@db:5432/sapscope
       SAPSCOPE_JWT_SECRET: ${SAPSCOPE_JWT_SECRET}
       ANTHROPIC_API_KEY:   ${ANTHROPIC_API_KEY}
-      ALLOWED_ORIGINS:        ${ALLOWED_ORIGINS:-https://sapscope.luku.fr}
+      ALLOWED_ORIGINS:        ${ALLOWED_ORIGINS:-https://app.sapscope.com}
       ENV:                    ${ENV:-production}
       DEBUG:                  ${DEBUG:-false}
       # SaaS : true (auto-inscription activée)
@@ -66,11 +66,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
-      - "traefik.http.routers.sapscope.rule=Host(`sapscope.luku.fr`)"
+      - "traefik.http.routers.sapscope.rule=Host(`sapscope.com`) || Host(`app.sapscope.com`)"
       - "traefik.http.routers.sapscope.entrypoints=websecure"
       - "traefik.http.routers.sapscope.tls=true"
       - "traefik.http.routers.sapscope.tls.certresolver=lets-encrypt"
-      - "traefik.http.routers.sapscope-http.rule=Host(`sapscope.luku.fr`)"
+      - "traefik.http.routers.sapscope-http.rule=Host(`sapscope.com`) || Host(`app.sapscope.com`)"
       - "traefik.http.routers.sapscope-http.entrypoints=web"
       - "traefik.http.routers.sapscope-http.middlewares=sapscope-https"
       - "traefik.http.middlewares.sapscope-https.redirectscheme.scheme=https"
