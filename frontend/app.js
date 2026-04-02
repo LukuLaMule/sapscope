@@ -118,6 +118,8 @@ const resetUserPassword      = (uid, pwd)        => apiFetch(`/api/v1/admin/user
 const setUserAdmin           = (uid, is_admin)   => apiFetch(`/api/v1/admin/users/${uid}/admin`,    { method: "PATCH", body: JSON.stringify({ is_admin }) });
 const deleteUser             = (uid)             => apiFetch(`/api/v1/admin/users/${uid}`,          { method: "DELETE" });
 const changeOwnPassword      = (cur, pwd)        => apiFetch(`/api/v1/auth/me/password`,            { method: "PATCH", body: JSON.stringify({ current_password: cur, new_password: pwd }) });
+const forgotPassword         = (email)           => apiFetch(`/api/v1/auth/forgot-password`,        { method: "POST",  body: JSON.stringify({ email }) });
+const resetPassword          = (token, pwd)      => apiFetch(`/api/v1/auth/reset-password`,         { method: "POST",  body: JSON.stringify({ token, new_password: pwd }) });
 const loadDiff              = (cid, snapId, baseId) => apiFetch(`/api/v1/clients/${cid}/snapshots/${snapId}/diff?base=${baseId}`);
 const createCheckout        = (tier)             => apiFetch(`/api/v1/billing/checkout?tier=${tier}`, { method: "POST" });
 const getOnboardingToken    = ()                 => apiFetch(`/api/v1/billing/onboarding`);
@@ -2049,6 +2051,81 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("register-form").style.display = "none";
     document.getElementById("login-form").style.display    = "";
     document.getElementById("login-error").textContent = "";
+  });
+
+  // ── Mot de passe oublié ────────────────────────────────────────────────────
+  const showForm = (id) => {
+    ["login-form", "register-form", "forgot-form", "reset-form"].forEach(f => {
+      document.getElementById(f).style.display = f === id ? "" : "none";
+    });
+  };
+
+  document.getElementById("show-forgot").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("forgot-error").textContent = "";
+    document.getElementById("forgot-ok").style.display = "none";
+    document.getElementById("forgot-email").value = "";
+    showForm("forgot-form");
+  });
+
+  document.getElementById("show-login-from-forgot").addEventListener("click", (e) => {
+    e.preventDefault();
+    showForm("login-form");
+  });
+
+  document.getElementById("forgot-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById("forgot-error");
+    const okEl  = document.getElementById("forgot-ok");
+    const btn   = document.getElementById("forgot-btn");
+    errEl.textContent = "";
+    okEl.style.display = "none";
+    btn.disabled = true;
+    try {
+      const email = document.getElementById("forgot-email").value.trim();
+      await forgotPassword(email);
+      okEl.textContent   = "Si cet email est enregistré, vous recevrez un lien dans quelques minutes.";
+      okEl.style.display = "";
+      document.getElementById("forgot-email").value = "";
+    } catch (err) {
+      errEl.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ── Reset mot de passe (lien depuis l'email) ───────────────────────────────
+  const resetToken = new URLSearchParams(window.location.search).get("reset_token");
+  if (resetToken) {
+    // Nettoyer le token de l'URL sans recharger la page
+    window.history.replaceState({}, "", window.location.pathname);
+    showForm("reset-form");
+  }
+
+  document.getElementById("reset-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById("reset-error");
+    const okEl  = document.getElementById("reset-ok");
+    const btn   = document.getElementById("reset-btn");
+    errEl.textContent = "";
+    okEl.style.display = "none";
+    const pwd  = document.getElementById("reset-pass").value;
+    const conf = document.getElementById("reset-pass2").value;
+    if (pwd.length < 12) { errEl.textContent = "Le mot de passe doit faire au moins 12 caractères."; return; }
+    if (pwd !== conf)    { errEl.textContent = "Les mots de passe ne correspondent pas."; return; }
+    btn.disabled = true;
+    try {
+      await resetPassword(resetToken, pwd);
+      okEl.textContent   = "Mot de passe mis à jour. Vous pouvez vous connecter.";
+      okEl.style.display = "";
+      document.getElementById("reset-pass").value  = "";
+      document.getElementById("reset-pass2").value = "";
+      setTimeout(() => showForm("login-form"), 2500);
+    } catch (err) {
+      errEl.textContent = err.message || "Lien invalide ou expiré.";
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   document.getElementById("admin-btn").addEventListener("click", openAdminPanel);
