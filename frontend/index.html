@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en" id="html-root">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAPscope — Intelligence SAP pour consultants Basis</title>
-  <meta name="description" content="SAPscope analyse automatiquement vos systèmes SAP et génère des diagnostics précis par IA. Conçu pour les consultants Basis.">
+  <title>SAPscope — SAP Intelligence for Basis Consultants</title>
+  <meta name="description" content="SAPscope automatically analyzes your SAP systems and generates precise AI-powered diagnostics. Built for Basis consultants.">
 
   <!-- Canonical & robots -->
   <link rel="canonical" href="https://sapscope.com/">
@@ -13,15 +13,15 @@
   <!-- Open Graph -->
   <meta property="og:type"        content="website">
   <meta property="og:url"         content="https://sapscope.com/">
-  <meta property="og:title"       content="SAPscope — Intelligence SAP pour consultants Basis">
-  <meta property="og:description" content="SAPscope analyse automatiquement vos systèmes SAP et génère des diagnostics précis par IA. Conçu pour les consultants Basis.">
+  <meta property="og:title"       content="SAPscope — SAP Intelligence for Basis Consultants">
+  <meta property="og:description" content="SAPscope automatically analyzes your SAP systems and generates precise AI-powered diagnostics. Built for Basis consultants.">
   <meta property="og:image"       content="https://sapscope.com/og-image.png">
-  <meta property="og:locale"      content="fr_FR">
+  <meta property="og:locale"      content="en_US">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:title"       content="SAPscope — Intelligence SAP pour consultants Basis">
-  <meta name="twitter:description" content="Surveillance et diagnostic automatique de paysages SAP par IA.">
+  <meta name="twitter:title"       content="SAPscope — SAP Intelligence for Basis Consultants">
+  <meta name="twitter:description" content="Automated monitoring and AI diagnostics for SAP landscapes.">
   <meta name="twitter:image"       content="https://sapscope.com/og-image.png">
 
   <!-- JSON-LD structured data -->
@@ -31,7 +31,7 @@
     "@type": "SoftwareApplication",
     "name": "SAPscope",
     "url": "https://sapscope.com",
-    "description": "Outil de surveillance et de diagnostic de paysages SAP. Collecte automatique des métadonnées et analyses IA.",
+    "description": "SAP landscape monitoring and diagnostics tool. Automatic metadata collection and AI-powered analysis.",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "offers": [
@@ -515,6 +515,15 @@
       .btn-hero-primary, .btn-hero-ghost { width: 100%; max-width: 320px; text-align: center; }
       .mockup-app { height: 280px; }
     }
+    .lang-switcher { display:flex; gap:2px; margin-right:4px; }
+    .lang-btn {
+      background:transparent; border:1px solid var(--border-2);
+      color:var(--fg-3); font-size:11px; font-weight:600;
+      padding:4px 8px; border-radius:6px; cursor:pointer;
+      transition:color .15s, border-color .15s, background .15s;
+    }
+    .lang-btn:hover { color:var(--fg); border-color:var(--border); }
+    .lang-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
   </style>
 </head>
 <body>
@@ -524,14 +533,19 @@
   <div class="nav-inner">
     <a href="/" class="nav-logo">SAP<span>scope</span></a>
     <div class="nav-links">
-      <a href="#features">Fonctionnalités</a>
-      <a href="#how">Comment ça marche</a>
-      <a href="#pricing">Tarifs</a>
-      <a href="/docs">Documentation</a>
+      <a href="#features" data-i18n="nav_features">Features</a>
+      <a href="#how" data-i18n="nav_how">How it works</a>
+      <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
+      <a href="/docs" data-i18n="nav_docs">Documentation</a>
     </div>
     <div class="nav-cta">
-      <a href="/app" class="btn-ghost">Se connecter</a>
-      <a href="/app" class="btn-nav-primary">Essai gratuit →</a>
+      <div class="lang-switcher" id="lang-switcher">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="fr">FR</button>
+        <button class="lang-btn" data-lang="de">DE</button>
+      </div>
+      <a href="/app" class="btn-ghost" data-i18n="nav_signin">Sign in</a>
+      <a href="/app" class="btn-nav-primary" data-i18n="nav_cta">Free trial →</a>
     </div>
     <button class="nav-mobile-toggle" id="nav-toggle" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -543,15 +557,15 @@
 <section class="hero">
   <div class="hero-glow"></div>
 
-  <div class="hero-badge">Bêta ouverte — accès gratuit</div>
+  <div class="hero-badge" data-i18n="hero_badge">Open Beta — free access</div>
 
-  <h1>Maîtrisez votre<br>paysage SAP.</h1>
+  <h1 data-i18n-html="hero_h1">Master your<br>SAP landscape.</h1>
 
-  <p>SAPscope collecte automatiquement les données de vos systèmes SAP et génère des diagnostics d'architecture précis par intelligence artificielle. En quelques secondes.</p>
+  <p data-i18n="hero_p">SAPscope automatically collects data from your SAP systems and generates precise architecture diagnostics powered by AI. In seconds.</p>
 
   <div class="hero-actions">
-    <a href="/app" class="btn-hero-primary">Commencer gratuitement →</a>
-    <a href="#features" class="btn-hero-ghost">Découvrir les fonctionnalités</a>
+    <a href="/app" class="btn-hero-primary" data-i18n="hero_cta1">Get started for free →</a>
+    <a href="#features" class="btn-hero-ghost" data-i18n="hero_cta2">Discover features</a>
   </div>
 
   <!-- CSS Mockup -->
@@ -622,15 +636,15 @@
   <div class="stats-inner">
     <div class="fade-up">
       <div class="stat-value">30<span>s</span></div>
-      <div class="stat-label">Pour analyser un système complet</div>
+      <div class="stat-label" data-i18n="stat1_lbl">To analyze a complete system</div>
     </div>
     <div class="fade-up delay-1">
       <div class="stat-value">100<span>%</span></div>
-      <div class="stat-label">Automatisé — zéro saisie manuelle</div>
+      <div class="stat-label" data-i18n="stat2_lbl">Automated — zero manual input</div>
     </div>
     <div class="fade-up delay-2">
       <div class="stat-value">360<span>°</span></div>
-      <div class="stat-label">Vue composants, patches, objets custom</div>
+      <div class="stat-label" data-i18n="stat3_lbl">Components, patches, custom objects</div>
     </div>
   </div>
 </div>
@@ -638,52 +652,52 @@
 <!-- ── FEATURES ───────────────────────────────────────────────────────────────── -->
 <div id="features">
   <div class="section">
-    <div class="section-eyebrow fade-up">Fonctionnalités</div>
-    <h2 class="section-title fade-up">Tout ce qu'un consultant Basis<br>a toujours voulu avoir.</h2>
-    <p class="section-sub fade-up">Fini les transactions SM51, SE16, SPAM en rafale pour reconstituer une image de votre système.</p>
+    <div class="section-eyebrow fade-up" data-i18n="feat_eyebrow">Features</div>
+    <h2 class="section-title fade-up" data-i18n-html="feat_title">Everything a Basis consultant<br>always wanted.</h2>
+    <p class="section-sub fade-up" data-i18n="feat_sub">No more running SM51, SE16, SPAM one after another to reconstruct a picture of your system.</p>
 
     <div class="features-grid">
       <div class="feature-card fade-up">
         <div class="feature-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 16v6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M16 12h6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg>
         </div>
-        <div class="feature-title">Collecte RFC automatique</div>
-        <div class="feature-text">Un agent tourne sur votre serveur SAP et remonte automatiquement composants, support packages, niveaux kernel et objets ABAP custom — sans intervention manuelle.</div>
+        <div class="feature-title" data-i18n="feat1_title">Automatic RFC collection</div>
+        <div class="feature-text" data-i18n="feat1_text">An agent runs on your SAP server and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.</div>
       </div>
       <div class="feature-card fade-up delay-1">
         <div class="feature-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h7M7 16h5"/></svg>
         </div>
-        <div class="feature-title">Diagnostic par intelligence artificielle</div>
-        <div class="feature-text">Chaque snapshot génère un rapport structuré : état de maintenance, risques identifiés, recommandations priorisées, actions à planifier.</div>
+        <div class="feature-title" data-i18n="feat2_title">AI-powered diagnostics</div>
+        <div class="feature-text" data-i18n="feat2_text">Every snapshot generates a structured report: maintenance status, identified risks, prioritized recommendations, actions to schedule.</div>
       </div>
       <div class="feature-card fade-up delay-2">
         <div class="feature-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8M8 14h5"/></svg>
         </div>
-        <div class="feature-title">Comparaison entre snapshots</div>
-        <div class="feature-text">Identifiez exactement ce qui a changé entre deux dates : composants ajoutés ou mis à jour, patches appliqués, évolution des objets custom.</div>
+        <div class="feature-title" data-i18n="feat3_title">Snapshot comparison</div>
+        <div class="feature-text" data-i18n="feat3_text">See exactly what changed between two dates: added or updated components, applied patches, evolution of custom objects.</div>
       </div>
       <div class="feature-card fade-up">
         <div class="feature-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="9" height="9" rx="1"/><rect x="13" y="3" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect x="13" y="13" width="9" height="9" rx="1"/></svg>
         </div>
-        <div class="feature-title">Multi-clients, multi-systèmes</div>
-        <div class="feature-text">Gérez plusieurs clients SAP depuis une seule interface. Chaque périmètre est isolé, avec ses propres tokens d'agent et ses consultants assignés.</div>
+        <div class="feature-title" data-i18n="feat4_title">Multi-client, multi-system</div>
+        <div class="feature-text" data-i18n="feat4_text">Manage multiple SAP clients from a single interface. Each scope is isolated, with its own agent tokens and assigned consultants.</div>
       </div>
       <div class="feature-card fade-up delay-1">
         <div class="feature-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
-        <div class="feature-title">Isolation et confidentialité</div>
-        <div class="feature-text">Tokens d'agent à usage unique, accès consultant en lecture seule. Vos données SAP restent dans votre périmètre — aucune exposition vers l'extérieur.</div>
+        <div class="feature-title" data-i18n="feat5_title">Isolation &amp; confidentiality</div>
+        <div class="feature-text" data-i18n="feat5_text">Single-use agent tokens, read-only consultant access. Your SAP data stays within your perimeter — never exposed to the outside.</div>
       </div>
       <div class="feature-card fade-up delay-2">
         <div class="feature-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
-        <div class="feature-title">Historique continu</div>
-        <div class="feature-text">Chaque snapshot est archivé. Remontez à n'importe quelle date, comparez les périodes, suivez les dérives avant qu'elles deviennent des incidents.</div>
+        <div class="feature-title" data-i18n="feat6_title">Continuous history</div>
+        <div class="feature-text" data-i18n="feat6_text">Every snapshot is archived. Go back to any date, compare periods, track drift before it becomes an incident.</div>
       </div>
     </div>
   </div>
@@ -692,16 +706,17 @@
 <!-- ── HOW IT WORKS ───────────────────────────────────────────────────────────── -->
 <div class="hiw-bg" id="how">
   <div class="section">
-    <div class="section-eyebrow fade-up">Comment ça marche</div>
-    <h2 class="section-title fade-up">Opérationnel en 10 minutes.</h2>
-    <p class="section-sub fade-up">Pas de RFC compliqués à configurer. Pas d'accès BTP. Juste un agent Python, un cron, et c'est parti.</p>
+    <div class="section-eyebrow fade-up" data-i18n="hiw_eyebrow">How it works</div>
+    <h2 class="section-title fade-up" data-i18n="hiw_title">Up and running in 10 minutes.</h2>
+    <p class="section-sub fade-up" data-i18n="hiw_sub">No complex RFC setup. No BTP access. Just a Python agent, a cron job, and you're done.</p>
 
     <div class="steps">
+
       <div class="step fade-up">
         <div>
-          <div class="step-num">Étape 01</div>
-          <h3 class="step-title">Installez l'agent sur votre serveur SAP</h3>
-          <p class="step-text">L'agent pyrfc se déploie en quelques commandes sur n'importe quel serveur applicatif SAP. Il se connecte en RFC local pour lire les métadonnées système — sans accès externe entrant.</p>
+          <div class="step-num" data-i18n="step1_num">Step 01</div>
+          <h3 class="step-title" data-i18n="step1_title">Install the agent on your SAP server</h3>
+          <p class="step-text" data-i18n="step1_text">The pyrfc agent deploys in a few commands on any SAP application server. It connects via local RFC to read system metadata — no inbound external access required.</p>
         </div>
         <div class="step-visual">
           <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">curl -O https://app.sapscope.com/dist/agent.tar.gz</span></div>
@@ -715,9 +730,9 @@
 
       <div class="step reverse fade-up">
         <div>
-          <div class="step-num">Étape 02</div>
-          <h3 class="step-title">Les données remontent automatiquement</h3>
-          <p class="step-text">Un systemd timer déclenche l'agent toutes les 24h. Chaque exécution envoie un snapshot complet : composants installés, support packages, kernel, objets custom ABAP, infos DB.</p>
+          <div class="step-num" data-i18n="step2_num">Step 02</div>
+          <h3 class="step-title" data-i18n="step2_title">Data syncs automatically</h3>
+          <p class="step-text" data-i18n="step2_text">A systemd timer triggers the agent every 24h. Each run sends a complete snapshot: installed components, support packages, kernel, custom ABAP objects, DB info.</p>
         </div>
         <div class="step-visual" style="gap:16px">
           <div class="agent-card">
@@ -746,13 +761,13 @@
 
       <div class="step fade-up">
         <div>
-          <div class="step-num">Étape 03</div>
-          <h3 class="step-title">Consultez l'analyse IA depuis n'importe où</h3>
-          <p class="step-text">Claude analyse chaque snapshot et génère un rapport structuré : statut de maintenance, risques identifiés, recommandations priorisées. Accessible sur ordinateur, tablette ou mobile.</p>
+          <div class="step-num" data-i18n="step3_num">Step 03</div>
+          <h3 class="step-title" data-i18n="step3_title">Consult the AI analysis from anywhere</h3>
+          <p class="step-text" data-i18n="step3_text">Claude analyzes each snapshot and generates a structured report: maintenance status, identified risks, prioritized recommendations. Accessible on desktop, tablet or mobile.</p>
         </div>
         <div class="step-visual">
           <div class="analysis-preview">
-            <div class="analysis-preview-title">Recommandations prioritaires</div>
+            <div class="analysis-preview-title" data-i18n="analysis_title">Priority recommendations</div>
             <div class="analysis-preview-line good">OK  &nbsp;SAP_BASIS 756 SP14 — maintenance assurée jusqu'en 2027</div>
             <div class="analysis-preview-line warn">!&nbsp;&nbsp;&nbsp;Note SAP 3089413 critique — planifier l'application</div>
             <div class="analysis-preview-line warn">!&nbsp;&nbsp;&nbsp;Kernel 785 patch 19 disponible — mise à jour recommandée</div>
@@ -768,78 +783,78 @@
 <!-- ── FAQ ───────────────────────────────────────────────────────────────────── -->
 <div id="faq">
   <div class="section">
-    <div class="section-eyebrow fade-up">FAQ</div>
-    <h2 class="section-title fade-up">Questions fréquentes</h2>
+    <div class="section-eyebrow fade-up" data-i18n="faq_eyebrow">FAQ</div>
+    <h2 class="section-title fade-up" data-i18n="faq_title">Frequently asked questions</h2>
 
     <div class="faq-list">
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          SAPscope est-il compatible avec toutes les versions de SAP ?
+          <span data-i18n="faq1_q">Is SAPscope compatible with all SAP versions?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Oui. SAPscope est compatible avec <strong>SAP ECC 6.0, S/4HANA, BW et Solution Manager</strong>. La collecte se fait via RFC/SM59, sans modification du système SAP. Consultez notre <a href="/docs#sap-rfc-user-setup">guide de création de l'utilisateur RFC</a>.
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq1_a">
+          Yes. SAPscope is compatible with <strong>SAP ECC 6.0, S/4HANA, BW and Solution Manager</strong>. Collection is done via RFC/SM59, with no modification to the SAP system. See our <a href="/docs#sap-rfc-user-setup">RFC user setup guide</a>.
         </div></div>
       </div>
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Mes données SAP quittent-elles mon infrastructure ?
+          <span data-i18n="faq2_q">Does my SAP data leave my infrastructure?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Non. L'agent s'exécute <strong>sur votre infrastructure</strong> et n'envoie à SAPscope que des <strong>métriques techniques anonymisées</strong> (performances, jobs, logs système). Aucune donnée métier, aucun contenu de table n'est transmis.
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq2_a">
+          No. The agent runs <strong>on your infrastructure</strong> and only sends SAPscope <strong>anonymized technical metrics</strong> (performance, jobs, system logs). No business data, no table content is ever transmitted.
         </div></div>
       </div>
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Combien de temps prend l'installation ?
+          <span data-i18n="faq3_q">How long does installation take?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Moins de <strong>10 minutes</strong>. Dès votre abonnement activé, vous obtenez une clé API. Il suffit de copier-coller la commande d'installation de l'agent sur le serveur SAP et de renseigner la clé. C'est tout.
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq3_a">
+          Less than <strong>10 minutes</strong>. Once your subscription is activated, you receive an API key. Simply copy-paste the agent installation command on the SAP server and enter the key. That's it.
         </div></div>
       </div>
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Quels droits SAP sont nécessaires pour l'agent ?
+          <span data-i18n="faq4_q">What SAP authorizations does the agent need?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Un utilisateur de type <strong>Système (A)</strong> avec un profil d'autorisation minimal en lecture seule. Nous fournissons un programme ABAP <code>ZSAPSCOPE_SETUP</code> qui crée l'utilisateur et affecte exactement les autorisations requises. Voir le <a href="/docs#sap-rfc-user-setup">guide RFC</a>.
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq4_a">
+          A <strong>System (A) type</strong> user with a minimal read-only authorization profile. We provide an ABAP program <code>ZSAPSCOPE_SETUP</code> that creates the user and assigns exactly the required authorizations. See the <a href="/docs#sap-rfc-user-setup">RFC guide</a>.
         </div></div>
       </div>
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          L'IA a-t-elle accès à mes données métier ?
+          <span data-i18n="faq5_q">Does the AI have access to my business data?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Non. Les diagnostics IA portent <strong>uniquement sur les métriques techniques</strong> : performances système, statuts des jobs background, logs d'erreur. Aucune donnée de table (clients, commandes, comptabilité…) n'est jamais transmise au modèle.
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq5_a">
+          No. AI diagnostics are based <strong>only on technical metrics</strong>: system performance, background job statuses, error logs. No table data (customers, orders, accounting…) is ever transmitted to the model.
         </div></div>
       </div>
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Puis-je résilier à tout moment ?
+          <span data-i18n="faq6_q">Can I cancel at any time?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Oui, sans engagement ni frais. Vous pouvez résilier depuis votre espace client ou en nous contactant à <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. La résiliation prend effet à la fin de la période en cours. Nous proposons également une <strong>garantie satisfait ou remboursé de 14 jours</strong>.
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq6_a">
+          Yes, no commitment, no fees. You can cancel from your account or by contacting us at <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. Cancellation takes effect at the end of the current period. We also offer a <strong>14-day money-back guarantee</strong>.
         </div></div>
       </div>
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Existe-t-il une offre on-premise / self-hosted ?
+          <span data-i18n="faq7_q">Is there an on-premise / self-hosted option?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Oui, notre offre <strong>Enterprise à €799/mois</strong> inclut un déploiement on-premise sur votre infrastructure, une intégration SSO/Active Directory, un SLA garanti et la possibilité d'acquérir une licence perpétuelle. <a href="mailto:contact@sapscope.com">Contactez-nous</a> pour un devis personnalisé.
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq7_a">
+          Yes, our <strong>Enterprise plan at €799/month</strong> includes on-premise deployment on your infrastructure, SSO/Active Directory integration, a guaranteed SLA and the option of a perpetual license. <a href="mailto:contact@sapscope.com">Contact us</a> for a custom quote.
         </div></div>
       </div>
 
@@ -850,9 +865,9 @@
 <!-- ── PRICING ────────────────────────────────────────────────────────────────── -->
 <div id="pricing">
   <div class="section">
-    <div class="section-eyebrow fade-up">Tarifs</div>
-    <h2 class="section-title fade-up">Simple. Transparent. Sans surprise.</h2>
-    <p class="section-sub fade-up">Activation immédiate dès le paiement. Résiliez à tout moment.</p>
+    <div class="section-eyebrow fade-up" data-i18n="pricing_eyebrow">Pricing</div>
+    <h2 class="section-title fade-up" data-i18n="pricing_title">Simple. Transparent. No surprises.</h2>
+    <p class="section-sub fade-up" data-i18n="pricing_sub">Instant activation after payment. Cancel anytime.</p>
 
     <div class="pricing-grid">
       <!-- Solo -->
@@ -860,43 +875,43 @@
         <div class="pricing-tier">Solo</div>
         <div class="pricing-price">
           <div class="pricing-amount"><span>€</span>49</div>
-          <div class="pricing-period">par mois</div>
-          <div class="pricing-save">2 mois offerts en annuel</div>
+          <div class="pricing-period" data-i18n="pricing_per_month">per month</div>
+          <div class="pricing-save" data-i18n="pricing_save">2 months free on annual</div>
         </div>
-        <p class="pricing-desc">Pour le consultant indépendant qui surveille plusieurs périmètres SAP en solo.</p>
-        <a href="/app" class="pricing-cta pricing-cta-secondary">Choisir Solo →</a>
+        <p class="pricing-desc" data-i18n="solo_desc">For independent consultants monitoring multiple SAP scopes solo.</p>
+        <a href="/app" class="pricing-cta pricing-cta-secondary" data-i18n="solo_cta">Choose Solo →</a>
         <hr class="pricing-divider">
         <ul class="pricing-features">
-          <li>1 utilisateur</li>
-          <li>Jusqu'à 3 systèmes SAP</li>
-          <li>Analyses IA illimitées</li>
-          <li>Historique 90 jours</li>
-          <li>Snapshots & diff</li>
-          <li>Alertes système</li>
+          <li data-i18n="solo_f1">1 user</li>
+          <li data-i18n="solo_f2">Up to 3 SAP systems</li>
+          <li data-i18n="solo_f3">Unlimited AI analyses</li>
+          <li data-i18n="solo_f4">90-day history</li>
+          <li data-i18n="solo_f5">Snapshots &amp; diff</li>
+          <li data-i18n="solo_f6">System alerts</li>
         </ul>
       </div>
 
       <!-- Team -->
       <div class="pricing-card featured fade-up delay-1">
-        <div class="pricing-popular">⭐ Le plus populaire</div>
+        <div class="pricing-popular" data-i18n="pricing_popular">⭐ Most popular</div>
         <div class="pricing-tier pricing-tier-featured">Team</div>
         <div class="pricing-price">
           <div class="pricing-amount"><span>€</span>199</div>
-          <div class="pricing-period">par mois</div>
-          <div class="pricing-save">2 mois offerts en annuel</div>
+          <div class="pricing-period" data-i18n="pricing_per_month">per month</div>
+          <div class="pricing-save" data-i18n="pricing_save">2 months free on annual</div>
         </div>
-        <p class="pricing-desc">Pour les équipes Basis et cabinets de conseil qui gèrent de nombreux clients SAP.</p>
-        <a href="/app" class="pricing-cta pricing-cta-primary">Choisir Team →</a>
+        <p class="pricing-desc" data-i18n="team_desc">For Basis teams and consulting firms managing many SAP clients.</p>
+        <a href="/app" class="pricing-cta pricing-cta-primary" data-i18n="team_cta">Choose Team →</a>
         <hr class="pricing-divider">
         <ul class="pricing-features">
-          <li>5 utilisateurs</li>
-          <li>Jusqu'à 20 systèmes SAP</li>
-          <li>Analyses IA illimitées</li>
-          <li>Historique illimité</li>
-          <li>Rapports client partageables</li>
-          <li>Snapshots & diff</li>
-          <li>Alertes système</li>
-          <li>Support prioritaire</li>
+          <li data-i18n="team_f1">5 users</li>
+          <li data-i18n="team_f2">Up to 20 SAP systems</li>
+          <li data-i18n="team_f3">Unlimited AI analyses</li>
+          <li data-i18n="team_f4">Unlimited history</li>
+          <li data-i18n="team_f5">Shareable client reports</li>
+          <li data-i18n="team_f6">Snapshots &amp; diff</li>
+          <li data-i18n="team_f7">System alerts</li>
+          <li data-i18n="team_f8">Priority support</li>
         </ul>
       </div>
 
@@ -905,41 +920,41 @@
         <div class="pricing-tier">Enterprise</div>
         <div class="pricing-price">
           <div class="pricing-amount"><span>€</span>799</div>
-          <div class="pricing-period">par mois</div>
-          <div class="pricing-save">2 mois offerts en annuel</div>
+          <div class="pricing-period" data-i18n="pricing_per_month">per month</div>
+          <div class="pricing-save" data-i18n="pricing_save">2 months free on annual</div>
         </div>
-        <p class="pricing-desc">Pour les grands comptes avec des exigences de conformité et une infrastructure dédiée.</p>
-        <a href="mailto:contact@sapscope.com" class="pricing-cta pricing-cta-secondary">Nous contacter →</a>
+        <p class="pricing-desc" data-i18n="ent_desc">For enterprises with compliance requirements and dedicated infrastructure.</p>
+        <a href="mailto:contact@sapscope.com" class="pricing-cta pricing-cta-secondary" data-i18n="ent_cta">Contact us →</a>
         <hr class="pricing-divider">
         <ul class="pricing-features">
-          <li>Utilisateurs illimités</li>
-          <li>Systèmes SAP illimités</li>
-          <li>Analyses IA illimitées</li>
-          <li>Déploiement on-premise</li>
-          <li>Intégration SSO / Active Directory</li>
-          <li>Licence perpétuelle disponible</li>
-          <li>SLA garanti</li>
-          <li>Support dédié</li>
+          <li data-i18n="ent_f1">Unlimited users</li>
+          <li data-i18n="ent_f2">Unlimited SAP systems</li>
+          <li data-i18n="ent_f3">Unlimited AI analyses</li>
+          <li data-i18n="ent_f4">On-premise deployment</li>
+          <li data-i18n="ent_f5">SSO / Active Directory</li>
+          <li data-i18n="ent_f6">Perpetual license available</li>
+          <li data-i18n="ent_f7">Guaranteed SLA</li>
+          <li data-i18n="ent_f8">Dedicated support</li>
         </ul>
       </div>
     </div>
 
     <!-- Trust signals -->
     <div class="pricing-trust fade-up">
-      <span class="pricing-trust-item">Activation en 30 secondes</span>
-      <span class="pricing-trust-item">Satisfait ou remboursé 14 jours</span>
-      <span class="pricing-trust-item">Résiliez à tout moment</span>
-      <span class="pricing-trust-item">Paiement sécurisé par Stripe</span>
+      <span class="pricing-trust-item" data-i18n="trust1">Activation in 30 seconds</span>
+      <span class="pricing-trust-item" data-i18n="trust2">14-day money-back guarantee</span>
+      <span class="pricing-trust-item" data-i18n="trust3">Cancel anytime</span>
+      <span class="pricing-trust-item" data-i18n="trust4">Secure payment by Stripe</span>
     </div>
   </div>
 </div>
 
 <!-- ── FINAL CTA ───────────────────────────────────────────────────────────────── -->
 <div class="cta-section">
-  <h2 class="fade-up">Prêt à enfin voir<br>clair dans votre SAP ?</h2>
-  <p class="fade-up">Activation immédiate. Vos premiers résultats en moins de 5 minutes.</p>
-  <a href="/app" class="btn-hero-primary fade-up">Créer mon compte →</a>
-  <small class="fade-up">Déjà un compte ? <a href="/app" style="color:var(--accent)">Se connecter →</a></small>
+  <h2 class="fade-up" data-i18n-html="cta_title">Ready to finally see<br>clearly in your SAP?</h2>
+  <p class="fade-up" data-i18n="cta_p">Instant activation. Your first results in under 5 minutes.</p>
+  <a href="/app" class="btn-hero-primary fade-up" data-i18n="cta_btn">Create my account →</a>
+  <small class="fade-up"><span data-i18n="cta_already">Already have an account?</span> <a href="/app" style="color:var(--accent)" data-i18n="cta_signin">Sign in →</a></small>
 </div>
 
 <!-- ── FOOTER ──────────────────────────────────────────────────────────────────── -->
@@ -947,13 +962,13 @@
   <div class="footer-inner">
     <div class="footer-logo">SAP<span>scope</span></div>
     <div class="footer-links">
-      <a href="#features">Fonctionnalités</a>
-      <a href="#pricing">Tarifs</a>
-      <a href="/docs">Documentation</a>
-      <a href="/app">Application</a>
-      <a href="mailto:contact@sapscope.com">Contact</a>
+      <a href="#features" data-i18n="foot_features">Features</a>
+      <a href="#pricing" data-i18n="foot_pricing">Pricing</a>
+      <a href="/docs" data-i18n="foot_docs">Documentation</a>
+      <a href="/app" data-i18n="foot_app">Application</a>
+      <a href="mailto:contact@sapscope.com" data-i18n="foot_contact">Contact</a>
     </div>
-    <div class="footer-copy">© 2026 SAPscope. Tous droits réservés.</div>
+    <div class="footer-copy" data-i18n="foot_copy">© 2026 SAPscope. All rights reserved.</div>
   </div>
 </footer>
 
@@ -994,6 +1009,412 @@
       ? 'rgba(0,0,0,0.92)'
       : 'rgba(0,0,0,0.72)';
   }, { passive: true });
+
+  // ── i18n ──────────────────────────────────────────────────────────────────
+  const TRANSLATIONS = {
+    en: {
+      meta_title: 'SAPscope — SAP Intelligence for Basis Consultants',
+      meta_desc: 'SAPscope automatically analyzes your SAP systems and generates precise AI-powered diagnostics. Built for Basis consultants.',
+      og_title: 'SAPscope — SAP Intelligence for Basis Consultants',
+      og_desc: 'SAPscope automatically analyzes your SAP systems and generates precise AI-powered diagnostics. Built for Basis consultants.',
+      og_locale: 'en_US',
+      nav_features: 'Features',
+      nav_how: 'How it works',
+      nav_pricing: 'Pricing',
+      nav_docs: 'Documentation',
+      nav_signin: 'Sign in',
+      nav_cta: 'Free trial →',
+      hero_badge: 'Open Beta — free access',
+      hero_h1: 'Master your<br>SAP landscape.',
+      hero_p: 'SAPscope automatically collects data from your SAP systems and generates precise architecture diagnostics powered by AI. In seconds.',
+      hero_cta1: 'Get started for free →',
+      hero_cta2: 'Discover features',
+      stat1_lbl: 'To analyze a complete system',
+      stat2_lbl: 'Automated — zero manual input',
+      stat3_lbl: 'Components, patches, custom objects',
+      feat_eyebrow: 'Features',
+      feat_title: 'Everything a Basis consultant<br>always wanted.',
+      feat_sub: 'No more running SM51, SE16, SPAM one after another to reconstruct a picture of your system.',
+      feat1_title: 'Automatic RFC collection',
+      feat1_text: 'An agent runs on your SAP server and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.',
+      feat2_title: 'AI-powered diagnostics',
+      feat2_text: 'Every snapshot generates a structured report: maintenance status, identified risks, prioritized recommendations, actions to schedule.',
+      feat3_title: 'Snapshot comparison',
+      feat3_text: 'See exactly what changed between two dates: added or updated components, applied patches, evolution of custom objects.',
+      feat4_title: 'Multi-client, multi-system',
+      feat4_text: 'Manage multiple SAP clients from a single interface. Each scope is isolated, with its own agent tokens and assigned consultants.',
+      feat5_title: 'Isolation & confidentiality',
+      feat5_text: 'Single-use agent tokens, read-only consultant access. Your SAP data stays within your perimeter — never exposed to the outside.',
+      feat6_title: 'Continuous history',
+      feat6_text: 'Every snapshot is archived. Go back to any date, compare periods, track drift before it becomes an incident.',
+      hiw_eyebrow: 'How it works',
+      hiw_title: 'Up and running in 10 minutes.',
+      hiw_sub: "No complex RFC setup. No BTP access. Just a Python agent, a cron job, and you're done.",
+      step1_num: 'Step 01',
+      step1_title: 'Install the agent on your SAP server',
+      step1_text: 'The pyrfc agent deploys in a few commands on any SAP application server. It connects via local RFC to read system metadata — no inbound external access required.',
+      step2_num: 'Step 02',
+      step2_title: 'Data syncs automatically',
+      step2_text: 'A systemd timer triggers the agent every 24h. Each run sends a complete snapshot: installed components, support packages, kernel, custom ABAP objects, DB info.',
+      step3_num: 'Step 03',
+      step3_title: 'Consult the AI analysis from anywhere',
+      step3_text: 'Claude analyzes each snapshot and generates a structured report: maintenance status, identified risks, prioritized recommendations. Accessible on desktop, tablet or mobile.',
+      analysis_title: 'Priority recommendations',
+      faq_eyebrow: 'FAQ',
+      faq_title: 'Frequently asked questions',
+      faq1_q: 'Is SAPscope compatible with all SAP versions?',
+      faq1_a: 'Yes. SAPscope is compatible with <strong>SAP ECC 6.0, S/4HANA, BW and Solution Manager</strong>. Collection is done via RFC/SM59, with no modification to the SAP system. See our <a href="/docs#sap-rfc-user-setup">RFC user setup guide</a>.',
+      faq2_q: 'Does my SAP data leave my infrastructure?',
+      faq2_a: 'No. The agent runs <strong>on your infrastructure</strong> and only sends SAPscope <strong>anonymized technical metrics</strong> (performance, jobs, system logs). No business data, no table content is ever transmitted.',
+      faq3_q: 'How long does installation take?',
+      faq3_a: "Less than <strong>10 minutes</strong>. Once your subscription is activated, you receive an API key. Simply copy-paste the agent installation command on the SAP server and enter the key. That's it.",
+      faq4_q: 'What SAP authorizations does the agent need?',
+      faq4_a: 'A <strong>System (A) type</strong> user with a minimal read-only authorization profile. We provide an ABAP program <code>ZSAPSCOPE_SETUP</code> that creates the user and assigns exactly the required authorizations. See the <a href="/docs#sap-rfc-user-setup">RFC guide</a>.',
+      faq5_q: 'Does the AI have access to my business data?',
+      faq5_a: 'No. AI diagnostics are based <strong>only on technical metrics</strong>: system performance, background job statuses, error logs. No table data (customers, orders, accounting…) is ever transmitted to the model.',
+      faq6_q: 'Can I cancel at any time?',
+      faq6_a: 'Yes, no commitment, no fees. You can cancel from your account or by contacting us at <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. Cancellation takes effect at the end of the current period. We also offer a <strong>14-day money-back guarantee</strong>.',
+      faq7_q: 'Is there an on-premise / self-hosted option?',
+      faq7_a: 'Yes, our <strong>Enterprise plan at €799/month</strong> includes on-premise deployment on your infrastructure, SSO/Active Directory integration, a guaranteed SLA and the option of a perpetual license. <a href="mailto:contact@sapscope.com">Contact us</a> for a custom quote.',
+      pricing_eyebrow: 'Pricing',
+      pricing_title: 'Simple. Transparent. No surprises.',
+      pricing_sub: 'Instant activation after payment. Cancel anytime.',
+      pricing_popular: '⭐ Most popular',
+      pricing_per_month: 'per month',
+      pricing_save: '2 months free on annual',
+      solo_desc: 'For independent consultants monitoring multiple SAP scopes solo.',
+      solo_cta: 'Choose Solo →',
+      solo_f1: '1 user',
+      solo_f2: 'Up to 3 SAP systems',
+      solo_f3: 'Unlimited AI analyses',
+      solo_f4: '90-day history',
+      solo_f5: 'Snapshots & diff',
+      solo_f6: 'System alerts',
+      team_desc: 'For Basis teams and consulting firms managing many SAP clients.',
+      team_cta: 'Choose Team →',
+      team_f1: '5 users',
+      team_f2: 'Up to 20 SAP systems',
+      team_f3: 'Unlimited AI analyses',
+      team_f4: 'Unlimited history',
+      team_f5: 'Shareable client reports',
+      team_f6: 'Snapshots & diff',
+      team_f7: 'System alerts',
+      team_f8: 'Priority support',
+      ent_desc: 'For enterprises with compliance requirements and dedicated infrastructure.',
+      ent_cta: 'Contact us →',
+      ent_f1: 'Unlimited users',
+      ent_f2: 'Unlimited SAP systems',
+      ent_f3: 'Unlimited AI analyses',
+      ent_f4: 'On-premise deployment',
+      ent_f5: 'SSO / Active Directory',
+      ent_f6: 'Perpetual license available',
+      ent_f7: 'Guaranteed SLA',
+      ent_f8: 'Dedicated support',
+      trust1: 'Activation in 30 seconds',
+      trust2: '14-day money-back guarantee',
+      trust3: 'Cancel anytime',
+      trust4: 'Secure payment by Stripe',
+      cta_title: 'Ready to finally see<br>clearly in your SAP?',
+      cta_p: 'Instant activation. Your first results in under 5 minutes.',
+      cta_btn: 'Create my account →',
+      cta_already: 'Already have an account?',
+      cta_signin: 'Sign in →',
+      foot_features: 'Features',
+      foot_pricing: 'Pricing',
+      foot_docs: 'Documentation',
+      foot_app: 'Application',
+      foot_contact: 'Contact',
+      foot_copy: '© 2026 SAPscope. All rights reserved.'
+    },
+    fr: {
+      meta_title: 'SAPscope — Intelligence SAP pour consultants Basis',
+      meta_desc: 'SAPscope analyse automatiquement vos systèmes SAP et génère des diagnostics précis par IA. Conçu pour les consultants Basis.',
+      og_title: 'SAPscope — Intelligence SAP pour consultants Basis',
+      og_desc: 'SAPscope analyse automatiquement vos systèmes SAP et génère des diagnostics précis par IA. Conçu pour les consultants Basis.',
+      og_locale: 'fr_FR',
+      nav_features: 'Fonctionnalités',
+      nav_how: 'Comment ça marche',
+      nav_pricing: 'Tarifs',
+      nav_docs: 'Documentation',
+      nav_signin: 'Se connecter',
+      nav_cta: 'Essai gratuit →',
+      hero_badge: 'Bêta ouverte — accès gratuit',
+      hero_h1: 'Maîtrisez votre<br>paysage SAP.',
+      hero_p: 'SAPscope collecte automatiquement les données de vos systèmes SAP et génère des diagnostics d\'architecture précis par intelligence artificielle. En quelques secondes.',
+      hero_cta1: 'Commencer gratuitement →',
+      hero_cta2: 'Découvrir les fonctionnalités',
+      stat1_lbl: 'Pour analyser un système complet',
+      stat2_lbl: 'Automatisé — zéro saisie manuelle',
+      stat3_lbl: 'Vue composants, patches, objets custom',
+      feat_eyebrow: 'Fonctionnalités',
+      feat_title: 'Tout ce qu\'un consultant Basis<br>a toujours voulu avoir.',
+      feat_sub: 'Fini les transactions SM51, SE16, SPAM en rafale pour reconstituer une image de votre système.',
+      feat1_title: 'Collecte RFC automatique',
+      feat1_text: 'Un agent tourne sur votre serveur SAP et remonte automatiquement composants, support packages, niveaux kernel et objets ABAP custom — sans intervention manuelle.',
+      feat2_title: 'Diagnostic par intelligence artificielle',
+      feat2_text: 'Chaque snapshot génère un rapport structuré : état de maintenance, risques identifiés, recommandations priorisées, actions à planifier.',
+      feat3_title: 'Comparaison entre snapshots',
+      feat3_text: 'Identifiez exactement ce qui a changé entre deux dates : composants ajoutés ou mis à jour, patches appliqués, évolution des objets custom.',
+      feat4_title: 'Multi-clients, multi-systèmes',
+      feat4_text: 'Gérez plusieurs clients SAP depuis une seule interface. Chaque périmètre est isolé, avec ses propres tokens d\'agent et ses consultants assignés.',
+      feat5_title: 'Isolation et confidentialité',
+      feat5_text: 'Tokens d\'agent à usage unique, accès consultant en lecture seule. Vos données SAP restent dans votre périmètre — aucune exposition vers l\'extérieur.',
+      feat6_title: 'Historique continu',
+      feat6_text: 'Chaque snapshot est archivé. Remontez à n\'importe quelle date, comparez les périodes, suivez les dérives avant qu\'elles deviennent des incidents.',
+      hiw_eyebrow: 'Comment ça marche',
+      hiw_title: 'Opérationnel en 10 minutes.',
+      hiw_sub: 'Pas de RFC compliqués à configurer. Pas d\'accès BTP. Juste un agent Python, un cron, et c\'est parti.',
+      step1_num: 'Étape 01',
+      step1_title: 'Installez l\'agent sur votre serveur SAP',
+      step1_text: 'L\'agent pyrfc se déploie en quelques commandes sur n\'importe quel serveur applicatif SAP. Il se connecte en RFC local pour lire les métadonnées système — sans accès externe entrant.',
+      step2_num: 'Étape 02',
+      step2_title: 'Les données remontent automatiquement',
+      step2_text: 'Un systemd timer déclenche l\'agent toutes les 24h. Chaque exécution envoie un snapshot complet : composants installés, support packages, kernel, objets custom ABAP, infos DB.',
+      step3_num: 'Étape 03',
+      step3_title: 'Consultez l\'analyse IA depuis n\'importe où',
+      step3_text: 'Claude analyse chaque snapshot et génère un rapport structuré : statut de maintenance, risques identifiés, recommandations priorisées. Accessible sur ordinateur, tablette ou mobile.',
+      analysis_title: 'Recommandations prioritaires',
+      faq_eyebrow: 'FAQ',
+      faq_title: 'Questions fréquentes',
+      faq1_q: 'SAPscope est-il compatible avec toutes les versions de SAP ?',
+      faq1_a: 'Oui. SAPscope est compatible avec <strong>SAP ECC 6.0, S/4HANA, BW et Solution Manager</strong>. La collecte se fait via RFC/SM59, sans modification du système SAP. Consultez notre <a href="/docs#sap-rfc-user-setup">guide de création de l\'utilisateur RFC</a>.',
+      faq2_q: 'Mes données SAP quittent-elles mon infrastructure ?',
+      faq2_a: 'Non. L\'agent s\'exécute <strong>sur votre infrastructure</strong> et n\'envoie à SAPscope que des <strong>métriques techniques anonymisées</strong> (performances, jobs, logs système). Aucune donnée métier, aucun contenu de table n\'est transmis.',
+      faq3_q: 'Combien de temps prend l\'installation ?',
+      faq3_a: 'Moins de <strong>10 minutes</strong>. Dès votre abonnement activé, vous obtenez une clé API. Il suffit de copier-coller la commande d\'installation de l\'agent sur le serveur SAP et de renseigner la clé. C\'est tout.',
+      faq4_q: 'Quels droits SAP sont nécessaires pour l\'agent ?',
+      faq4_a: 'Un utilisateur de type <strong>Système (A)</strong> avec un profil d\'autorisation minimal en lecture seule. Nous fournissons un programme ABAP <code>ZSAPSCOPE_SETUP</code> qui crée l\'utilisateur et affecte exactement les autorisations requises. Voir le <a href="/docs#sap-rfc-user-setup">guide RFC</a>.',
+      faq5_q: 'L\'IA a-t-elle accès à mes données métier ?',
+      faq5_a: 'Non. Les diagnostics IA portent <strong>uniquement sur les métriques techniques</strong> : performances système, statuts des jobs background, logs d\'erreur. Aucune donnée de table (clients, commandes, comptabilité…) n\'est jamais transmise au modèle.',
+      faq6_q: 'Puis-je résilier à tout moment ?',
+      faq6_a: 'Oui, sans engagement ni frais. Vous pouvez résilier depuis votre espace client ou en nous contactant à <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. La résiliation prend effet à la fin de la période en cours. Nous proposons également une <strong>garantie satisfait ou remboursé de 14 jours</strong>.',
+      faq7_q: 'Existe-t-il une offre on-premise / self-hosted ?',
+      faq7_a: 'Oui, notre offre <strong>Enterprise à €799/mois</strong> inclut un déploiement on-premise sur votre infrastructure, une intégration SSO/Active Directory, un SLA garanti et la possibilité d\'acquérir une licence perpétuelle. <a href="mailto:contact@sapscope.com">Contactez-nous</a> pour un devis personnalisé.',
+      pricing_eyebrow: 'Tarifs',
+      pricing_title: 'Simple. Transparent. Sans surprise.',
+      pricing_sub: 'Activation immédiate dès le paiement. Résiliez à tout moment.',
+      pricing_popular: '⭐ Le plus populaire',
+      pricing_per_month: 'par mois',
+      pricing_save: '2 mois offerts en annuel',
+      solo_desc: 'Pour le consultant indépendant qui surveille plusieurs périmètres SAP en solo.',
+      solo_cta: 'Choisir Solo →',
+      solo_f1: '1 utilisateur',
+      solo_f2: 'Jusqu\'à 3 systèmes SAP',
+      solo_f3: 'Analyses IA illimitées',
+      solo_f4: 'Historique 90 jours',
+      solo_f5: 'Snapshots & diff',
+      solo_f6: 'Alertes système',
+      team_desc: 'Pour les équipes Basis et cabinets de conseil qui gèrent de nombreux clients SAP.',
+      team_cta: 'Choisir Team →',
+      team_f1: '5 utilisateurs',
+      team_f2: 'Jusqu\'à 20 systèmes SAP',
+      team_f3: 'Analyses IA illimitées',
+      team_f4: 'Historique illimité',
+      team_f5: 'Rapports client partageables',
+      team_f6: 'Snapshots & diff',
+      team_f7: 'Alertes système',
+      team_f8: 'Support prioritaire',
+      ent_desc: 'Pour les grands comptes avec des exigences de conformité et une infrastructure dédiée.',
+      ent_cta: 'Nous contacter →',
+      ent_f1: 'Utilisateurs illimités',
+      ent_f2: 'Systèmes SAP illimités',
+      ent_f3: 'Analyses IA illimitées',
+      ent_f4: 'Déploiement on-premise',
+      ent_f5: 'Intégration SSO / Active Directory',
+      ent_f6: 'Licence perpétuelle disponible',
+      ent_f7: 'SLA garanti',
+      ent_f8: 'Support dédié',
+      trust1: 'Activation en 30 secondes',
+      trust2: 'Satisfait ou remboursé 14 jours',
+      trust3: 'Résiliez à tout moment',
+      trust4: 'Paiement sécurisé par Stripe',
+      cta_title: 'Prêt à enfin voir<br>clair dans votre SAP ?',
+      cta_p: 'Activation immédiate. Vos premiers résultats en moins de 5 minutes.',
+      cta_btn: 'Créer mon compte →',
+      cta_already: 'Déjà un compte ?',
+      cta_signin: 'Se connecter →',
+      foot_features: 'Fonctionnalités',
+      foot_pricing: 'Tarifs',
+      foot_docs: 'Documentation',
+      foot_app: 'Application',
+      foot_contact: 'Contact',
+      foot_copy: '© 2026 SAPscope. Tous droits réservés.'
+    },
+    de: {
+      meta_title: 'SAPscope — SAP-Intelligence für Basis-Berater',
+      meta_desc: 'SAPscope analysiert Ihre SAP-Systeme automatisch und erstellt präzise KI-gestützte Diagnosen. Entwickelt für Basis-Berater.',
+      og_title: 'SAPscope — SAP-Intelligence für Basis-Berater',
+      og_desc: 'SAPscope analysiert Ihre SAP-Systeme automatisch und erstellt präzise KI-gestützte Diagnosen. Entwickelt für Basis-Berater.',
+      og_locale: 'de_DE',
+      nav_features: 'Funktionen',
+      nav_how: "So funktioniert's",
+      nav_pricing: 'Preise',
+      nav_docs: 'Dokumentation',
+      nav_signin: 'Anmelden',
+      nav_cta: 'Kostenlos starten →',
+      hero_badge: 'Offene Beta — kostenloser Zugang',
+      hero_h1: 'Behalten Sie Ihre<br>SAP-Landschaft im Blick.',
+      hero_p: 'SAPscope sammelt automatisch Daten aus Ihren SAP-Systemen und erstellt präzise Architekturdiagnosen mithilfe von KI. In wenigen Sekunden.',
+      hero_cta1: 'Kostenlos starten →',
+      hero_cta2: 'Funktionen entdecken',
+      stat1_lbl: 'Zur Analyse eines vollständigen Systems',
+      stat2_lbl: 'Automatisiert — keine manuelle Eingabe',
+      stat3_lbl: 'Komponenten, Patches, Custom-Objekte',
+      feat_eyebrow: 'Funktionen',
+      feat_title: 'Alles, was sich ein Basis-Berater<br>schon immer gewünscht hat.',
+      feat_sub: 'Schluss mit SM51, SE16, SPAM nacheinander aufrufen, um ein Bild Ihres Systems zu rekonstruieren.',
+      feat1_title: 'Automatische RFC-Erfassung',
+      feat1_text: 'Ein Agent läuft auf Ihrem SAP-Server und sammelt automatisch Komponenten, Support Packages, Kernel-Levels und Custom-ABAP-Objekte — ohne manuelle Eingriffe.',
+      feat2_title: 'KI-gestützte Diagnose',
+      feat2_text: 'Jeder Snapshot generiert einen strukturierten Bericht: Wartungsstatus, erkannte Risiken, priorisierte Empfehlungen, geplante Maßnahmen.',
+      feat3_title: 'Snapshot-Vergleich',
+      feat3_text: 'Sehen Sie genau, was sich zwischen zwei Daten geändert hat: hinzugefügte oder aktualisierte Komponenten, angewandte Patches, Entwicklung der Custom-Objekte.',
+      feat4_title: 'Multi-Client, Multi-System',
+      feat4_text: 'Verwalten Sie mehrere SAP-Mandanten über eine einzige Oberfläche. Jeder Bereich ist isoliert mit eigenen Agent-Tokens und zugewiesenen Beratern.',
+      feat5_title: 'Isolation & Vertraulichkeit',
+      feat5_text: 'Einmalige Agent-Tokens, schreibgeschützter Berater-Zugang. Ihre SAP-Daten verbleiben in Ihrem Bereich — keine externe Exposition.',
+      feat6_title: 'Kontinuierlicher Verlauf',
+      feat6_text: 'Jeder Snapshot wird archiviert. Gehen Sie zu jedem beliebigen Datum zurück, vergleichen Sie Zeiträume, verfolgen Sie Abweichungen bevor sie zu Vorfällen werden.',
+      hiw_eyebrow: "So funktioniert's",
+      hiw_title: 'In 10 Minuten einsatzbereit.',
+      hiw_sub: "Kein komplexes RFC-Setup. Kein BTP-Zugang. Nur ein Python-Agent, ein Cron-Job, und los geht's.",
+      step1_num: 'Schritt 01',
+      step1_title: 'Agent auf dem SAP-Server installieren',
+      step1_text: 'Der pyrfc-Agent wird mit wenigen Befehlen auf jedem SAP-Applikationsserver bereitgestellt. Er verbindet sich über lokalen RFC, um System-Metadaten zu lesen — ohne eingehenden externen Zugang.',
+      step2_num: 'Schritt 02',
+      step2_title: 'Daten werden automatisch übertragen',
+      step2_text: 'Ein systemd-Timer aktiviert den Agenten alle 24 Stunden. Jede Ausführung sendet einen vollständigen Snapshot: installierte Komponenten, Support Packages, Kernel, Custom-ABAP-Objekte, DB-Infos.',
+      step3_num: 'Schritt 03',
+      step3_title: 'KI-Analyse von überall abrufen',
+      step3_text: 'Claude analysiert jeden Snapshot und erstellt einen strukturierten Bericht: Wartungsstatus, erkannte Risiken, priorisierte Empfehlungen. Zugänglich auf Desktop, Tablet oder Mobilgerät.',
+      analysis_title: 'Prioritäre Empfehlungen',
+      faq_eyebrow: 'FAQ',
+      faq_title: 'Häufig gestellte Fragen',
+      faq1_q: 'Ist SAPscope mit allen SAP-Versionen kompatibel?',
+      faq1_a: 'Ja. SAPscope ist kompatibel mit <strong>SAP ECC 6.0, S/4HANA, BW und Solution Manager</strong>. Die Erfassung erfolgt über RFC/SM59, ohne Änderungen am SAP-System. Lesen Sie unsere <a href="/docs#sap-rfc-user-setup">RFC-Benutzer-Einrichtungsanleitung</a>.',
+      faq2_q: 'Verlassen meine SAP-Daten meine Infrastruktur?',
+      faq2_a: 'Nein. Der Agent läuft <strong>auf Ihrer Infrastruktur</strong> und sendet an SAPscope nur <strong>anonymisierte technische Metriken</strong> (Performance, Jobs, Systemlogs). Keine Geschäftsdaten, kein Tabelleninhalt wird übertragen.',
+      faq3_q: 'Wie lange dauert die Installation?',
+      faq3_a: "Weniger als <strong>10 Minuten</strong>. Sobald Ihr Abonnement aktiviert ist, erhalten Sie einen API-Schlüssel. Kopieren Sie einfach den Installationsbefehl für den Agenten auf den SAP-Server und geben Sie den Schlüssel ein. Das war's.",
+      faq4_q: 'Welche SAP-Berechtigungen benötigt der Agent?',
+      faq4_a: 'Ein Benutzer vom Typ <strong>System (A)</strong> mit einem minimalen Nur-Lesen-Berechtigungsprofil. Wir stellen ein ABAP-Programm <code>ZSAPSCOPE_SETUP</code> bereit, das den Benutzer erstellt und genau die erforderlichen Berechtigungen zuweist. Siehe <a href="/docs#sap-rfc-user-setup">RFC-Anleitung</a>.',
+      faq5_q: 'Hat die KI Zugang zu meinen Geschäftsdaten?',
+      faq5_a: 'Nein. KI-Diagnosen basieren <strong>ausschließlich auf technischen Metriken</strong>: System-Performance, Background-Job-Status, Fehlerprotokolle. Keine Tabellendaten (Kunden, Bestellungen, Buchhaltung…) werden jemals an das Modell übermittelt.',
+      faq6_q: 'Kann ich jederzeit kündigen?',
+      faq6_a: 'Ja, ohne Vertragsbindung und ohne Gebühren. Sie können über Ihr Kundenkonto kündigen oder uns unter <a href="mailto:contact@sapscope.com">contact@sapscope.com</a> kontaktieren. Die Kündigung tritt am Ende des laufenden Zeitraums in Kraft. Wir bieten auch eine <strong>14-tägige Geld-zurück-Garantie</strong>.',
+      faq7_q: 'Gibt es eine On-Premise / Self-Hosted-Option?',
+      faq7_a: 'Ja, unser <strong>Enterprise-Tarif für €799/Monat</strong> umfasst On-Premise-Bereitstellung auf Ihrer Infrastruktur, SSO/Active Directory-Integration, garantierten SLA und die Möglichkeit einer Dauerlizenz. <a href="mailto:contact@sapscope.com">Kontaktieren Sie uns</a> für ein individuelles Angebot.',
+      pricing_eyebrow: 'Preise',
+      pricing_title: 'Einfach. Transparent. Keine Überraschungen.',
+      pricing_sub: 'Sofortige Aktivierung nach Zahlung. Jederzeit kündbar.',
+      pricing_popular: '⭐ Am beliebtesten',
+      pricing_per_month: 'pro Monat',
+      pricing_save: '2 Monate gratis im Jahresabo',
+      solo_desc: 'Für unabhängige Berater, die mehrere SAP-Bereiche alleine überwachen.',
+      solo_cta: 'Solo wählen →',
+      solo_f1: '1 Benutzer',
+      solo_f2: 'Bis zu 3 SAP-Systeme',
+      solo_f3: 'Unbegrenzte KI-Analysen',
+      solo_f4: '90-Tage-Verlauf',
+      solo_f5: 'Snapshots & Diff',
+      solo_f6: 'Systembenachrichtigungen',
+      team_desc: 'Für Basis-Teams und Beratungsunternehmen mit vielen SAP-Kunden.',
+      team_cta: 'Team wählen →',
+      team_f1: '5 Benutzer',
+      team_f2: 'Bis zu 20 SAP-Systeme',
+      team_f3: 'Unbegrenzte KI-Analysen',
+      team_f4: 'Unbegrenzter Verlauf',
+      team_f5: 'Teilbare Kundenberichte',
+      team_f6: 'Snapshots & Diff',
+      team_f7: 'Systembenachrichtigungen',
+      team_f8: 'Prioritäts-Support',
+      ent_desc: 'Für Großunternehmen mit Compliance-Anforderungen und dedizierter Infrastruktur.',
+      ent_cta: 'Kontakt aufnehmen →',
+      ent_f1: 'Unbegrenzte Benutzer',
+      ent_f2: 'Unbegrenzte SAP-Systeme',
+      ent_f3: 'Unbegrenzte KI-Analysen',
+      ent_f4: 'On-Premise-Bereitstellung',
+      ent_f5: 'SSO / Active Directory',
+      ent_f6: 'Dauerlizenz verfügbar',
+      ent_f7: 'Garantierter SLA',
+      ent_f8: 'Dedizierter Support',
+      trust1: 'Aktivierung in 30 Sekunden',
+      trust2: '14-tägige Geld-zurück-Garantie',
+      trust3: 'Jederzeit kündbar',
+      trust4: 'Sichere Zahlung per Stripe',
+      cta_title: 'Bereit, endlich einen klaren<br>Blick auf Ihr SAP zu haben?',
+      cta_p: 'Sofortige Aktivierung. Ihre ersten Ergebnisse in unter 5 Minuten.',
+      cta_btn: 'Konto erstellen →',
+      cta_already: 'Bereits ein Konto?',
+      cta_signin: 'Anmelden →',
+      foot_features: 'Funktionen',
+      foot_pricing: 'Preise',
+      foot_docs: 'Dokumentation',
+      foot_app: 'Anwendung',
+      foot_contact: 'Kontakt',
+      foot_copy: '© 2026 SAPscope. Alle Rechte vorbehalten.'
+    }
+  };
+
+  function applyLang(lang) {
+    const t = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+
+    // Update html lang attribute
+    document.documentElement.lang = lang;
+
+    // Update page title
+    document.title = t.meta_title;
+
+    // Update meta description
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', t.meta_desc);
+
+    // Update Open Graph tags
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', t.og_title);
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute('content', t.og_desc);
+    const ogLocale = document.querySelector('meta[property="og:locale"]');
+    if (ogLocale) ogLocale.setAttribute('content', t.og_locale);
+
+    // Apply plain text translations
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+
+    // Apply HTML translations
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      if (t[key] !== undefined) el.innerHTML = t[key];
+    });
+
+    // Update active button
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+
+    // Persist choice
+    localStorage.setItem('sapscope_lang_landing', lang);
+  }
+
+  // Determine initial language
+  (function() {
+    const stored = localStorage.getItem('sapscope_lang_landing');
+    const browser = (navigator.language || '').slice(0, 2).toLowerCase();
+    const supported = ['en', 'fr', 'de'];
+    const lang = supported.includes(stored) ? stored
+               : supported.includes(browser) ? browser
+               : 'en';
+    applyLang(lang);
+  })();
+
+  // Lang switcher click handlers
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyLang(btn.getAttribute('data-lang'));
+    });
+  });
 </script>
 </body>
 </html>
