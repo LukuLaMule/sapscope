@@ -60,7 +60,7 @@ async def create_checkout(
 ):
     """Create a Stripe checkout session and return the redirect URL."""
     sc = _stripe_client()
-    base_url = "https://sapscope.luku.fr"
+    base_url = "https://app.sapscope.com"
 
     session = sc.checkout.sessions.create({
         "mode": "subscription",

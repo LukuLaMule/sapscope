@@ -4,14 +4,14 @@
 
 Outil de surveillance et de diagnostic de paysages SAP. Collecte automatiquement les métadonnées de vos systèmes (composants, support packages, kernel, objets custom) et génère des analyses par intelligence artificielle.
 
-Deux modes de déploiement : **SaaS** (hébergé sur sapscope.luku.fr) et **self-hosted** (sur votre infrastructure).
+Deux modes de déploiement : **SaaS** (hébergé sur sapscope.com) et **self-hosted** (sur votre infrastructure).
 
 ---
 
 ## SaaS — Démarrage rapide
 
-1. Créez un compte sur [sapscope.luku.fr/app](https://sapscope.luku.fr/app)
-2. Contactez [contact@luku.fr](mailto:contact@luku.fr) pour activer votre périmètre
+1. Créez un compte sur [app.sapscope.com](https://app.sapscope.com/app)
+2. Contactez [contact@sapscope.com](mailto:contact@sapscope.com) pour activer votre périmètre
 3. Un administrateur crée votre client SAP, génère un token agent et vous l'envoie
 4. Installez l'agent sur votre serveur SAP (voir section Agent ci-dessous)
 
@@ -22,7 +22,7 @@ Deux modes de déploiement : **SaaS** (hébergé sur sapscope.luku.fr) et **self
 ### Prérequis
 
 - Docker + Docker Compose
-- Une clé de licence SAPscope (contactez [contact@luku.fr](mailto:contact@luku.fr))
+- Une clé de licence SAPscope (contactez [contact@sapscope.com](mailto:contact@sapscope.com))
 - Une clé API Anthropic
 - Un reverse proxy avec TLS (Traefik, nginx, Caddy…)
 
@@ -96,7 +96,7 @@ L'agent se déploie sur le serveur d'application SAP. Il se connecte en RFC loca
 ### Installation
 
 ```bash
-curl -O https://sapscope.luku.fr/dist/agent.tar.gz
+curl -O https://app.sapscope.com/dist/agent.tar.gz
 tar xzf agent.tar.gz && cd sap-agent
 pip install -r requirements.txt
 ```
@@ -105,7 +105,7 @@ Créez un fichier `.env` dans le dossier agent :
 
 ```env
 SAPSCOPE_TOKEN=<token-genere-depuis-le-panel-admin>
-SAPSCOPE_URL=https://sapscope.luku.fr
+SAPSCOPE_URL=https://app.sapscope.com
 SAP_HOST=localhost
 SAP_SYSNR=00
 SAP_CLIENT=100
@@ -150,7 +150,7 @@ Depuis l'interface web (onglet Admin, visible uniquement pour les comptes `is_ad
 | `ANTHROPIC_API_KEY`   | oui    | Clé API Anthropic pour les analyses                          |
 | `LICENSE_KEY`         | self-hosted | JWT de licence signé par Sapscope                       |
 | `REGISTRATION_ENABLED`| non    | `true` (SaaS) / `false` (self-hosted). Défaut : `true`       |
-| `ALLOWED_ORIGINS`     | non    | Origines CORS autorisées. Défaut : `https://app.sapscope.io` |
+| `ALLOWED_ORIGINS`     | non    | Origines CORS autorisées. Défaut : `https://app.sapscope.com` |
 | `ENV`                 | non    | `development` active les logs SQL et `/docs`. Défaut : `production` |
 
 ---

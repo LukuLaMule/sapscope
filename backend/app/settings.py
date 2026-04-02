@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     database_url: str
     debug: bool = False
     token_min_length: int = 32
-    allowed_origins: list[str] = ["https://app.sapscope.io"]
+    allowed_origins: list[str] = ["https://app.sapscope.com", "https://sapscope.com"]
     env: str = "production"   # "development" active le SQL echo
 
     # SaaS : True (anyone can self-register)
