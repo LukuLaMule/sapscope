@@ -112,6 +112,7 @@ const createAdminClient     = (name)      => apiFetch(`/api/v1/admin/clients?nam
 const issueToken            = (cid, lbl)  => apiFetch(`/api/v1/admin/clients/${cid}/tokens?label=${encodeURIComponent(lbl)}`, { method: "POST" });
 const loadTokens            = (cid)       => apiFetch(`/api/v1/admin/clients/${cid}/tokens`);
 const revokeToken           = (cid, tid)  => apiFetch(`/api/v1/admin/clients/${cid}/tokens/${tid}`, { method: "DELETE" });
+const deleteAdminClient     = (cid)       => apiFetch(`/api/v1/admin/clients/${cid}`,                { method: "DELETE" });
 const assignClientToUser    = (uid, cid)  => apiFetch(`/api/v1/admin/users/${uid}/clients/${cid}`, { method: "POST" });
 const unassignClientFromUser = (uid, cid) => apiFetch(`/api/v1/admin/users/${uid}/clients/${cid}`, { method: "DELETE" });
 const resetUserPassword      = (uid, pwd)        => apiFetch(`/api/v1/admin/users/${uid}/password`, { method: "PATCH", body: JSON.stringify({ password: pwd }) });
@@ -1942,6 +1943,21 @@ function _renderClientsTab(clients, users) {
     };
   });
 
+  content.querySelectorAll('.delete-client-btn').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm(`Supprimer "${btn.dataset.name}" ? Tous les snapshots et tokens associés seront supprimés définitivement.`)) return;
+      btn.disabled = true;
+      try {
+        await deleteAdminClient(btn.dataset.cid);
+        const [u, c] = await Promise.all([loadUsers(), loadAdminClients()]);
+        _renderAdminTabs(u, c, 'clients');
+      } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+      }
+    };
+  });
+
   content.querySelectorAll('.show-tokens-btn').forEach(btn => {
     btn.onclick = async () => {
       const cid = btn.dataset.cid;
@@ -1997,6 +2013,7 @@ function _clientRow(client) {
         <span class="admin-client-name">${esc(client.name)}</span>
         <button class="issue-token-btn admin-action-btn" data-cid="${esc(client.id)}">+ Token</button>
         <button class="show-tokens-btn admin-action-btn" data-cid="${esc(client.id)}">Tokens ▾</button>
+        <button class="delete-client-btn admin-action-btn admin-action-btn--danger" data-cid="${esc(client.id)}" data-name="${esc(client.name)}" title="Supprimer ce client">✕</button>
       </div>
       <div class="token-list" id="tl-${esc(client.id)}" style="display:none"></div>
     </div>`;

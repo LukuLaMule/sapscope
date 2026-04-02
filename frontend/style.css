@@ -2092,6 +2092,7 @@ html, body {
 }
 .admin-action-btn:hover:not(:disabled) { border-color: #818cf8; color: #818cf8; }
 .admin-action-btn:disabled { opacity: 0.35; cursor: default; }
+.admin-action-btn--danger:hover:not(:disabled) { border-color: #f87171; color: #f87171; }
 
 .admin-form {
   display: flex;
