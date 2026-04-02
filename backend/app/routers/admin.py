@@ -53,6 +53,20 @@ async def list_clients(
     return [ClientOut(id=c.id, name=c.name, created_at=c.created_at) for c in rows.scalars()]
 
 
+@router.delete("/clients/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_client(
+    client_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(_require_admin),
+):
+    row = await db.execute(select(Client).where(Client.id == client_id))
+    client = row.scalar_one_or_none()
+    if client is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    await db.delete(client)
+    await db.commit()
+
+
 @router.post("/clients/{client_id}/tokens", response_model=TokenCreated, status_code=status.HTTP_201_CREATED)
 async def issue_token(
     client_id: str,

@@ -102,6 +102,17 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
     )
 
 
+@router.get("/me", response_model=LoginResponse)
+async def get_me(current_user: User = Depends(get_current_user)):
+    """Profil de l'utilisateur connecté — utile pour vérifier la session côté frontend."""
+    return LoginResponse(
+        token="",  # on ne régénère pas le token, juste les infos
+        user_id=current_user.id,
+        email=current_user.email,
+        is_admin=current_user.is_admin,
+    )
+
+
 @router.patch("/me/password", status_code=status.HTTP_204_NO_CONTENT)
 async def change_own_password(
     body: ChangePasswordRequest,
