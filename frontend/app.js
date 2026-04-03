@@ -219,11 +219,15 @@ function renderSidebar(snapshots) {
     el.dataset.id = snap.id;
     el.style.setProperty("--sys-color", theme.color);
     el.style.setProperty("--sys-dim",   theme.dim);
+    const hDot = snap.health && snap.health.status !== 'UNKNOWN'
+      ? `<span class="health-dot health-dot--${snap.health.status.toLowerCase()}" title="Health ${snap.health.score}/100">${snap.health.score}</span>`
+      : '';
     el.innerHTML = `
       <div class="sid-badge">${esc(snap.system_sid)}${stale ? '<span class="stale-dot"></span>' : ''}</div>
       <div class="host">${esc(snap.system_host)}</div>
       <div class="meta">
         <span class="pill">${snap.components_count} comp</span>
+        ${hDot}
         <span class="${stale ? 'stale-time' : ''}">${relativeTime(snap.collected_at)}</span>
       </div>`;
     el.addEventListener("click", () => selectSnapshot(snap.id, el, theme));
@@ -609,6 +613,84 @@ ${sps.length ? `<h2>Support Packages</h2>
   win.document.close();
 }
 
+// ── Health card ───────────────────────────────────────────────────────────────
+
+function buildHealthCard(snap) {
+  const h = snap.health;
+
+  if (!h || h.status === 'UNKNOWN') {
+    return `
+      <div class="card card--health">
+        <div class="card-header">
+          <span class="card-title">System Health</span>
+          <span class="health-status-badge health-status-badge--unknown">N/A</span>
+        </div>
+        <div class="card-body">
+          <div class="health-unknown-msg">No health data — update the agent to enable health monitoring.</div>
+        </div>
+      </div>`;
+  }
+
+  const DOMAIN_DEFS = [
+    { key: 'stability',      label: 'Stability',      icon: '◉' },
+    { key: 'performance',    label: 'Performance',    icon: '⚡' },
+    { key: 'connectivity',   label: 'Connectivity',   icon: '⇄' },
+    { key: 'infrastructure', label: 'Infrastructure', icon: '◫' },
+    { key: 'security',       label: 'Security',       icon: '⊛' },
+  ];
+
+  function domainDetail(key, ind) {
+    if (key === 'stability')
+      return `${ind.dumps_7d} dump${ind.dumps_7d !== 1 ? 's' : ''} (7d) · ${ind.jobs_aborted_7d} job${ind.jobs_aborted_7d !== 1 ? 's' : ''} aborted`;
+    if (key === 'performance')
+      return `${ind.wp_priv} WP PRIV · ${ind.wp_stopped} WP stopped`;
+    if (key === 'connectivity')
+      return `${ind.trfc_errors} tRFC error${ind.trfc_errors !== 1 ? 's' : ''}`;
+    if (key === 'infrastructure') {
+      const parts = [];
+      if (ind.critical?.length) parts.push(`${ind.critical.join(', ')} ≥90%`);
+      if (ind.warning?.length)  parts.push(`${ind.warning.join(', ')} ≥80%`);
+      return parts.length ? parts.join(' · ') : `Max tablespace: ${ind.max_used_pct}%`;
+    }
+    if (key === 'security')
+      return `${ind.users_locked} locked user${ind.users_locked !== 1 ? 's' : ''}`;
+    return '';
+  }
+
+  const domainRows = DOMAIN_DEFS
+    .filter(d => h.indicators[d.key])
+    .map(d => {
+      const ind = h.indicators[d.key];
+      const st  = ind.status.toLowerCase();
+      return `
+        <div class="health-domain">
+          <span class="hd-icon">${d.icon}</span>
+          <span class="hd-name">${d.label}</span>
+          <div class="hd-bar-wrap">
+            <div class="hd-bar hd-bar--${st}" style="width:${ind.score}%"></div>
+          </div>
+          <span class="hd-score">${ind.score}</span>
+          <span class="hd-status hd-status--${st}">${ind.status}</span>
+          <span class="hd-detail">${domainDetail(d.key, ind)}</span>
+        </div>`;
+    }).join('');
+
+  const statusCls = h.status.toLowerCase();
+  return `
+    <div class="card card--health">
+      <div class="card-header">
+        <span class="card-title">System Health</span>
+        <div class="health-score-wrap">
+          <span class="health-score-num health-score-num--${statusCls}">${h.score}</span>
+          <span class="health-status-badge health-status-badge--${statusCls}">${h.status}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="health-domains">${domainRows}</div>
+      </div>
+    </div>`;
+}
+
 // ── Render: detail view ────────────────────────────────────────────────────────
 
 function renderDetail(snap, theme) {
@@ -665,6 +747,8 @@ function renderDetail(snap, theme) {
         ? statCard("Base de données", dbMeta.label, sys.rfcdbsys || '', dbMeta.color)
         : statCard("SP Freshness",    spAge.label,  spAge.sub,          spAge.dim)}
     </div>
+
+    ${buildHealthCard(snap)}
 
     <!-- AI Analysis -->
     <div class="card card--ai" id="analysis-section">

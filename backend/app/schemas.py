@@ -15,6 +15,7 @@ class SnapshotIn(BaseModel):
     components: list[dict[str, Any]]
     support_packages: list[dict[str, Any]]
     custom_objects: dict[str, Any]
+    health: dict[str, Any] | None = None   # optional — agents v2+ only
 
 
 # ── Outbound responses ────────────────────────────────────────────────────────
@@ -22,6 +23,12 @@ class SnapshotIn(BaseModel):
 class SnapshotCreated(BaseModel):
     id: str
     received_at: datetime
+
+
+class HealthOut(BaseModel):
+    score: int
+    status: str                    # OK | WARNING | CRITICAL | UNKNOWN
+    indicators: dict[str, Any]
 
 
 class SnapshotSummary(BaseModel):
@@ -35,6 +42,7 @@ class SnapshotSummary(BaseModel):
     custom_objects_count: int
     system_release: str | None = None
     db_type: str | None = None
+    health: HealthOut | None = None
 
 
 class SnapshotDetail(SnapshotSummary):
