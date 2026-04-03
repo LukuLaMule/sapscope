@@ -12,7 +12,7 @@ analyses      — Claude-generated assessment for a snapshot
 import hashlib
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, SmallInteger, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -74,11 +74,32 @@ class Snapshot(Base):
 
     client: Mapped["Client"] = relationship(back_populates="snapshots")
     analysis: Mapped["Analysis | None"] = relationship(back_populates="snapshot", uselist=False, cascade="all, delete-orphan")
+    health_check: Mapped["HealthCheck | None"] = relationship(back_populates="snapshot", uselist=False, cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_snapshots_client_collected", "client_id", "collected_at"),
         Index("ix_snapshots_sid", "system_sid"),
     )
+
+
+class HealthCheck(Base):
+    """Health score computed at snapshot ingestion time."""
+    __tablename__ = "health_checks"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    snapshot_id: Mapped[str] = mapped_column(
+        ForeignKey("snapshots.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    score: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    status: Mapped[str] = mapped_column(String(10), nullable=False)   # OK | WARNING | CRITICAL | UNKNOWN
+    indicators: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    snapshot: Mapped["Snapshot"] = relationship(back_populates="health_check")
 
 
 class Analysis(Base):

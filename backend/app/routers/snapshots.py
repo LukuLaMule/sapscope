@@ -10,12 +10,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import get_client_for_agent, get_client_for_user, get_current_user
 from ..database import get_db
-from ..models import Client, Snapshot, User, UserClient
-from ..schemas import ClientOut, SnapshotCreated, SnapshotDetail, SnapshotIn, SnapshotSummary
+from .. import health_scorer
+from ..models import Client, HealthCheck, Snapshot, User, UserClient
+from ..schemas import ClientOut, HealthOut, SnapshotCreated, SnapshotDetail, SnapshotIn, SnapshotSummary
 
 router = APIRouter(tags=["snapshots"])
 
@@ -64,6 +66,16 @@ async def ingest_snapshot(
         payload=body.model_dump(mode="json"),
     )
     db.add(snap)
+    await db.flush()   # get snap.id before committing
+
+    result = health_scorer.compute(body.health)
+    hc = HealthCheck(
+        snapshot_id=snap.id,
+        score=result["score"],
+        status=result["status"],
+        indicators=result["indicators"],
+    )
+    db.add(hc)
     await db.commit()
     await db.refresh(snap)
     return SnapshotCreated(id=snap.id, received_at=snap.received_at)
@@ -82,7 +94,11 @@ async def list_snapshots(
 ):
     client = await get_client_for_user(client_id, user, db)
 
-    q = select(Snapshot).where(Snapshot.client_id == client.id)
+    q = (
+        select(Snapshot)
+        .options(selectinload(Snapshot.health_check))
+        .where(Snapshot.client_id == client.id)
+    )
     if sid:
         q = q.where(Snapshot.system_sid == sid.upper())
     q = q.order_by(Snapshot.collected_at.desc()).limit(limit).offset(offset)
@@ -101,7 +117,9 @@ async def get_snapshot(
     client = await get_client_for_user(client_id, user, db)
 
     row = await db.execute(
-        select(Snapshot).where(
+        select(Snapshot)
+        .options(selectinload(Snapshot.health_check))
+        .where(
             Snapshot.id == snapshot_id,
             Snapshot.client_id == client.id,
         )
@@ -117,6 +135,7 @@ async def get_snapshot(
 def _to_summary(s: Snapshot) -> SnapshotSummary:
     co  = s.payload.get("custom_objects", {})
     sys = s.payload.get("system", {})
+    hc  = s.health_check
     return SnapshotSummary(
         id=s.id,
         system_sid=s.system_sid,
@@ -128,6 +147,7 @@ def _to_summary(s: Snapshot) -> SnapshotSummary:
         custom_objects_count=co.get("total", 0),
         system_release=sys.get("rfcsaprl") or None,
         db_type=sys.get("rfcdbsys") or None,
+        health=HealthOut(score=hc.score, status=hc.status, indicators=hc.indicators) if hc else None,
     )
 
 

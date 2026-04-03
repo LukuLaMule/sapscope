@@ -5,7 +5,7 @@ from a live SAP system via RFC.
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import pyrfc
@@ -167,6 +167,113 @@ class SAPCollector:
             "objects": objects,
         }
 
+    def get_health_indicators(self) -> dict[str, Any]:
+        """Collect health indicators for the global system health score.
+
+        Each sub-collector is wrapped in its own try/except — a failure
+        (permission, DB type incompatibility, etc.) simply omits that
+        indicator from the result.  The backend scorer handles missing domains
+        gracefully.
+        """
+        result: dict[str, Any] = {}
+        seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%Y%m%d")
+
+        # Short dumps (ST22) — last 7 days
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="SNAP",
+                FIELDS=[{"FIELDNAME": "DATUM"}],
+                OPTIONS=[{"TEXT": f"DATUM >= '{seven_days_ago}'"}],
+                ROWCOUNT=500,
+            )
+            result["dumps_7d"] = len(_parse_table(rows))
+        except Exception:
+            logger.debug("Health: SNAP table not readable")
+
+        # Background jobs aborted — last 7 days
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="TBTCO",
+                FIELDS=[{"FIELDNAME": "JOBNAME"}],
+                OPTIONS=[
+                    {"TEXT": f"SDLSTRTDT >= '{seven_days_ago}'"},
+                    {"TEXT": " AND STATUS = 'A'"},
+                ],
+                ROWCOUNT=500,
+            )
+            result["jobs_aborted_7d"] = len(_parse_table(rows))
+        except Exception:
+            logger.debug("Health: TBTCO table not readable")
+
+        # Work processes in abnormal state (PRIV / Stopped)
+        try:
+            wp_result = self.conn.call("TH_WPINFO")
+            wplist = wp_result.get("WPLIST", [])
+            priv_labels    = {"Hold", "PRIV", "2"}
+            stopped_labels = {"Stop", "Stopped", "STOP", "3"}
+            result["wp_priv"]    = sum(1 for wp in wplist if str(wp.get("WP_STATUS", "")).strip() in priv_labels)
+            result["wp_stopped"] = sum(1 for wp in wplist if str(wp.get("WP_STATUS", "")).strip() in stopped_labels)
+        except Exception:
+            logger.debug("Health: TH_WPINFO not callable")
+
+        # Asynchronous RFC errors (ARFCSSTATE)
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="ARFCSSTATE",
+                FIELDS=[{"FIELDNAME": "ARFCSTATE"}],
+                OPTIONS=[{"TEXT": "ARFCSTATE = 'SYSFAIL'"}],
+                ROWCOUNT=200,
+            )
+            result["trfc_errors"] = len(_parse_table(rows))
+        except Exception:
+            logger.debug("Health: ARFCSSTATE table not readable")
+
+        # Tablespace fill level (DBSNP — Oracle/DB2 only, silently skipped for HANA)
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="DBSNP",
+                FIELDS=[
+                    {"FIELDNAME": "TSNAME"},
+                    {"FIELDNAME": "ALLOCATED"},
+                    {"FIELDNAME": "USED"},
+                ],
+                ROWCOUNT=50,
+            )
+            tablespaces = []
+            for row in _parse_table(rows):
+                name      = _trim(row, "TSNAME")
+                allocated = _trim(row, "ALLOCATED")
+                used      = _trim(row, "USED")
+                if name and allocated and used:
+                    try:
+                        pct = round(int(used) / int(allocated) * 100, 1)
+                        tablespaces.append({"name": name, "used_pct": pct})
+                    except (ValueError, ZeroDivisionError):
+                        pass
+            if tablespaces:
+                result["tablespaces"] = tablespaces
+        except Exception:
+            logger.debug("Health: DBSNP not readable (non-Oracle DB or insufficient auth)")
+
+        # Locked user accounts (USR02.UFLAG != 0)
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="USR02",
+                FIELDS=[{"FIELDNAME": "BNAME"}],
+                OPTIONS=[{"TEXT": "UFLAG <> 0"}],
+                ROWCOUNT=500,
+            )
+            result["users_locked"] = len(_parse_table(rows))
+        except Exception:
+            logger.debug("Health: USR02 table not readable")
+
+        return result
+
     # ------------------------------------------------------------------
     # Full snapshot
     # ------------------------------------------------------------------
@@ -175,10 +282,11 @@ class SAPCollector:
         """Run all collectors and return a single snapshot dict."""
         collected_at = datetime.now(timezone.utc).isoformat()
 
-        system_info    = self.get_system_info()
-        components     = self.get_component_versions()
-        sup_packages   = self.get_support_packages()
-        custom_objects = self.get_custom_objects()
+        system_info       = self.get_system_info()
+        components        = self.get_component_versions()
+        sup_packages      = self.get_support_packages()
+        custom_objects    = self.get_custom_objects()
+        health_indicators = self.get_health_indicators()
 
         return {
             "schema_version": "1",
@@ -187,6 +295,7 @@ class SAPCollector:
             "components": components,
             "support_packages": sup_packages,
             "custom_objects": custom_objects,
+            "health": health_indicators,
         }
 
 
