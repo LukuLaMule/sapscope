@@ -461,6 +461,68 @@ class SAPCollector:
             logger.debug("Update: VBHDR not readable")
         return result
 
+    def get_stms_domain_info(self) -> dict[str, Any]:
+        """STMS domain: domain members (TMSYSTEM) and transport routes (TMSROUTE)."""
+        result: dict[str, Any] = {}
+
+        # Domain members — which systems are in the same STMS domain + who is DC
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="TMSYSTEM",
+                DELIMITER="|",
+                FIELDS=[
+                    {"FIELDNAME": "SYSID"},
+                    {"FIELDNAME": "DOMCTRL"},
+                    {"FIELDNAME": "DOMNAME"},
+                    {"FIELDNAME": "SYSTXT"},
+                    {"FIELDNAME": "SYSCONDID"},   # consolidation system ID (empty on DC/PRD)
+                ],
+                ROWCOUNT=50,
+            )
+            result["domain_systems"] = [
+                {
+                    "sid":    _trim(r, "SYSID"),
+                    "is_dc":  _trim(r, "DOMCTRL") == "X",
+                    "domain": _trim(r, "DOMNAME"),
+                    "name":   _trim(r, "SYSTXT"),
+                    "consolidation_target": _trim(r, "SYSCONDID"),
+                }
+                for r in _parse_table(rows)
+                if _trim(r, "SYSID")
+            ]
+        except Exception:
+            logger.debug("STMS: TMSYSTEM not readable")
+
+        # Transport routes — explicit source → target pairs with route name
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="TMSROUTE",
+                DELIMITER="|",
+                FIELDS=[
+                    {"FIELDNAME": "SYSNAM"},   # source system SID
+                    {"FIELDNAME": "SYSTO"},    # target system SID
+                    {"FIELDNAME": "ROUTNAM"},  # route name
+                    {"FIELDNAME": "ROUTDSC"},  # route description
+                ],
+                ROWCOUNT=200,
+            )
+            result["routes"] = [
+                {
+                    "from":        _trim(r, "SYSNAM"),
+                    "to":          _trim(r, "SYSTO"),
+                    "route_name":  _trim(r, "ROUTNAM"),
+                    "description": _trim(r, "ROUTDSC"),
+                }
+                for r in _parse_table(rows)
+                if _trim(r, "SYSNAM") and _trim(r, "SYSTO")
+            ]
+        except Exception:
+            logger.debug("STMS: TMSROUTE not readable")
+
+        return result
+
     def get_spool_info(self) -> dict[str, Any]:
         """TSP01 — pending spool output requests."""
         result: dict[str, Any] = {}
@@ -614,6 +676,55 @@ class SAPCollector:
         return result
 
     # ------------------------------------------------------------------
+    # System type detection
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def detect_system_type(
+        components: list[dict[str, str]],
+        system_info: dict[str, Any],
+    ) -> str:
+        """
+        Dérive le type fonctionnel du système SAP depuis la liste de composants
+        installés (CVERS) et les infos système RFC.
+
+        Valeurs possibles :
+          S/4HANA · BW/4HANA · BW · ECC · CRM · SRM · SolMan · PI/PO
+          Fiori · GRC · ABAP · Java · Unknown
+        """
+        comps = {c.get("component", "").upper() for c in components}
+        sid   = system_info.get("rfcsysid", "").upper()
+        opsys = system_info.get("rfcopsys", "").upper()
+
+        # ── Détection prioritaire par composant ──────────────────────────
+        if "S4CORE" in comps:
+            return "S/4HANA"
+        if "DW4CORE" in comps:
+            return "BW/4HANA"
+        if "BW" in comps or "BI_CONT" in comps:
+            return "BW"
+        if "LCMGT" in comps:          # Landscape Config Management → SolMan
+            return "SolMan"
+        if "XICORE" in comps or "XI_BASIS" in comps or "XITOOL" in comps:
+            return "PI/PO"
+        if "BBPCRM" in comps or "CRM_APPLICATION" in comps:
+            return "CRM"
+        if "SRMSERVER" in comps:
+            return "SRM"
+        if "GRCFND_A" in comps or "GRC_FOUNDATION" in comps:
+            return "GRC"
+        if "SAP_GWFND" in comps and "SAP_APPL" not in comps and "S4CORE" not in comps:
+            return "Fiori"
+        if "SAP_APPL" in comps or "EA-APPL" in comps:
+            return "ECC"
+        if "SAP_BASIS" in comps:
+            return "ABAP"             # BASIS présent mais aucun composant fonctionnel reconnu
+        if not comps and "JAVA" in opsys.upper():
+            return "Java"
+
+        return "Unknown"
+
+    # ------------------------------------------------------------------
     # Full snapshot
     # ------------------------------------------------------------------
 
@@ -623,12 +734,14 @@ class SAPCollector:
 
         system_info       = self.get_system_info()
         components        = self.get_component_versions()
+        system_type       = self.detect_system_type(components, system_info)
         sup_packages      = self.get_support_packages()
         custom_objects    = self.get_custom_objects()
         health_indicators = self.get_health_indicators()
         instances         = self.get_instances()
         security          = self.get_security_info()
         transports        = self.get_transport_info()
+        stms_domain       = self.get_stms_domain_info()
         license_info      = self.get_license_info()
         performance       = self.get_performance_stats()
         background_jobs   = self.get_background_jobs()
@@ -649,6 +762,7 @@ class SAPCollector:
             "schema_version":   "2",
             "collected_at":     collected_at,
             "system":           system_info,
+            "system_type":      system_type,
             "components":       components,
             "support_packages": sup_packages,
             "custom_objects":   custom_objects,
@@ -656,6 +770,7 @@ class SAPCollector:
             "instances":        instances,
             "security":         security,
             "transports":       transports,
+            "stms_domain":      stms_domain,
             "license_info":     license_info,
             "performance":      performance,
             "background_jobs":  background_jobs,

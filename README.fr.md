@@ -141,6 +141,71 @@ Voir [docs/sap-rfc-user-setup.md](docs/sap-rfc-user-setup.md) pour la création 
 
 ---
 
+## Test local de l'agent (SAP ABAP Trial)
+
+Vous pouvez tester le pipeline de collecte complet sur un système SAP ABAP Trial gratuit tournant sur votre machine.
+
+### 1 — Démarrer un container SAP ABAP Trial
+
+Prérequis : Docker, 8 Go de RAM, ~150 Go de disque, [SAP Universal ID](https://account.sap.com) (gratuit).
+
+```bash
+docker login   # authentifiez-vous avec votre SAP Universal ID
+docker pull sapse/abap-platform-trial:1909
+
+docker run -d \
+  --name sap-trial \
+  --hostname vhcalnplci \
+  --stop-timeout 3600 \
+  -p 3200:3200 -p 8443:8443 \
+  sapse/abap-platform-trial:1909
+
+# Suivre le démarrage (environ 45 min au premier lancement)
+docker logs -f sap-trial | grep -E "started|ICM|Dispatcher"
+```
+
+Connexion par défaut : host `localhost`, numéro système `00`, client `001`, user `DEVELOPER`, mot de passe `ABAPtr1909`.
+
+### 2 — Installer le SAP NW RFC SDK
+
+Téléchargez **SAP NW RFC SDK 7.50** (Linux 64-bit) depuis [SAP Software Downloads](https://support.sap.com/swdc) (S-User requis).
+
+```bash
+unzip nwrfc750*.zip -d /usr/local/sap
+export SAPNWRFC_HOME=/usr/local/sap/nwrfc750
+echo 'export SAPNWRFC_HOME=/usr/local/sap/nwrfc750' >> ~/.bashrc
+```
+
+### 3 — Installer les dépendances de l'agent
+
+```bash
+cd agent
+pip install -r requirements.txt   # inclut pyrfc
+```
+
+### 4 — Configurer l'utilisateur RFC dans SAP
+
+- **SE38** → créer et exécuter le programme `ZSAPSCOPE_SETUP` (source : `docs/ZSAPSCOPE_SETUP.abap`)
+- **SU01** → créer l'utilisateur `SAPSCOPE` selon `docs/sap-rfc-user-setup.md`
+
+### 5 — Lancer l'agent en mode dry-run
+
+```bash
+SAPSCOPE_BACKEND_URL=https://app.sapscope.com \
+SAPSCOPE_TOKEN=<token-depuis-le-panel-admin> \
+SAP_USER=SAPSCOPE \
+SAP_PASSWD=<mot-de-passe> \
+SAP_HOST=localhost \
+SAP_SYSNR=00 \
+SAP_CLIENT=001 \
+SAPSCOPE_SYSTEMS="NPL:00" \
+python -m agent --dry-run   # affiche le JSON collecté sans l'envoyer
+```
+
+Supprimez `--dry-run` pour envoyer le snapshot au backend et le voir apparaître dans l'interface.
+
+---
+
 ## Administration
 
 Depuis l'interface web (onglet Admin, visible uniquement pour les comptes `is_admin`) :

@@ -1,0 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 6%;
+    --foreground: 210 20% 90%;
+
+    --card: 222 44% 8%;
+    --card-foreground: 210 20% 90%;
+
+    --popover: 222 44% 10%;
+    --popover-foreground: 210 20% 90%;
+
+    --primary: 187 72% 50%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 222 30% 14%;
+    --secondary-foreground: 210 20% 80%;
+
+    --muted: 222 30% 12%;
+    --muted-foreground: 215 15% 50%;
+
+    --accent: 222 30% 16%;
+    --accent-foreground: 210 20% 90%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 25% 15%;
+    --input: 222 25% 15%;
+    --ring: 187 72% 50%;
+
+    --radius: 0.5rem;
+
+    /* Status colors */
+    --status-ok: 152 69% 45%;
+    --status-warning: 38 92% 50%;
+    --status-critical: 0 72% 51%;
+
+    /* Health score gradient stops */
+    --health-high: 152 69% 45%;
+    --health-mid: 38 92% 50%;
+    --health-low: 0 72% 51%;
+
+    /* Surface layers */
+    --surface-1: 222 44% 8%;
+    --surface-2: 222 40% 10%;
+    --surface-3: 222 35% 13%;
+
+    /* Tier colors */
+    --tier-prod: 0 72% 51%;
+    --tier-quality: 38 92% 50%;
+    --tier-dev: 187 72% 50%;
+
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 210 20% 75%;
+    --sidebar-primary: 187 72% 50%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 222 30% 12%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 222 25% 12%;
+    --sidebar-ring: 187 72% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .health-bar {
+    @apply h-2 rounded-full;
+    background: linear-gradient(90deg,
+      hsl(var(--health-low)) 0%,
+      hsl(var(--health-mid)) 50%,
+      hsl(var(--health-high)) 100%
+    );
+  }
+
+  .status-badge-ok {
+    @apply bg-[hsl(var(--status-ok)/0.15)] text-[hsl(var(--status-ok))] border border-[hsl(var(--status-ok)/0.3)];
+  }
+
+  .status-badge-warning {
+    @apply bg-[hsl(var(--status-warning)/0.15)] text-[hsl(var(--status-warning))] border border-[hsl(var(--status-warning)/0.3)];
+  }
+
+  .status-badge-critical {
+    @apply bg-[hsl(var(--status-critical)/0.15)] text-[hsl(var(--status-critical))] border border-[hsl(var(--status-critical)/0.3)];
+  }
+
+  .tier-badge-production {
+    @apply bg-[hsl(var(--tier-prod)/0.12)] text-[hsl(var(--tier-prod))] border border-[hsl(var(--tier-prod)/0.25)];
+  }
+
+  .tier-badge-quality {
+    @apply bg-[hsl(var(--tier-quality)/0.12)] text-[hsl(var(--tier-quality))] border border-[hsl(var(--tier-quality)/0.25)];
+  }
+
+  .tier-badge-development {
+    @apply bg-[hsl(var(--tier-dev)/0.12)] text-[hsl(var(--tier-dev))] border border-[hsl(var(--tier-dev)/0.25)];
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 hover:bg-[hsl(var(--surface-2))] hover:border-[hsl(var(--primary)/0.3)] cursor-pointer;
+  }
+
+  .score-ring {
+    @apply inline-flex items-center justify-center rounded-full font-mono font-semibold text-sm;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .stale-indicator {
+    @apply animate-pulse;
+  }
+
+  /* Smooth section animations */
+  .section-card {
+    @apply rounded-xl border border-border bg-card p-5 transition-all duration-300;
+  }
+
+  .section-card:hover {
+    border-color: hsl(var(--primary) / 0.15);
+  }
+
+  .section-header {
+    @apply flex items-center gap-2.5 mb-4 pb-3 border-b border-border;
+  }
+
+  .section-icon {
+    @apply w-8 h-8 rounded-lg flex items-center justify-center bg-primary/10 text-primary;
+  }
+
+  .kpi-card {
+    @apply rounded-lg bg-surface-1 border border-border/50 px-4 py-3 transition-all duration-200;
+  }
+
+  .kpi-card:hover {
+    background: hsl(var(--surface-2));
+    border-color: hsl(var(--border));
+  }
+
+  .info-row {
+    @apply flex items-center justify-between py-2 text-sm;
+  }
+
+  .info-row + .info-row {
+    @apply border-t border-border/30;
+  }
+
+  .table-clean th {
+    @apply text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground bg-surface-2/80;
+  }
+
+  .table-clean td {
+    @apply px-4 py-2.5 text-sm;
+  }
+
+  .table-clean tbody tr {
+    @apply transition-colors duration-150;
+  }
+
+  .table-clean tbody tr:hover {
+    background: hsl(var(--surface-2) / 0.5);
+  }
+
+  /* Score progress bar */
+  .score-bar {
+    @apply h-1.5 rounded-full bg-border/50 overflow-hidden;
+  }
+
+  .score-bar-fill {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+  }
+}
+
+/* ── Print styles (Export PDF) ──────────────────────────────────────────── */
+@media print {
+  body { background: white !important; color: black !important; }
+  .print\:hidden { display: none !important; }
+  nav, aside, [data-sidebar], header { display: none !important; }
+  .section-card {
+    border: 1px solid #ddd !important;
+    background: white !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .kpi-card {
+    border: 1px solid #eee !important;
+    background: #fafafa !important;
+  }
+  a { color: inherit !important; text-decoration: none !important; }
+  /* Report-specific overrides */
+  .report-content { max-width: 100% !important; padding: 0 !important; }
+  table { font-size: 10px !important; }
+  .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+  h2 { color: #555 !important; }
+}
