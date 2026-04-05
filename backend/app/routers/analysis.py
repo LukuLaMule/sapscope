@@ -114,7 +114,7 @@ async def run_analysis(
 
 @router.get(
     "/api/v1/clients/{client_id}/snapshots/{snapshot_id}/analysis",
-    response_model=AnalysisOut,
+    response_model=AnalysisOut | None,
     summary="Retrieve existing analysis for a snapshot",
 )
 async def get_analysis(
@@ -136,7 +136,7 @@ async def get_analysis(
     if snap is None:
         raise HTTPException(status_code=404, detail="Snapshot not found")
     if snap.analysis is None:
-        raise HTTPException(status_code=404, detail="No analysis yet — POST to generate one")
+        return None
 
     a = snap.analysis
     return AnalysisOut(

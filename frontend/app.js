@@ -853,9 +853,9 @@ function renderDetail(snap, theme) {
     });
   }
 
-  // Load cached analysis
+  // Load cached analysis (null = pas encore générée)
   loadAnalysis(state.clientId, snap.id)
-    .then(a => renderAnalysis(a))
+    .then(a => { if (a) renderAnalysis(a); })
     .catch(() => {});
 
   document.getElementById("analyse-btn").addEventListener("click", async (e) => {
