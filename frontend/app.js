@@ -2061,14 +2061,10 @@ function _renderClientsTab(clients, users) {
   };
 
   content.querySelectorAll('.issue-token-btn').forEach(btn => {
-    btn.onclick = async () => {
-      const cid = btn.dataset.cid;
-      btn.disabled = true;
-      try {
-        const tok = await issueToken(cid, `agent-${Date.now()}`);
-        _showToken(tok.token);
-        await _loadTokenList(cid);
-      } catch { btn.disabled = false; }
+    btn.onclick = () => {
+      const cid      = btn.dataset.cid;
+      const cname    = btn.dataset.cname || "client";
+      _showTokenWizard(cid, cname);
     };
   });
 
@@ -2140,7 +2136,7 @@ function _clientRow(client) {
     <div class="admin-client-row">
       <div class="admin-client-info">
         <span class="admin-client-name">${esc(client.name)}</span>
-        <button class="issue-token-btn admin-action-btn" data-cid="${esc(client.id)}">+ Token</button>
+        <button class="issue-token-btn admin-action-btn" data-cid="${esc(client.id)}" data-cname="${esc(client.name)}">+ Token</button>
         <button class="show-tokens-btn admin-action-btn" data-cid="${esc(client.id)}">Tokens ▾</button>
         <button class="delete-client-btn admin-action-btn admin-action-btn--danger" data-cid="${esc(client.id)}" data-name="${esc(client.name)}" title="Supprimer ce client">✕</button>
       </div>
@@ -2148,23 +2144,79 @@ function _clientRow(client) {
     </div>`;
 }
 
-function _showToken(token) {
+function _showTokenWizard(cid, cname) {
   const el = document.createElement('div');
   el.className = 'token-overlay';
+
+  // Étape 1 — nommer le token
   el.innerHTML = `
     <div class="token-box">
-      <div class="token-title">Token agent généré</div>
-      <div class="token-warn">Copiez maintenant — affiché une seule fois.</div>
-      <code class="token-val" id="tok-val">${esc(token)}</code>
+      <div class="token-title">Nouveau token agent</div>
+      <div class="token-warn" style="color:var(--fg-2);font-weight:400">
+        Donnez un nom à ce token pour l'identifier dans la liste.
+      </div>
+      <input id="tok-label-input" class="admin-input" style="margin-top:12px"
+        type="text" placeholder="ex: agent-PRD, agent-DEV…"
+        value="agent-${esc(cname).toLowerCase().replace(/\s+/g,'-')}">
+      <div id="tok-label-err" class="admin-error"></div>
       <div style="display:flex;gap:8px;margin-top:14px">
-        <button id="tok-copy" class="admin-submit-btn">Copier</button>
-        <button id="tok-close" class="admin-cancel-btn">Fermer</button>
+        <button id="tok-label-submit" class="admin-submit-btn">Générer →</button>
+        <button id="tok-label-cancel" class="admin-cancel-btn">Annuler</button>
       </div>
     </div>`;
   document.body.appendChild(el);
+
+  document.getElementById('tok-label-cancel').onclick = () => el.remove();
+  document.getElementById('tok-label-submit').onclick = async () => {
+    const label  = document.getElementById('tok-label-input').value.trim();
+    const errEl  = document.getElementById('tok-label-err');
+    const btn    = document.getElementById('tok-label-submit');
+    if (!label) { errEl.textContent = 'Nom requis.'; return; }
+    btn.disabled = true;
+    btn.textContent = 'Génération…';
+    try {
+      const tok = await issueToken(cid, label);
+      _showTokenResult(el, tok.token, label);
+      await _loadTokenList(cid);
+    } catch (err) {
+      errEl.textContent = err.message || 'Erreur lors de la génération.';
+      btn.disabled = false;
+      btn.textContent = 'Générer →';
+    }
+  };
+}
+
+function _showTokenResult(el, token, label) {
+  const origin      = window.location.origin;
+  const installCmd  = `curl -O ${origin}/dist/agent.tar.gz\ntar xzf agent.tar.gz\nsudo ./install.sh --token ${token} --host <SAP_HOST> --sysnr 00 --client 100`;
+
+  el.querySelector('.token-box').innerHTML = `
+    <div class="token-title">Token généré — <span style="color:var(--accent)">${esc(label)}</span></div>
+    <div class="token-warn">Copiez maintenant — affiché une seule fois.</div>
+    <code class="token-val" id="tok-val">${esc(token)}</code>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button id="tok-copy" class="admin-submit-btn">Copier le token</button>
+    </div>
+
+    <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
+      <div style="font-size:13px;color:var(--fg-2);margin-bottom:8px">
+        Commande d'installation — SSH sur le serveur SAP :
+      </div>
+      <pre class="ob-code" id="tok-cmd" style="font-size:12px;white-space:pre;overflow-x:auto">${esc(installCmd)}</pre>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="tok-copy-cmd" class="admin-submit-btn" style="font-size:12px">Copier la commande</button>
+        <button id="tok-close" class="admin-cancel-btn">Fermer</button>
+      </div>
+    </div>`;
+
   document.getElementById('tok-copy').onclick = () => {
     navigator.clipboard.writeText(token).then(() => {
       document.getElementById('tok-copy').textContent = '✓ Copié';
+    });
+  };
+  document.getElementById('tok-copy-cmd').onclick = () => {
+    navigator.clipboard.writeText(installCmd).then(() => {
+      document.getElementById('tok-copy-cmd').textContent = '✓ Copié';
     });
   };
   document.getElementById('tok-close').onclick = () => el.remove();
