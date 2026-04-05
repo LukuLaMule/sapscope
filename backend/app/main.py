@@ -15,7 +15,7 @@ from .database import engine
 from .license import validate as validate_license
 from .limiter import limiter
 from .models import Base, OnboardingToken, PasswordResetToken
-from .routers import admin, analysis, auth, billing, diff, snapshots
+from .routers import admin, analysis, auth, billing, diff, history, notes, snapshots
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -97,6 +97,8 @@ app.include_router(auth.router)
 app.include_router(snapshots.router)
 app.include_router(analysis.router)
 app.include_router(diff.router)
+app.include_router(history.router)
+app.include_router(notes.router)
 app.include_router(admin.router)
 app.include_router(billing.router)
 

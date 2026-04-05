@@ -13,6 +13,9 @@
 | 07 | Admin — Users | [EN](guide-07-admin-utilisateurs.md) | [FR](guide-07-admin-utilisateurs.fr.md) |
 | 08 | Admin — Clients & Tokens | [EN](guide-08-admin-clients-tokens.md) | [FR](guide-08-admin-clients-tokens.fr.md) |
 | 09 | Account Recovery & Edge Cases | [EN](guide-09-recovery.md) | [FR](guide-09-recovery.fr.md) |
+| 10 | Global Inventory | [EN](guide-10-inventory.md) | [FR](guide-10-inventory.fr.md) |
+| 11 | System Notes | [EN](guide-11-notes.md) | [FR](guide-11-notes.fr.md) |
+| 12 | Client Report (PDF) | [EN](guide-12-report.md) | [FR](guide-12-report.fr.md) |
 
 ## Technical Documentation
 

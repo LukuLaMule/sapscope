@@ -141,6 +141,71 @@ See [docs/sap-rfc-user-setup.md](docs/sap-rfc-user-setup.md) for creating the co
 
 ---
 
+## Testing the agent locally (SAP ABAP Trial)
+
+You can test the full collection pipeline against a free SAP ABAP trial system running on your machine.
+
+### 1 — Start an SAP ABAP Trial container
+
+Requires: Docker, 8 GB RAM, ~150 GB disk, [SAP Universal ID](https://account.sap.com) (free).
+
+```bash
+docker login   # authenticate with your SAP Universal ID
+docker pull sapse/abap-platform-trial:1909
+
+docker run -d \
+  --name sap-trial \
+  --hostname vhcalnplci \
+  --stop-timeout 3600 \
+  -p 3200:3200 -p 8443:8443 \
+  sapse/abap-platform-trial:1909
+
+# Follow the boot (takes ~45 min on first run)
+docker logs -f sap-trial | grep -E "started|ICM|Dispatcher"
+```
+
+Default logon: host `localhost`, system number `00`, client `001`, user `DEVELOPER`, password `ABAPtr1909`.
+
+### 2 — Install the SAP NW RFC SDK
+
+Download **SAP NW RFC SDK 7.50** (Linux 64-bit) from [SAP Software Downloads](https://support.sap.com/swdc) (S-User required).
+
+```bash
+unzip nwrfc750*.zip -d /usr/local/sap
+export SAPNWRFC_HOME=/usr/local/sap/nwrfc750
+echo 'export SAPNWRFC_HOME=/usr/local/sap/nwrfc750' >> ~/.bashrc
+```
+
+### 3 — Install agent dependencies
+
+```bash
+cd agent
+pip install -r requirements.txt   # includes pyrfc
+```
+
+### 4 — Setup the RFC user in SAP
+
+- **SE38** → create and execute program `ZSAPSCOPE_SETUP` (source: `docs/ZSAPSCOPE_SETUP.abap`)
+- **SU01** → create user `SAPSCOPE` following `docs/sap-rfc-user-setup.md`
+
+### 5 — Run the agent in dry-run mode
+
+```bash
+SAPSCOPE_BACKEND_URL=https://app.sapscope.com \
+SAPSCOPE_TOKEN=<token-from-admin-panel> \
+SAP_USER=SAPSCOPE \
+SAP_PASSWD=<password> \
+SAP_HOST=localhost \
+SAP_SYSNR=00 \
+SAP_CLIENT=001 \
+SAPSCOPE_SYSTEMS="NPL:00" \
+python -m agent --dry-run   # prints collected JSON, does not send
+```
+
+Remove `--dry-run` to send the snapshot to the backend and see it appear in the UI.
+
+---
+
 ## Administration
 
 From the web interface (Admin tab, visible only for `is_admin` accounts):

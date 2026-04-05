@@ -136,30 +136,30 @@ async def get_snapshot(
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _to_summary(s: Snapshot) -> SnapshotSummary:
-    co  = s.payload.get("custom_objects", {})
-    sys = s.payload.get("system", {})
+    co  = s.payload.get("custom_objects") or {}
+    sys = s.payload.get("system") or {}
     hc  = s.health_check
 
     # SAP_BASIS SP level (extrelease "0016" → "16")
     basis_sp = None
-    for comp in s.payload.get("components", []):
+    for comp in s.payload.get("components") or []:
         if comp.get("component") == "SAP_BASIS":
             raw = (comp.get("extrelease") or "").lstrip("0")
             basis_sp = raw or None
             break
 
     # Security summary
-    sec = s.payload.get("security", {})
-    default_users  = sec.get("default_users_active", [])
-    sap_all_users  = sec.get("sap_all_users", [])
+    sec = s.payload.get("security") or {}
+    default_users  = sec.get("default_users_active") or []
+    sap_all_users  = sec.get("sap_all_users") or []
     security_crit  = bool(default_users or sap_all_users)
 
     # Operations summary
-    trans  = s.payload.get("transports", {})
-    bgjobs = s.payload.get("background_jobs", {})
-    upd    = s.payload.get("update_info", {})
-    spool  = s.payload.get("spool", {})
-    perf   = s.payload.get("performance", {})
+    trans  = s.payload.get("transports") or {}
+    bgjobs = s.payload.get("background_jobs") or {}
+    upd    = s.payload.get("update_info") or {}
+    spool  = s.payload.get("spool") or {}
+    perf   = s.payload.get("performance") or {}
 
     return SnapshotSummary(
         id=s.id,
