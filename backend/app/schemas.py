@@ -54,6 +54,20 @@ class SnapshotSummary(BaseModel):
     system_release: str | None = None
     db_type: str | None = None
     health: HealthOut | None = None
+    # Champs enrichis (v2) — extraits du payload côté backend
+    kernel_release: str | None = None     # ex: "785"
+    kernel_patch: str | None = None       # ex: "900"
+    basis_sp: str | None = None           # ex: "16" (SAP_BASIS extrelease)
+    unicode: bool | None = None           # True si unicode
+    installation_no: str | None = None
+    security_critical: bool = False       # SAP*/DDIC actif ou SAP_ALL
+    security_sap_all_count: int = 0       # nb utilisateurs SAP_ALL
+    security_default_users: list[str] = []# ex: ["SAP*", "DDIC"]
+    transport_queue: int | None = None    # nb transports en attente
+    bg_jobs_delayed: int | None = None    # nb jobs en retard
+    update_errors: int | None = None      # nb erreurs SM13
+    spool_pending: int | None = None      # spool requests en attente
+    avg_response_ms: int | None = None    # temps de réponse dialog moyen
 
 
 class SnapshotDetail(SnapshotSummary):

@@ -139,6 +139,28 @@ def _to_summary(s: Snapshot) -> SnapshotSummary:
     co  = s.payload.get("custom_objects", {})
     sys = s.payload.get("system", {})
     hc  = s.health_check
+
+    # SAP_BASIS SP level (extrelease "0016" → "16")
+    basis_sp = None
+    for comp in s.payload.get("components", []):
+        if comp.get("component") == "SAP_BASIS":
+            raw = (comp.get("extrelease") or "").lstrip("0")
+            basis_sp = raw or None
+            break
+
+    # Security summary
+    sec = s.payload.get("security", {})
+    default_users  = sec.get("default_users_active", [])
+    sap_all_users  = sec.get("sap_all_users", [])
+    security_crit  = bool(default_users or sap_all_users)
+
+    # Operations summary
+    trans  = s.payload.get("transports", {})
+    bgjobs = s.payload.get("background_jobs", {})
+    upd    = s.payload.get("update_info", {})
+    spool  = s.payload.get("spool", {})
+    perf   = s.payload.get("performance", {})
+
     return SnapshotSummary(
         id=s.id,
         system_sid=s.system_sid,
@@ -151,6 +173,19 @@ def _to_summary(s: Snapshot) -> SnapshotSummary:
         system_release=sys.get("rfcsaprl") or None,
         db_type=sys.get("rfcdbsys") or None,
         health=HealthOut(score=hc.score, status=hc.status, indicators=hc.indicators) if hc else None,
+        kernel_release=sys.get("rfckernrl") or None,
+        kernel_patch=sys.get("rfckernpatch") or None,
+        basis_sp=basis_sp,
+        unicode=True if sys.get("rfcunicode") == "U" else (False if sys.get("rfcunicode") == "" else None),
+        installation_no=sys.get("rfcintno") or None,
+        security_critical=security_crit,
+        security_sap_all_count=len(sap_all_users),
+        security_default_users=default_users,
+        transport_queue=trans.get("import_queue_count"),
+        bg_jobs_delayed=bgjobs.get("delayed_count"),
+        update_errors=upd.get("update_errors"),
+        spool_pending=spool.get("pending_count"),
+        avg_response_ms=perf.get("avg_response_ms"),
     )
 
 

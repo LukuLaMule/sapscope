@@ -1750,30 +1750,75 @@ function buildTierRow(tier, items) {
 }
 
 function buildChip(snap, role) {
-  // Summary objects — use dedicated fields, not payload (not available in list endpoint)
-  const dbKey   = classifyDb(snap.db_type);
-  const db      = DB_THEMES[dbKey];
-  const tier    = classifyTier(snap.system_sid, snap.system_host || '');
-  const t       = ENV_TIER_DEFS[tier] || ENV_TIER_DEFS.other;
-  const spCount = snap.support_packages_count || 0;
-  const spLabel = spCount > 0 ? `${spCount} SP` : 'No SP';
-  const spColor = spCount > 0 ? '#94a3b8' : '#475569';
+  const dbKey      = classifyDb(snap.db_type);
+  const db         = DB_THEMES[dbKey];
+  const tier       = classifyTier(snap.system_sid, snap.system_host || '');
+  const t          = ENV_TIER_DEFS[tier] || ENV_TIER_DEFS.other;
   const isSelected = selectedSnaps.has(snap.id);
+
+  // Health score badge
+  const HEALTH_COLOR = { OK: '#34d399', WARNING: '#fbbf24', CRITICAL: '#f87171', UNKNOWN: '#64748b' };
+  const hc     = snap.health;
+  const hColor = hc ? (HEALTH_COLOR[hc.status] || '#64748b') : '#334155';
+  const hBadge = hc
+    ? `<span class="chip-score" style="background:${hColor}22;color:${hColor};border-color:${hColor}55"
+              title="${hc.status} — ${hc.score}/100">${hc.score}</span>`
+    : '';
+
+  // Version line: release + BASIS SP + kernel
+  const rel      = snap.system_release || '';
+  const sp       = snap.basis_sp       ? `SP${snap.basis_sp}` : '';
+  const kern     = snap.kernel_release  ? `K${snap.kernel_release}${snap.kernel_patch ? '.'+snap.kernel_patch : ''}` : '';
+  const relLine  = [rel + (sp ? ' · ' + sp : ''), kern].filter(Boolean).join(' &nbsp;|&nbsp; ');
+
+  // DB badge
+  const dbBadge = dbKey !== 'none'
+    ? `<span class="chip-tag-db" style="color:${db.color};border-color:${db.color}44">${esc(db.label)}</span>`
+    : '';
+
+  // Performance
+  const respBadge = snap.avg_response_ms != null
+    ? `<span class="chip-tag chip-tag--perf" title="Avg dialog response">${snap.avg_response_ms}ms</span>`
+    : '';
+
+  // Alert badges
+  const alerts = [];
+  if (snap.security_critical) {
+    const users = (snap.security_default_users || []).join(', ');
+    alerts.push(`<span class="chip-alert chip-alert--crit" title="Users actifs: ${users}">⚠ ${esc(users || 'SEC')}</span>`);
+  }
+  if ((snap.security_sap_all_count || 0) > 0)
+    alerts.push(`<span class="chip-alert chip-alert--warn" title="${snap.security_sap_all_count} user(s) avec SAP_ALL">SAP_ALL:${snap.security_sap_all_count}</span>`);
+  if ((snap.transport_queue || 0) > 50)
+    alerts.push(`<span class="chip-alert chip-alert--warn" title="${snap.transport_queue} transports en queue">T:${snap.transport_queue}</span>`);
+  if ((snap.bg_jobs_delayed || 0) > 0)
+    alerts.push(`<span class="chip-alert chip-alert--warn" title="${snap.bg_jobs_delayed} jobs en retard">J:${snap.bg_jobs_delayed}</span>`);
+  if ((snap.update_errors || 0) > 0)
+    alerts.push(`<span class="chip-alert chip-alert--crit" title="${snap.update_errors} erreurs update (SM13)">UPD:${snap.update_errors}</span>`);
+
+  const stale = isStale(snap.collected_at);
+
   return `
-    <div class="sys-chip ${isSelected ? 'chip-selected' : ''}" data-id="${esc(snap.id)}" data-role="${role}"
+    <div class="sys-chip ${isSelected ? 'chip-selected' : ''} ${stale ? 'chip-stale' : ''}"
+         data-id="${esc(snap.id)}" data-role="${role}"
          style="--cc:${t.color};--cc-dim:${t.dim};--cc-glow:${t.glow}"
          title="Cliquer pour ouvrir le détail">
       <label class="chip-sel" title="Sélectionner pour l'export" onclick="event.stopPropagation()">
         <input type="checkbox" class="chip-check" data-id="${esc(snap.id)}" ${isSelected ? 'checked' : ''}>
         <span class="chip-check-box"></span>
       </label>
-      <div class="sys-chip-sid">${esc(snap.system_sid)}</div>
-      <div class="sys-chip-host">${esc(snap.system_host)}</div>
-      <div class="sys-chip-meta">
-        ${snap.system_release ? `<span class="sys-chip-tag">${esc(snap.system_release)}</span>` : ''}
-        ${dbKey !== 'none' ? `<span class="sys-chip-db" style="color:${db.color};border-color:${db.color}44">${esc(db.label)}</span>` : ''}
-        <span class="sys-chip-tag" style="color:${spColor}">${esc(spLabel)}</span>
+      <div class="chip-header">
+        <span class="sys-chip-sid">${esc(snap.system_sid)}</span>
+        ${hBadge}
       </div>
+      <div class="sys-chip-host">${esc(snap.system_host)}</div>
+      ${relLine ? `<div class="chip-versions">${relLine}</div>` : ''}
+      <div class="chip-tags-row">
+        ${dbBadge}
+        ${respBadge}
+      </div>
+      ${alerts.length ? `<div class="chip-alerts">${alerts.join('')}</div>` : ''}
+      ${stale ? `<div class="chip-stale-label" title="${fmtDate(snap.collected_at)}">⏱ Stale</div>` : ''}
     </div>`;
 }
 
