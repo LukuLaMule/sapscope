@@ -4,7 +4,7 @@
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 from ..analyser import MODEL, analyse
 from ..auth import get_client_for_user, get_current_user
 from ..database import get_db
+from ..limiter import limiter
 from ..models import Analysis, Client, Snapshot, User
 
 router = APIRouter(tags=["analysis"])
@@ -36,7 +37,9 @@ class AnalysisOut(BaseModel):
     status_code=status.HTTP_201_CREATED,
     summary="Run Claude analysis on a snapshot (or return cached result)",
 )
+@limiter.limit("20/hour")
 async def run_analysis(
+    request: Request,
     client_id: str,
     snapshot_id: str,
     force: bool = Query(False, description="Re-run even if analysis already exists"),
