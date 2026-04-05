@@ -1905,7 +1905,6 @@ function renderOverview(snapshots) {
           </button>
         </div>
       </div>
-      <svg id="conn-svg" aria-hidden="true"><defs></defs></svg>
       <div class="ov-canvas">${tiersHtml}</div>
     </div>`;
 
@@ -1988,10 +1987,8 @@ function buildTierRow(tier, items) {
   const def   = ENV_TIER_DEFS[tier];
   const chips = items.map(({ snap, role }) => buildChip(snap, role)).join('');
   return `
-    <div class="ov-section" data-tier="${tier}"
-         style="--sc:${def.color};--sc-dim:${def.dim};--sc-glow:${def.glow}">
+    <div class="ov-section" data-tier="${tier}">
       <div class="ov-section-hdr">
-        <span class="ov-section-dot"></span>
         <span class="ov-section-label">${esc(def.label)}</span>
         <span class="ov-section-count">${items.length}</span>
       </div>
@@ -2010,9 +2007,9 @@ function buildChip(snap, role) {
   const hc    = snap.health;
   const sc    = hc && hc.status !== 'UNKNOWN' ? getScoreColors(hc.score) : null;
   const scoreRing = sc
-    ? `<div class="score-ring-sm" style="background:${sc.bg};color:${sc.color};border-color:${sc.border};"
+    ? `<div class="score-ring" style="width:48px;height:48px;font-size:15px;border-radius:12px;background:${sc.bg};color:${sc.color};border-color:${sc.border};"
             title="${hc.status} — ${hc.score}/100">${hc.score}</div>`
-    : '';
+    : `<div style="width:48px;height:48px;border-radius:12px;border:2px solid var(--border);background:var(--bg-surface);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-dim);">—</div>`;
   const statusBadge = hc && hc.status !== 'UNKNOWN'
     ? `<span class="${getStatusBadgeCls(hc.status)}" style="font-size:9px;padding:1px 5px;">${hc.status}</span>`
     : '';
@@ -2057,36 +2054,59 @@ function buildChip(snap, role) {
 
   const stale = isStale(snap.collected_at);
 
+  // Resp time color (like SystemCard.tsx avgDialogResponse > 1000 → critical)
+  const respMs = snap.avg_response_ms;
+  const respColor = respMs != null
+    ? (respMs > 1000 ? 'var(--status-critical)' : respMs > 600 ? 'var(--status-warning)' : 'var(--text)')
+    : null;
+
   return `
     <div class="sys-chip ${isSelected ? 'chip-selected' : ''} ${stale ? 'chip-stale' : ''}"
          data-id="${esc(snap.id)}" data-role="${role}"
-         style="--cc:${t.color};--cc-dim:${t.dim};--cc-glow:${t.glow}"
          title="Cliquer pour ouvrir le détail">
       <label class="chip-sel" title="Sélectionner pour l'export" onclick="event.stopPropagation()">
         <input type="checkbox" class="chip-check" data-id="${esc(snap.id)}" ${isSelected ? 'checked' : ''}>
         <span class="chip-check-box"></span>
       </label>
-      <!-- Header row: score + SID + tier + status -->
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:6px;">
-        <div style="display:flex;align-items:center;gap:8px;">
+
+      <!-- Header: score-ring + SID/tier + status badge -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px;">
+        <div style="display:flex;align-items:center;gap:12px;">
           ${scoreRing}
           <div>
-            <div style="display:flex;align-items:center;gap:6px;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
               <span class="sys-chip-sid">${esc(snap.system_sid)}</span>
-              <span class="${tierBadgeCls}" style="font-size:9px;padding:1px 6px;">${esc(tierLabel)}</span>
+              <span class="${tierBadgeCls}">${esc(tierLabel)}</span>
             </div>
             <div class="sys-chip-host">${esc(snap.system_host)}</div>
           </div>
         </div>
         ${statusBadge}
       </div>
-      ${relLine ? `<div class="chip-versions" style="font-size:10px;color:var(--text-dim);font-family:var(--font-mono);margin-bottom:5px;">${relLine}</div>` : ''}
-      <div class="chip-tags-row">
-        ${dbBadge}
-        ${respBadge}
+
+      <!-- Tech info grid (2 cols) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;font-size:11px;color:var(--text-dim);margin-bottom:10px;">
+        ${snap.system_release ? `<span>${esc(snap.system_release)}</span>` : '<span></span>'}
+        ${kern ? `<span style="font-family:var(--font-mono);">${esc(kern)}</span>` : '<span></span>'}
+        ${sp  ? `<span>BASIS ${esc(sp)}</span>` : '<span></span>'}
+        ${dbKey !== 'none' ? `<span style="color:${db.color}">${esc(db.label)}</span>` : '<span></span>'}
       </div>
-      ${alerts.length ? `<div class="chip-alerts">${alerts.join('')}</div>` : ''}
-      ${stale ? `<div class="chip-stale-label" title="${fmtDate(snap.collected_at)}">⏱ ${relativeTime(snap.collected_at)}</div>` : `<div style="font-size:9px;color:var(--text-dim);margin-top:4px;font-family:var(--font-mono);">⏱ ${relativeTime(snap.collected_at)}</div>`}
+
+      <!-- Response time -->
+      ${respMs != null ? `
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);margin-bottom:10px;">
+        <span>◷</span>
+        <span>Avg dialog: <span style="font-family:var(--font-mono);font-weight:600;color:${respColor}">${respMs} ms</span></span>
+      </div>` : ''}
+
+      <!-- Alerts -->
+      ${alerts.length ? `<div class="chip-alerts" style="margin-bottom:10px;">${alerts.join('')}</div>` : ''}
+
+      <!-- Timestamp footer -->
+      <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:${stale ? 'var(--status-warning)' : 'var(--text-dim)'};font-family:var(--font-mono);">
+        <span>⏱</span>
+        <span>${stale ? '⚠ Stale · ' : ''}${relativeTime(snap.collected_at)}</span>
+      </div>
     </div>`;
 }
 
