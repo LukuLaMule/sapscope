@@ -28,6 +28,30 @@ function sidTheme(sid) {
   return SID_PALETTE[Math.abs(h) % SID_PALETTE.length];
 }
 
+// ── Score/status helpers (design system) ─────────────────────────────────────
+
+function getScoreColors(score) {
+  if (score >= 80) return { color: '#34d399', bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.35)' };
+  if (score >= 50) return { color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.35)'  };
+  return               { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.35)' };
+}
+
+function getStatusBadgeCls(status) {
+  if (!status) return 'status-badge-critical';
+  if (status === 'OK')       return 'status-badge-ok';
+  if (status === 'WARNING')  return 'status-badge-warning';
+  return 'status-badge-critical';
+}
+
+function getTierBadgeCls(tier) {
+  if (!tier) return '';
+  const t = tier.toLowerCase();
+  if (t === 'pro' || t === 'production')        return 'tier-badge-production';
+  if (t === 'qal' || t === 'quality' || t === 'preprod') return 'tier-badge-quality';
+  if (t === 'dev' || t === 'development')       return 'tier-badge-development';
+  return 'tier-badge-sandbox';
+}
+
 function applyTheme(theme) {
   const r = document.documentElement;
   r.style.setProperty('--sys-color',    theme.color);
@@ -151,6 +175,153 @@ const showAppScreen = () => {
   document.getElementById("app-screen").style.display   = "flex";
 };
 
+// ── Render: client overview (dashboard) ────────────────────────────────────────
+
+function renderClientOverview(clients) {
+  const content = document.getElementById("content");
+  if (!clients || !clients.length) {
+    content.innerHTML = `<div class="placeholder">Aucun client.</div>`;
+    return;
+  }
+
+  const h = new Date().getHours();
+  const greeting = h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
+
+  // Compute stats from available snapshots (already loaded)
+  const snaps = state.snapshots || [];
+  const totalSnaps = state.allSnapshots ? state.allSnapshots.length : 0;
+  const staleCount = snaps.filter(s => isStale(s.collected_at)).length;
+  const critCount  = snaps.filter(s => s.health && s.health.status === 'CRITICAL').length;
+  const healthScores = snaps.filter(s => s.health && s.health.status !== 'UNKNOWN').map(s => s.health.score);
+  const avgHealth  = healthScores.length ? Math.round(healthScores.reduce((a,b) => a+b, 0) / healthScores.length) : null;
+
+  const avgSc  = avgHealth !== null ? getScoreColors(avgHealth) : { color:'#64748b', bg:'rgba(100,116,139,0.1)', border:'rgba(100,116,139,0.3)' };
+  const critSc = critCount > 0 ? { color:'#f87171' } : { color:'#34d399' };
+
+  // KPI strip
+  const kpiStrip = `
+    <div class="global-kpi-strip">
+      <div class="global-kpi-card">
+        <div class="global-kpi-icon" style="color:#38bdf8;">⊞</div>
+        <div>
+          <div class="global-kpi-val">${snaps.length}</div>
+          <div class="global-kpi-label">Total Systems</div>
+        </div>
+      </div>
+      <div class="global-kpi-card">
+        <div class="global-kpi-icon" style="color:${avgSc.color};">⚡</div>
+        <div>
+          <div class="global-kpi-val" style="color:${avgSc.color};">${avgHealth !== null ? avgHealth + '<span style="font-size:13px;font-weight:400;color:var(--text-dim)">/100</span>' : '—'}</div>
+          <div class="global-kpi-label">Health Global</div>
+        </div>
+      </div>
+      <div class="global-kpi-card">
+        <div class="global-kpi-icon" style="color:${critSc.color};">⊗</div>
+        <div>
+          <div class="global-kpi-val" style="color:${critSc.color};">${critCount}</div>
+          <div class="global-kpi-label">Systèmes critiques</div>
+        </div>
+      </div>
+      <div class="global-kpi-card">
+        <div class="global-kpi-icon" style="color:${staleCount > 0 ? '#fbbf24' : '#34d399'};">⏱</div>
+        <div>
+          <div class="global-kpi-val" style="color:${staleCount > 0 ? '#fbbf24' : '#34d399'};">${staleCount}</div>
+          <div class="global-kpi-label">Agents stale</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Client cards — one per client, avec les systèmes visibles
+  const clientCards = clients.map(client => {
+    // Systèmes de ce client (depuis state.snapshots si client actif)
+    const clientSnaps = state.clientId === client.id ? snaps : [];
+    const clientScore  = clientSnaps.filter(s => s.health && s.health.status !== 'UNKNOWN');
+    const avgScore     = clientScore.length
+      ? Math.round(clientScore.reduce((a,b) => a + b.health.score, 0) / clientScore.length)
+      : null;
+    const csc = avgScore !== null ? getScoreColors(avgScore) : { color:'#64748b', bg:'rgba(100,116,139,0.1)', border:'rgba(100,116,139,0.3)' };
+
+    // Stripe color selon score
+    const stripeColor = avgScore !== null
+      ? (avgScore >= 80 ? '#34d399' : avgScore >= 50 ? '#fbbf24' : '#f87171')
+      : '#334155';
+
+    // System dots
+    const systemDots = clientSnaps.slice(0, 10).map(s => {
+      const dotColor = s.health && s.health.status !== 'UNKNOWN'
+        ? (s.health.score >= 80 ? '#34d399' : s.health.score >= 50 ? '#fbbf24' : '#f87171')
+        : '#475569';
+      return `<div class="system-dot">
+        <span class="system-dot-indicator" style="background:${dotColor};"></span>
+        <span class="system-dot-sid">${esc(s.system_sid)}</span>
+        ${s.health && s.health.status !== 'UNKNOWN' ? `<span class="system-dot-score">${s.health.score}</span>` : ''}
+      </div>`;
+    }).join('');
+
+    const isActive = state.clientId === client.id;
+
+    return `
+      <div class="client-card ${isActive ? 'client-card--active' : ''}" data-client-id="${esc(client.id)}" style="${isActive ? 'border-color:rgba(56,189,248,0.3);' : ''}">
+        <div class="client-card-inner">
+          <div class="client-card-stripe" style="background:${stripeColor};"></div>
+          <div class="client-card-body">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div class="score-ring" style="width:56px;height:56px;font-size:18px;border-radius:14px;background:${csc.bg};color:${csc.color};border-color:${csc.border};">
+                  ${avgScore !== null ? avgScore : '?'}
+                </div>
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:17px;font-weight:600;color:var(--text);">${esc(client.name)}</span>
+                    ${isActive ? `<span style="font-size:10px;background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);border-radius:4px;padding:1px 6px;font-weight:600;">Actif</span>` : ''}
+                  </div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">
+                    ${clientSnaps.length} système${clientSnaps.length !== 1 ? 's' : ''}
+                    ${client.created_at ? ` · Créé le ${fmtDateShort(client.created_at)}` : ''}
+                  </div>
+                </div>
+              </div>
+              <span style="font-size:18px;color:var(--text-dim);opacity:0.3;transition:all 0.3s;">›</span>
+            </div>
+            ${systemDots ? `<div style="display:flex;flex-wrap:wrap;gap:6px;">${systemDots}</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div style="padding:4px 0 8px;">
+      <h1 style="font-size:26px;font-weight:700;color:var(--text);margin-bottom:4px;">
+        ${greeting} 👋
+      </h1>
+      <p style="font-size:12px;color:var(--text-dim);">
+        ${clients.length} client${clients.length > 1 ? 's' : ''} · ${snaps.length} systèmes SAP surveillés
+      </p>
+    </div>
+
+    ${kpiStrip}
+
+    <div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:12px;">Vos clients</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        ${clientCards}
+      </div>
+    </div>`;
+
+  // Click on client card → switch client
+  content.querySelectorAll('.client-card').forEach(card => {
+    card.addEventListener('click', async () => {
+      const cid = card.dataset.clientId;
+      if (cid === state.clientId) return;
+      const sel = document.getElementById("client-select");
+      sel.value = cid;
+      state.clientId = cid;
+      sessionStorage.setItem("sapscope_client", cid);
+      await loadAndRenderSnapshots();
+    });
+  });
+}
+
 // ── Render: client selector ────────────────────────────────────────────────────
 
 function renderClientSelector(clients) {
@@ -200,7 +371,10 @@ async function loadAndRenderSnapshots() {
   if (!state.snapshots.length) {
     renderOnboarding("no-snapshots");
   } else {
-    document.querySelector(".system-item")?.click();
+    // Afficher l'overview des clients au lieu de sélectionner automatiquement
+    // (désactive la sélection automatique du premier système)
+    document.getElementById("content").innerHTML =
+      `<div class="placeholder" style="padding:60px 0;font-size:12px;">← Sélectionnez un système dans la liste.</div>`;
   }
 }
 
@@ -217,18 +391,30 @@ function renderSidebar(snapshots) {
     const el = document.createElement("div");
     el.className  = stale ? "system-item stale" : "system-item";
     el.dataset.id = snap.id;
-    el.style.setProperty("--sys-color", theme.color);
-    el.style.setProperty("--sys-dim",   theme.dim);
-    const hDot = snap.health && snap.health.status !== 'UNKNOWN'
-      ? `<span class="health-dot health-dot--${snap.health.status.toLowerCase()}" title="Health ${snap.health.score}/100">${snap.health.score}</span>`
-      : '';
+
+    // Health score indicator
+    let hBadge = '';
+    if (snap.health && snap.health.status !== 'UNKNOWN') {
+      const sc = getScoreColors(snap.health.score);
+      hBadge = `<span class="health-dot health-dot--${snap.health.status.toLowerCase()}"
+                      style="background:${sc.bg};color:${sc.color};border-color:${sc.border}"
+                      title="${snap.health.status} — ${snap.health.score}/100">${snap.health.score}</span>`;
+    }
+
+    // Tier badge
+    const rawTier = classifyTier(snap.system_sid, snap.system_host || '');
+    const tierDef = ENV_TIER_DEFS[rawTier] || ENV_TIER_DEFS.other;
+
     el.innerHTML = `
-      <div class="sid-badge">${esc(snap.system_sid)}${stale ? '<span class="stale-dot"></span>' : ''}</div>
-      <div class="host">${esc(snap.system_host)}</div>
-      <div class="meta">
-        <span class="pill">${snap.components_count} comp</span>
-        ${hDot}
-        <span class="${stale ? 'stale-time' : ''}">${relativeTime(snap.collected_at)}</span>
+      <div class="sid-badge">
+        <span>${esc(snap.system_sid)}</span>
+        ${stale ? '<span class="stale-dot"></span>' : ''}
+        ${hBadge}
+      </div>
+      <div class="host" style="font-size:10px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(snap.system_host)}</div>
+      <div class="meta" style="margin-top:4px;display:flex;gap:6px;align-items:center;">
+        <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${tierDef.dim};color:${tierDef.color};border:1px solid ${tierDef.color}44;font-family:var(--font-mono);font-weight:600;">${esc(tierDef.label)}</span>
+        <span class="${stale ? 'stale-time' : ''}" style="font-size:10px;color:${stale ? '#f87171' : 'var(--text-dim)'};">${relativeTime(snap.collected_at)}</span>
       </div>`;
     el.addEventListener("click", () => selectSnapshot(snap.id, el, theme));
     list.appendChild(el);
@@ -620,13 +806,13 @@ function buildHealthCard(snap) {
 
   if (!h || h.status === 'UNKNOWN') {
     return `
-      <div class="card card--health">
-        <div class="card-header">
-          <span class="card-title">System Health</span>
-          <span class="health-status-badge health-status-badge--unknown">N/A</span>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon">◉</div>
+          <h3>Health Score Breakdown</h3>
         </div>
-        <div class="card-body">
-          <div class="health-unknown-msg">No health data — update the agent to enable health monitoring.</div>
+        <div style="color:var(--text-dim);font-size:12px;padding:8px 0;">
+          No health data — update the agent to enable health monitoring.
         </div>
       </div>`;
   }
@@ -657,36 +843,49 @@ function buildHealthCard(snap) {
     return '';
   }
 
-  const domainRows = DOMAIN_DEFS
+  // Score ring global
+  const sc = getScoreColors(h.score);
+  const scoreRing = `<div class="score-ring" style="background:${sc.bg};color:${sc.color};border-color:${sc.border};">${h.score}</div>`;
+
+  const domainCards = DOMAIN_DEFS
     .filter(d => h.indicators[d.key])
     .map(d => {
-      const ind = h.indicators[d.key];
-      const st  = ind.status.toLowerCase();
+      const ind  = h.indicators[d.key];
+      const dc   = getScoreColors(ind.score);
+      const detail = domainDetail(d.key, ind);
+      const barColor = ind.score >= 80 ? '#34d399' : ind.score >= 50 ? '#fbbf24' : '#f87171';
       return `
-        <div class="health-domain">
-          <span class="hd-icon">${d.icon}</span>
-          <span class="hd-name">${d.label}</span>
-          <div class="hd-bar-wrap">
-            <div class="hd-bar hd-bar--${st}" style="width:${ind.score}%"></div>
+        <div class="kpi-card domain-kpi">
+          <div class="domain-kpi-header">
+            <span class="domain-icon">${d.icon}</span>
+            <span class="domain-name">${d.label}</span>
+            <span class="domain-score" style="color:${dc.color}">${ind.score}</span>
           </div>
-          <span class="hd-score">${ind.score}</span>
-          <span class="hd-status hd-status--${st}">${ind.status}</span>
-          <span class="hd-detail">${domainDetail(d.key, ind)}</span>
+          <div class="score-bar">
+            <div class="score-bar-fill" style="width:${ind.score}%;background:${barColor}"></div>
+          </div>
+          ${detail ? `
+          <div class="domain-indicators">
+            <div class="domain-indicator-row">
+              <span class="domain-indicator-label">${esc(detail)}</span>
+              <span class="domain-indicator-val ${ind.status.toLowerCase()}">${ind.status}</span>
+            </div>
+          </div>` : ''}
         </div>`;
     }).join('');
 
-  const statusCls = h.status.toLowerCase();
   return `
-    <div class="card card--health">
-      <div class="card-header">
-        <span class="card-title">System Health</span>
-        <div class="health-score-wrap">
-          <span class="health-score-num health-score-num--${statusCls}">${h.score}</span>
-          <span class="health-status-badge health-status-badge--${statusCls}">${h.status}</span>
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon">◉</div>
+        <h3>Health Score Breakdown</h3>
+        <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+          ${scoreRing}
+          <span class="${getStatusBadgeCls(h.status)}">${h.status}</span>
         </div>
       </div>
-      <div class="card-body">
-        <div class="health-domains">${domainRows}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+        ${domainCards}
       </div>
     </div>`;
 }
@@ -710,55 +909,92 @@ function renderDetail(snap, theme) {
        </div>`
     : '';
 
+  // Score ring header
+  const hScore  = snap.health && snap.health.status !== 'UNKNOWN' ? snap.health.score : null;
+  const hStatus = snap.health ? snap.health.status : null;
+  const sc      = hScore !== null ? getScoreColors(hScore) : { color: '#64748b', bg: 'rgba(100,116,139,0.1)', border: 'rgba(100,116,139,0.3)' };
+  const rawTier = classifyTier(snap.system_sid, sys.rfchost || '');
+  const tierBadgeCls = getTierBadgeCls(rawTier);
+
+  const quickKpis = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div class="kpi-card" style="min-width:80px;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text)">${p.components.length}</div>
+        <div style="font-size:10px;color:var(--text-dim)">Composants</div>
+      </div>
+      <div class="kpi-card" style="min-width:80px;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text)">${p.support_packages.length}</div>
+        <div style="font-size:10px;color:var(--text-dim)">Packages</div>
+      </div>
+      <div class="kpi-card" style="min-width:80px;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:${spAge.dim || 'var(--text)'}">${spAge.label}</div>
+        <div style="font-size:10px;color:var(--text-dim)">SP Status</div>
+      </div>
+      ${dbKey !== 'none' ? `<div class="kpi-card" style="min-width:80px;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:${dbMeta.color}">${esc(dbMeta.label)}</div>
+        <div style="font-size:10px;color:var(--text-dim)">Base de données</div>
+      </div>` : ''}
+    </div>`;
+
+  // System info kpi grid
+  const sysKpis = [
+    ['SAP Release', sys.rfcsaprl || '?'],
+    ['Kernel',      sys.rfckernrl || '?'],
+    ['OS',          sys.rfcopsys || '—'],
+    ['Database',    sys.rfcdbsys ? `${sys.rfcdbsys}` : '—'],
+    ['DB Host',     sys.rfcdbhost || '—'],
+    ['Collected',   fmtDate(snap.collected_at)],
+    ['Schema',      snap.schema_version || '—'],
+    ['Custom Obj',  (co.total || 0).toLocaleString()],
+  ].map(([label, value]) => `
+    <div class="kpi-card">
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">${esc(label)}</div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--text);font-weight:600;">${esc(value)}</div>
+    </div>`).join('');
+
   content.innerHTML = `
 
     ${staleBanner}
 
-    <!-- Hero header -->
-    <div class="sys-hero">
-      <div class="sys-hero-banner">
-        <div class="sys-hero-sid">${esc(sys.rfcsysid || '?')}</div>
-        <div class="sys-hero-info">
-          <div class="sys-hero-host">${esc(sys.rfchost || '—')}</div>
-          <div class="sys-hero-tags">
-            <span class="tag accent">${esc(sys.rfcsaprl || '?')}</span>
-            <span class="tag">${esc(sys.rfcopsys || '—')}</span>
-            ${dbKey !== 'none' ? `<span class="tag tag-db" style="color:${dbMeta.color};border-color:${dbMeta.color}55;background:${dbMeta.dim}">${esc(dbMeta.label)}</span>` : ''}
-            <span class="tag">Kernel ${esc(sys.rfckernrl || '?')}</span>
+    <!-- Hero header — section-card style -->
+    <div class="section-card" style="padding:0;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:16px;padding:20px;">
+        <div class="score-ring" style="width:64px;height:64px;font-size:20px;border-radius:16px;
+             background:${sc.bg};color:${sc.color};border-color:${sc.border};">
+          ${hScore !== null ? hScore : '—'}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--text);">${esc(sys.rfcsysid || '?')}</span>
+            <span class="${tierBadgeCls}">${esc(ENV_TIER_DEFS[rawTier]?.label || rawTier)}</span>
+            ${hStatus ? `<span class="${getStatusBadgeCls(hStatus)}">${hStatus}</span>` : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:6px;font-size:12px;color:var(--text-dim);flex-wrap:wrap;">
+            <span style="font-family:var(--font-mono);">${esc(sys.rfchost || '—')}</span>
+            <span style="color:var(--border)">|</span>
+            <span>${esc(sys.rfcsaprl || '?')}</span>
+            ${dbKey !== 'none' ? `<span style="color:var(--border)">|</span><span style="color:${dbMeta.color}">${esc(dbMeta.label)}</span>` : ''}
           </div>
         </div>
-      </div>
-      <div class="sys-hero-kv">
-        ${kvcell("DB Host",   sys.rfcdbhost   || '—')}
-        ${kvcell("Collected", fmtDate(snap.collected_at))}
-        ${kvcell("Received",  fmtDate(snap.received_at))}
-        ${kvcell("Schema",    snap.schema_version || '—')}
+        <div style="display:none;" class="detail-quick-kpis">
+          <!-- populated on wider screens by flexbox overflow -->
+        </div>
       </div>
     </div>
 
     ${historyHtml}
 
-    <!-- Stats row -->
-    <div class="stats-row">
-      ${statCard("Components",       p.components.length,              "")}
-      ${statCard("Support Packages", p.support_packages.length,        "")}
-      ${statCard("Custom Objects",   (co.total || 0).toLocaleString(), "Z/Y objects")}
-      ${spAge.label === 'N/A' && dbKey !== 'none'
-        ? statCard("Base de données", dbMeta.label, sys.rfcdbsys || '', dbMeta.color)
-        : statCard("SP Freshness",    spAge.label,  spAge.sub,          spAge.dim)}
-    </div>
+    ${quickKpis}
 
     ${buildHealthCard(snap)}
 
     <!-- AI Analysis -->
-    <div class="card card--ai" id="analysis-section">
-      <div class="card-header card-header--ai">
-        <div class="ai-header-left">
-          <span class="ai-spark">✦</span>
-          <div>
-            <div class="card-title card-title--ai">Claude AI Analysis</div>
-            <div class="ai-tagline">Automated SAP landscape assessment</div>
-          </div>
+    <div class="section-card" id="analysis-section" style="border-color:rgba(56,189,248,0.2);box-shadow:0 0 20px rgba(56,189,248,0.05);">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(56,189,248,0.12);color:#38bdf8;">✦</div>
+        <div style="flex:1;">
+          <h3 style="margin:0;font-size:13px;color:#38bdf8;">Claude AI Analysis</h3>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:1px;">Automated SAP landscape assessment</div>
         </div>
         <div class="analysis-toolbar">
           <select id="lang-select" class="lang-select">
@@ -773,33 +1009,44 @@ function renderDetail(snap, theme) {
           <span class="analysis-meta" id="analysis-meta"></span>
         </div>
       </div>
-      <div class="card-body">
-        <div id="analysis-content">
-          <div class="analysis-placeholder">Cliquez sur Analyse pour générer un rapport Claude sur ce système.</div>
-        </div>
+      <div id="analysis-content">
+        <div class="analysis-placeholder">Cliquez sur Analyse pour générer un rapport Claude sur ce système.</div>
+      </div>
+    </div>
+
+    <!-- System Info grid -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon">◫</div>
+        <h3>System Information</h3>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+        ${sysKpis}
       </div>
     </div>
 
     <!-- Custom objects (collapsible) -->
-    <div class="card collapsible-card">
-      <div class="card-header card-toggle">
-        <span class="toggle-arrow">›</span>
-        <span class="card-title">Custom Development</span>
-        <span class="card-badge">${(co.total || 0).toLocaleString()} objects</span>
+    <div class="section-card collapsible-card" style="padding:0;overflow:hidden;">
+      <div class="card-toggle" style="display:flex;align-items:center;gap:10px;padding:16px 20px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);">
+        <div class="section-icon">⊞</div>
+        <span style="font-size:13px;font-weight:600;color:var(--text);flex:1;">Custom Development</span>
+        <span style="font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(51,65,85,0.4);color:var(--text-dim);">${(co.total || 0).toLocaleString()}</span>
+        <span class="toggle-arrow" style="font-size:12px;color:var(--text-dim);transition:transform 0.2s;font-family:var(--font-mono);">›</span>
       </div>
       <div class="card-collapsible-body" style="display:none">
-        <div class="card-body">
+        <div style="padding:16px 20px;">
           ${renderCustomObjects(co)}
         </div>
       </div>
     </div>
 
     <!-- Components (collapsible + searchable) -->
-    <div class="card collapsible-card">
-      <div class="card-header card-toggle">
-        <span class="toggle-arrow">›</span>
-        <span class="card-title">Installed Components</span>
-        <span class="card-badge">${p.components.length}</span>
+    <div class="section-card collapsible-card" style="padding:0;overflow:hidden;">
+      <div class="card-toggle" style="display:flex;align-items:center;gap:10px;padding:16px 20px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);">
+        <div class="section-icon">⊞</div>
+        <span style="font-size:13px;font-weight:600;color:var(--text);flex:1;">Installed Components</span>
+        <span style="font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(51,65,85,0.4);color:var(--text-dim);">${p.components.length}</span>
+        <span class="toggle-arrow" style="font-size:12px;color:var(--text-dim);transition:transform 0.2s;font-family:var(--font-mono);">›</span>
       </div>
       <div class="card-collapsible-body" style="display:none">
         <div class="section-search">
@@ -815,11 +1062,12 @@ function renderDetail(snap, theme) {
     </div>
 
     <!-- Support Packages (collapsible + searchable) -->
-    <div class="card collapsible-card">
-      <div class="card-header card-toggle">
-        <span class="toggle-arrow">›</span>
-        <span class="card-title">Support Packages</span>
-        <span class="card-badge">${p.support_packages.length}</span>
+    <div class="section-card collapsible-card" style="padding:0;overflow:hidden;">
+      <div class="card-toggle" style="display:flex;align-items:center;gap:10px;padding:16px 20px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);">
+        <div class="section-icon">◈</div>
+        <span style="font-size:13px;font-weight:600;color:var(--text);flex:1;">Support Packages</span>
+        <span style="font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(51,65,85,0.4);color:var(--text-dim);">${p.support_packages.length}</span>
+        <span class="toggle-arrow" style="font-size:12px;color:var(--text-dim);transition:transform 0.2s;font-family:var(--font-mono);">›</span>
       </div>
       <div class="card-collapsible-body" style="display:none">
         <div class="section-search">
@@ -1378,6 +1626,8 @@ async function initApp() {
     }
     renderClientSelector(clients);
     await loadAndRenderSnapshots();
+    // Affiche l'overview des clients après chargement des snapshots
+    if (clients.length > 1) renderClientOverview(clients);
   } catch (err) {
     console.error("[sapscope] init error:", err);
     document.getElementById("content").innerHTML =
@@ -1756,29 +2006,38 @@ function buildChip(snap, role) {
   const t          = ENV_TIER_DEFS[tier] || ENV_TIER_DEFS.other;
   const isSelected = selectedSnaps.has(snap.id);
 
-  // Health score badge
-  const HEALTH_COLOR = { OK: '#34d399', WARNING: '#fbbf24', CRITICAL: '#f87171', UNKNOWN: '#64748b' };
-  const hc     = snap.health;
-  const hColor = hc ? (HEALTH_COLOR[hc.status] || '#64748b') : '#334155';
-  const hBadge = hc
-    ? `<span class="chip-score" style="background:${hColor}22;color:${hColor};border-color:${hColor}55"
-              title="${hc.status} — ${hc.score}/100">${hc.score}</span>`
+  // Health score badge (score-ring style)
+  const hc    = snap.health;
+  const sc    = hc && hc.status !== 'UNKNOWN' ? getScoreColors(hc.score) : null;
+  const scoreRing = sc
+    ? `<div class="score-ring-sm" style="background:${sc.bg};color:${sc.color};border-color:${sc.border};"
+            title="${hc.status} — ${hc.score}/100">${hc.score}</div>`
     : '';
+  const statusBadge = hc && hc.status !== 'UNKNOWN'
+    ? `<span class="${getStatusBadgeCls(hc.status)}" style="font-size:9px;padding:1px 5px;">${hc.status}</span>`
+    : '';
+
+  // Tier badge
+  const tierBadgeCls = getTierBadgeCls(tier);
+  const tierLabel    = ENV_TIER_DEFS[tier]?.label || tier;
 
   // Version line: release + BASIS SP + kernel
   const rel      = snap.system_release || '';
   const sp       = snap.basis_sp       ? `SP${snap.basis_sp}` : '';
-  const kern     = snap.kernel_release  ? `K${snap.kernel_release}${snap.kernel_patch ? '.'+snap.kernel_patch : ''}` : '';
-  const relLine  = [rel + (sp ? ' · ' + sp : ''), kern].filter(Boolean).join(' &nbsp;|&nbsp; ');
+  const kern     = snap.kernel_release
+    ? `Kernel ${snap.kernel_release}${snap.kernel_patch ? '.'+snap.kernel_patch : ''}`
+    : '';
+  const relLine  = [rel + (sp ? ' · ' + sp : ''), kern].filter(Boolean).join('  |  ');
 
   // DB badge
   const dbBadge = dbKey !== 'none'
-    ? `<span class="chip-tag-db" style="color:${db.color};border-color:${db.color}44">${esc(db.label)}</span>`
+    ? `<span style="font-size:9px;padding:2px 5px;border-radius:3px;border:1px solid ${db.color}44;color:${db.color};background:rgba(0,0,0,0.25);font-family:var(--font-mono);font-weight:600;">${esc(db.label)}</span>`
     : '';
 
-  // Performance
+  // Performance badge
   const respBadge = snap.avg_response_ms != null
-    ? `<span class="chip-tag chip-tag--perf" title="Avg dialog response">${snap.avg_response_ms}ms</span>`
+    ? `<span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,0.04);color:var(--text-dim);font-family:var(--font-mono);"
+             title="Avg dialog response">${snap.avg_response_ms}ms</span>`
     : '';
 
   // Alert badges
@@ -1807,18 +2066,27 @@ function buildChip(snap, role) {
         <input type="checkbox" class="chip-check" data-id="${esc(snap.id)}" ${isSelected ? 'checked' : ''}>
         <span class="chip-check-box"></span>
       </label>
-      <div class="chip-header">
-        <span class="sys-chip-sid">${esc(snap.system_sid)}</span>
-        ${hBadge}
+      <!-- Header row: score + SID + tier + status -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${scoreRing}
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="sys-chip-sid">${esc(snap.system_sid)}</span>
+              <span class="${tierBadgeCls}" style="font-size:9px;padding:1px 6px;">${esc(tierLabel)}</span>
+            </div>
+            <div class="sys-chip-host">${esc(snap.system_host)}</div>
+          </div>
+        </div>
+        ${statusBadge}
       </div>
-      <div class="sys-chip-host">${esc(snap.system_host)}</div>
-      ${relLine ? `<div class="chip-versions">${relLine}</div>` : ''}
+      ${relLine ? `<div class="chip-versions" style="font-size:10px;color:var(--text-dim);font-family:var(--font-mono);margin-bottom:5px;">${relLine}</div>` : ''}
       <div class="chip-tags-row">
         ${dbBadge}
         ${respBadge}
       </div>
       ${alerts.length ? `<div class="chip-alerts">${alerts.join('')}</div>` : ''}
-      ${stale ? `<div class="chip-stale-label" title="${fmtDate(snap.collected_at)}">⏱ Stale</div>` : ''}
+      ${stale ? `<div class="chip-stale-label" title="${fmtDate(snap.collected_at)}">⏱ ${relativeTime(snap.collected_at)}</div>` : `<div style="font-size:9px;color:var(--text-dim);margin-top:4px;font-family:var(--font-mono);">⏱ ${relativeTime(snap.collected_at)}</div>`}
     </div>`;
 }
 
