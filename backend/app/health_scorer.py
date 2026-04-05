@@ -5,28 +5,33 @@ Score: 0–100 (weighted average over available domains)
 Status: OK (≥80) | WARNING (≥50) | CRITICAL (<50) | UNKNOWN (no data)
 
 Domains and weights:
-  stability      25%  — ABAP dumps + aborted jobs (last 7 days)
-  performance    25%  — work processes in PRIV/Stopped state
-  connectivity   20%  — tRFC/qRFC errors in ARFCSSTATE
-  infrastructure 20%  — tablespace fill level
-  security       10%  — locked user accounts (informative)
+  stability      20%  — ABAP dumps + aborted jobs (last 7 days)
+  performance    20%  — work processes in PRIV/Stopped state
+  connectivity   15%  — tRFC/qRFC errors in ARFCSSTATE
+  infrastructure 15%  — tablespace fill level
+  security_ops   20%  — default users, SAP_ALL, RFC sans logon (v2)
+  security_users  5%  — locked user accounts
+  transports      5%  — import queue size (v2)
 
-Missing domains (agent didn't collect or collection failed) are excluded
-from the weighted average rather than penalised.
+Missing domains are excluded from the weighted average rather than penalised.
 """
 
 from typing import Any
 
 _WEIGHTS: dict[str, float] = {
-    "stability":      0.25,
-    "performance":    0.25,
-    "connectivity":   0.20,
-    "infrastructure": 0.20,
-    "security":       0.10,
+    "stability":      0.20,
+    "performance":    0.20,
+    "connectivity":   0.15,
+    "infrastructure": 0.15,
+    "security_ops":   0.20,   # v2 — default users, SAP_ALL, RFC
+    "security":       0.05,   # locked users (informative)
+    "transports":     0.05,   # import queue
 }
 
 
-def compute(health_data: dict[str, Any] | None) -> dict[str, Any]:
+def compute(health_data: dict[str, Any] | None,
+            security_data: dict[str, Any] | None = None,
+            transport_data: dict[str, Any] | None = None) -> dict[str, Any]:
     """
     Compute global score + per-domain indicators from the 'health' key of a snapshot payload.
     Returns a dict ready to be stored in health_checks.indicators.
@@ -138,12 +143,63 @@ def compute(health_data: dict[str, Any] | None) -> dict[str, Any]:
             "users_locked": users_locked,
         }
 
+    # ── Security ops: default users, SAP_ALL, RFC sans logon (v2) ──────────────
+    if security_data:
+        default_users = security_data.get("default_users_active", [])
+        sap_all       = security_data.get("sap_all_users", [])
+        rfc_no_logon  = security_data.get("rfc_no_logon_count", 0)
+
+        issues = len(default_users) + len(sap_all)
+        if default_users:          # SAP* ou DDIC actif → critique
+            s = 10
+        elif sap_all:              # utilisateurs SAP_ALL
+            s = 30 if len(sap_all) > 3 else 50
+        elif rfc_no_logon > 10:
+            s = 60
+        elif rfc_no_logon > 3:
+            s = 80
+        else:
+            s = 100
+
+        domain_scores["security_ops"] = s
+        indicators["security_ops"] = {
+            "status":            _label(s),
+            "score":             s,
+            "default_users_active": default_users,
+            "sap_all_count":     len(sap_all),
+            "rfc_no_logon_count": rfc_no_logon,
+        }
+
+    # ── Transports: import queue size (v2) ───────────────────────────────────
+    if transport_data:
+        queue = transport_data.get("import_queue_count", 0)
+        if queue == 0:
+            s = 100
+        elif queue <= 10:
+            s = 90
+        elif queue <= 50:
+            s = 70
+        elif queue <= 200:
+            s = 50
+        else:
+            s = 20
+        domain_scores["transports"] = s
+        indicators["transports"] = {
+            "status":             _label(s),
+            "score":              s,
+            "import_queue_count": queue,
+            "recent_imports_count": transport_data.get("recent_imports_count", 0),
+        }
+
     if not domain_scores:
         return {"score": 0, "status": "UNKNOWN", "indicators": {}}
 
     # Weighted average — only over domains that were collected
-    total_weight  = sum(_WEIGHTS[k] for k in domain_scores)
-    global_score  = round(sum(domain_scores[k] * _WEIGHTS[k] for k in domain_scores) / total_weight)
+    total_weight  = sum(_WEIGHTS[k] for k in domain_scores if k in _WEIGHTS)
+    global_score  = round(
+        sum(domain_scores[k] * _WEIGHTS[k] for k in domain_scores if k in _WEIGHTS)
+        / total_weight
+    )
 
     return {
         "score":      global_score,

@@ -45,23 +45,27 @@ class SAPCollector:
     # ------------------------------------------------------------------
 
     def get_system_info(self) -> dict[str, Any]:
-        """RFC_SYSTEM_INFO — SID, hostname, OS, DB, kernel version."""
+        """RFC_SYSTEM_INFO — SID, hostname, OS, DB, kernel version + patch + unicode/64bit."""
         logger.debug("Calling RFC_SYSTEM_INFO")
         result = self.conn.call("RFC_SYSTEM_INFO")
         ri = result.get("RFCSI_EXPORT", {})
         return {
-            "rfchost":     ri.get("RFCHOST", ""),
-            "rfcsysid":    ri.get("RFCSYSID", ""),
-            "rfcdbhost":   ri.get("RFCDBHOST", ""),
-            "rfcdbsys":    ri.get("RFCDBSYS", ""),
-            "rfcsaprl":    ri.get("RFCSAPRL", ""),   # SAP release (e.g. 740)
-            "rfckernrl":   ri.get("RFCKERNRL", ""),  # kernel release
-            "rfcmach":     ri.get("RFCMACH", ""),    # machine type
-            "rfcopsys":    ri.get("RFCOPSYS", ""),   # OS
-            "rfctzone":    ri.get("RFCTZONE", ""),
-            "rfcdayst":    ri.get("RFCDAYST", ""),
-            "rfcipaddr":   ri.get("RFCIPADDR", ""),
-            "rfcipv6addr": ri.get("RFCIPV6ADDR", ""),
+            "rfchost":      ri.get("RFCHOST", ""),
+            "rfcsysid":     ri.get("RFCSYSID", ""),
+            "rfcdbhost":    ri.get("RFCDBHOST", ""),
+            "rfcdbsys":     ri.get("RFCDBSYS", ""),
+            "rfcsaprl":     ri.get("RFCSAPRL", ""),    # SAP release (e.g. 756)
+            "rfckernrl":    ri.get("RFCKERNRL", ""),   # kernel release
+            "rfckernpatch": ri.get("RFCKERNPATCH", ""),# kernel patch level
+            "rfcmach":      ri.get("RFCMACH", ""),     # machine type
+            "rfcopsys":     ri.get("RFCOPSYS", ""),    # OS
+            "rfcunicode":   ri.get("RFCUNICODE", ""),  # U = unicode
+            "rfcbit64":     ri.get("RFCBIT64", ""),    # X = 64-bit
+            "rfcintno":     ri.get("RFCINTNO", ""),    # installation number
+            "rfctzone":     ri.get("RFCTZONE", ""),
+            "rfcdayst":     ri.get("RFCDAYST", ""),
+            "rfcipaddr":    ri.get("RFCIPADDR", ""),
+            "rfcipv6addr":  ri.get("RFCIPV6ADDR", ""),
         }
 
     def get_component_versions(self) -> list[dict[str, str]]:
@@ -166,6 +170,341 @@ class SAPCollector:
             "by_type": dict(sorted(by_type.items(), key=lambda x: -x[1])),
             "objects": objects,
         }
+
+    def get_instances(self) -> list[dict[str, Any]]:
+        """TH_SERVER_LIST — active application server instances with WP counts."""
+        logger.debug("Calling TH_SERVER_LIST")
+        instances = []
+        try:
+            result = self.conn.call("TH_SERVER_LIST")
+            for srv in result.get("LIST", []):
+                instances.append({
+                    "name":    str(srv.get("NAME", "")).strip(),
+                    "host":    str(srv.get("HOST", "")).strip(),
+                    "type":    str(srv.get("ITYPE", "")).strip(),
+                    "release": str(srv.get("RELEASE", "")).strip(),
+                })
+        except Exception:
+            logger.debug("get_instances: TH_SERVER_LIST not callable")
+
+        # WP counts per instance
+        try:
+            wp_result = self.conn.call("TH_WPINFO")
+            wp_by_host: dict[str, dict] = {}
+            for wp in wp_result.get("WPLIST", []):
+                host = str(wp.get("WP_AUTOMAT_LOKAL_HOST", "")).strip() or "local"
+                wp_type   = str(wp.get("WP_TYP", "")).strip()
+                wp_status = str(wp.get("WP_STATUS", "")).strip()
+                entry = wp_by_host.setdefault(host, {
+                    "dia": 0, "bgd": 0, "spo": 0, "upd": 0, "enq": 0,
+                    "free": 0, "busy": 0,
+                })
+                type_map = {"DIA": "dia", "BGD": "bgd", "SPO": "spo",
+                            "UPD": "upd", "ENQ": "enq"}
+                if wp_type in type_map:
+                    entry[type_map[wp_type]] += 1
+                if wp_status in ("Wait", "WAIT", "0"):
+                    entry["free"] += 1
+                else:
+                    entry["busy"] += 1
+
+            for inst in instances:
+                host = inst.get("host", "")
+                inst["wp"] = wp_by_host.get(host, {})
+        except Exception:
+            logger.debug("get_instances: TH_WPINFO not callable")
+
+        return instances
+
+    def get_security_info(self) -> dict[str, Any]:
+        """Security metrics: default users, SAP_ALL holders, RFC without logon."""
+        result: dict[str, Any] = {}
+
+        # Default users active (not locked)
+        try:
+            active_defaults = []
+            for user in ("SAP*", "DDIC", "EARLYWATCH", "SAPCPIC"):
+                rows = self.conn.call(
+                    "RFC_READ_TABLE",
+                    QUERY_TABLE="USR02",
+                    FIELDS=[{"FIELDNAME": "BNAME"}, {"FIELDNAME": "UFLAG"}],
+                    OPTIONS=[{"TEXT": f"BNAME = '{user}'"}],
+                    ROWCOUNT=1,
+                )
+                parsed = _parse_table(rows)
+                if parsed and _trim(parsed[0], "UFLAG") == "0":
+                    active_defaults.append(user)
+            result["default_users_active"] = active_defaults
+        except Exception:
+            logger.debug("Security: USR02 not readable")
+
+        # Users with SAP_ALL
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="AGR_USERS",
+                FIELDS=[{"FIELDNAME": "UNAME"}],
+                OPTIONS=[{"TEXT": "AGR_NAME = 'SAP_ALL'"}],
+                ROWCOUNT=100,
+            )
+            result["sap_all_users"] = [
+                _trim(r, "UNAME") for r in _parse_table(rows) if _trim(r, "UNAME")
+            ]
+        except Exception:
+            logger.debug("Security: AGR_USERS not readable")
+
+        # RFC destinations type-3 without logon user
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="RFCDES",
+                FIELDS=[
+                    {"FIELDNAME": "RFCDEST"},
+                    {"FIELDNAME": "RFCTYPE"},
+                    {"FIELDNAME": "RFCUSER"},
+                    {"FIELDNAME": "TRUSTED"},
+                ],
+                OPTIONS=[{"TEXT": "RFCTYPE = '3'"}],
+                ROWCOUNT=300,
+            )
+            no_user = []
+            trusted = []
+            for r in _parse_table(rows):
+                dest = _trim(r, "RFCDEST")
+                if not dest:
+                    continue
+                if not _trim(r, "RFCUSER"):
+                    no_user.append(dest)
+                if _trim(r, "TRUSTED") == "X":
+                    trusted.append(dest)
+            result["rfc_no_logon"]       = no_user
+            result["rfc_no_logon_count"] = len(no_user)
+            result["rfc_trusted"]        = trusted
+            result["rfc_trusted_count"]  = len(trusted)
+        except Exception:
+            logger.debug("Security: RFCDES not readable")
+
+        return result
+
+    def get_transport_info(self) -> dict[str, Any]:
+        """Transport queue: pending imports + last 30 days imports."""
+        result: dict[str, Any] = {}
+        thirty_days_ago = (datetime.now() - timedelta(days=30)).strftime("%Y%m%d")
+
+        # Pending imports in buffer (TRBAT)
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="TRBAT",
+                FIELDS=[{"FIELDNAME": "TRKORR"}, {"FIELDNAME": "PSTEP"}],
+                ROWCOUNT=500,
+            )
+            result["import_queue_count"] = len(_parse_table(rows))
+        except Exception:
+            logger.debug("Transport: TRBAT not readable")
+
+        # Recent imported transports (E070)
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="E070",
+                FIELDS=[
+                    {"FIELDNAME": "TRKORR"},
+                    {"FIELDNAME": "TRSTATUS"},
+                    {"FIELDNAME": "AS4USER"},
+                    {"FIELDNAME": "AS4DATE"},
+                    {"FIELDNAME": "STRKORR"},
+                ],
+                OPTIONS=[
+                    {"TEXT": f"AS4DATE >= '{thirty_days_ago}'"},
+                    {"TEXT": " AND TRSTATUS = 'R'"},
+                ],
+                ROWCOUNT=100,
+            )
+            result["recent_imports"] = [
+                {
+                    "trkorr":  _trim(r, "TRKORR"),
+                    "user":    _trim(r, "AS4USER"),
+                    "date":    _trim(r, "AS4DATE"),
+                    "source":  _trim(r, "STRKORR"),
+                }
+                for r in _parse_table(rows)
+            ]
+            result["recent_imports_count"] = len(result["recent_imports"])
+        except Exception:
+            logger.debug("Transport: E070 not readable")
+
+        return result
+
+    def get_license_info(self) -> dict[str, Any]:
+        """LICENSE_GET — licence expiry and user counts."""
+        result: dict[str, Any] = {}
+        try:
+            lic = self.conn.call("LICENSE_GET")
+            info = lic.get("LICENSE_INFO", [{}])[0] if lic.get("LICENSE_INFO") else {}
+            result["expiry_date"]     = str(info.get("LIC_EXPIRE", "")).strip()
+            result["system_id"]       = str(info.get("SID", "")).strip()
+            result["installation_no"] = str(info.get("INSTNO", "")).strip()
+        except Exception:
+            logger.debug("License: LICENSE_GET not callable")
+
+        # Named users count from USZBVSYS
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="USZBVSYS",
+                FIELDS=[{"FIELDNAME": "MANDT"}, {"FIELDNAME": "COUNTER"}],
+                ROWCOUNT=10,
+            )
+            total = sum(int(_trim(r, "COUNTER") or 0) for r in _parse_table(rows))
+            result["named_users"] = total
+        except Exception:
+            logger.debug("License: USZBVSYS not readable")
+
+        return result
+
+    def get_performance_stats(self) -> dict[str, Any]:
+        """Response time + buffer hit rates via SWNC_COLLECTOR_GET_AGGREGATES."""
+        result: dict[str, Any] = {}
+        try:
+            perf = self.conn.call(
+                "SWNC_COLLECTOR_GET_AGGREGATES",
+                COMPONENT="DIALOG",
+                STARTDATE=datetime.now().strftime("%Y%m%d"),
+                STARTTIME="000000",
+            )
+            agg = perf.get("AGGREGATES", [])
+            if agg:
+                row = agg[0]
+                total_steps = int(row.get("RESPCOUNT", 0) or 0)
+                total_resp  = int(row.get("RESPTIME",  0) or 0)
+                if total_steps > 0:
+                    result["avg_response_ms"]  = round(total_resp / total_steps)
+                    result["dialog_steps_today"] = total_steps
+        except Exception:
+            logger.debug("Performance: SWNC_COLLECTOR_GET_AGGREGATES not callable")
+
+        # Buffer hit rates (program buffer)
+        try:
+            buf = self.conn.call("SWNC_COLLECTOR_GET_AGGREGATES", COMPONENT="BUFFER")
+            for row in buf.get("AGGREGATES", []):
+                name = str(row.get("BUFNAME", "")).strip()
+                hitratio = row.get("HITRATIO")
+                if name and hitratio is not None:
+                    result.setdefault("buffer_hit_rates", {})[name] = round(float(hitratio), 1)
+        except Exception:
+            logger.debug("Performance: buffer stats not available")
+
+        return result
+
+    def get_background_jobs(self) -> dict[str, Any]:
+        """TBTCO — active, scheduled and delayed background jobs."""
+        result: dict[str, Any] = {}
+        now_date = datetime.now().strftime("%Y%m%d")
+        now_time = datetime.now().strftime("%H%M%S")
+
+        # Currently running jobs
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="TBTCO",
+                FIELDS=[{"FIELDNAME": "JOBNAME"}, {"FIELDNAME": "SDLUNAME"}],
+                OPTIONS=[{"TEXT": "STATUS = 'R'"}],
+                ROWCOUNT=200,
+            )
+            result["active_count"] = len(_parse_table(rows))
+        except Exception:
+            logger.debug("BGjobs: TBTCO active not readable")
+
+        # Delayed jobs (scheduled before now, still waiting)
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="TBTCO",
+                FIELDS=[{"FIELDNAME": "JOBNAME"}, {"FIELDNAME": "SDLSTRTDT"},
+                        {"FIELDNAME": "SDLSTRTTM"}, {"FIELDNAME": "SDLUNAME"}],
+                OPTIONS=[
+                    {"TEXT": f"STATUS = 'S'"},
+                    {"TEXT": f" AND SDLSTRTDT < '{now_date}'"},
+                ],
+                ROWCOUNT=200,
+            )
+            delayed = _parse_table(rows)
+            result["delayed_count"] = len(delayed)
+            result["delayed_jobs"]  = [
+                {
+                    "name": _trim(r, "JOBNAME"),
+                    "user": _trim(r, "SDLUNAME"),
+                    "scheduled": _trim(r, "SDLSTRTDT") + " " + _trim(r, "SDLSTRTTM"),
+                }
+                for r in delayed[:20]
+            ]
+        except Exception:
+            logger.debug("BGjobs: TBTCO delayed not readable")
+
+        return result
+
+    def get_update_info(self) -> dict[str, Any]:
+        """VBHDR — update system errors (SM13)."""
+        result: dict[str, Any] = {}
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="VBHDR",
+                FIELDS=[{"FIELDNAME": "VBKEY"}, {"FIELDNAME": "VBMOD"},
+                        {"FIELDNAME": "VBCLI"}, {"FIELDNAME": "VBERR"}],
+                OPTIONS=[{"TEXT": "VBERR <> ' '"}],
+                ROWCOUNT=200,
+            )
+            result["update_errors"] = len(_parse_table(rows))
+        except Exception:
+            logger.debug("Update: VBHDR not readable")
+        return result
+
+    def get_spool_info(self) -> dict[str, Any]:
+        """TSP01 — pending spool output requests."""
+        result: dict[str, Any] = {}
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="TSP01",
+                FIELDS=[{"FIELDNAME": "RQIDENT"}],
+                OPTIONS=[{"TEXT": "RQSTATE = 'WAITING'"}],
+                ROWCOUNT=500,
+            )
+            result["pending_count"] = len(_parse_table(rows))
+        except Exception:
+            logger.debug("Spool: TSP01 not readable")
+        return result
+
+    def get_system_messages(self) -> list[dict[str, Any]]:
+        """SMSGMESSAGE / SM02 — active system-wide messages."""
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="SMSGMESSAGE",
+                FIELDS=[
+                    {"FIELDNAME": "SMSGID"},
+                    {"FIELDNAME": "MSGTEXT"},
+                    {"FIELDNAME": "EXPDATE"},
+                    {"FIELDNAME": "EXPTIME"},
+                    {"FIELDNAME": "CREUSER"},
+                ],
+                ROWCOUNT=20,
+            )
+            return [
+                {
+                    "id":      _trim(r, "SMSGID"),
+                    "text":    _trim(r, "MSGTEXT"),
+                    "expires": _trim(r, "EXPDATE") + " " + _trim(r, "EXPTIME"),
+                    "user":    _trim(r, "CREUSER"),
+                }
+                for r in _parse_table(rows)
+                if _trim(r, "MSGTEXT")
+            ]
+        except Exception:
+            logger.debug("System messages: SMSGMESSAGE not readable")
+            return []
 
     def get_health_indicators(self) -> dict[str, Any]:
         """Collect health indicators for the global system health score.
@@ -287,15 +626,42 @@ class SAPCollector:
         sup_packages      = self.get_support_packages()
         custom_objects    = self.get_custom_objects()
         health_indicators = self.get_health_indicators()
+        instances         = self.get_instances()
+        security          = self.get_security_info()
+        transports        = self.get_transport_info()
+        license_info      = self.get_license_info()
+        performance       = self.get_performance_stats()
+        background_jobs   = self.get_background_jobs()
+        update_info       = self.get_update_info()
+        spool             = self.get_spool_info()
+        system_messages   = self.get_system_messages()
+
+        sid = system_info.get("rfcsysid", "?")
+        logger.info(
+            "SID=%-3s  instances=%d  security_issues=%d  transport_queue=%d",
+            sid,
+            len(instances),
+            len(security.get("default_users_active", [])) + len(security.get("sap_all_users", [])),
+            transports.get("import_queue_count", 0),
+        )
 
         return {
-            "schema_version": "1",
-            "collected_at": collected_at,
-            "system": system_info,
-            "components": components,
+            "schema_version":   "2",
+            "collected_at":     collected_at,
+            "system":           system_info,
+            "components":       components,
             "support_packages": sup_packages,
-            "custom_objects": custom_objects,
-            "health": health_indicators,
+            "custom_objects":   custom_objects,
+            "health":           health_indicators,
+            "instances":        instances,
+            "security":         security,
+            "transports":       transports,
+            "license_info":     license_info,
+            "performance":      performance,
+            "background_jobs":  background_jobs,
+            "update_info":      update_info,
+            "spool":            spool,
+            "system_messages":  system_messages,
         }
 
 

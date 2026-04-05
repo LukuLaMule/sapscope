@@ -71,7 +71,7 @@ async def ingest_snapshot(
     db.add(snap)
     await db.flush()   # get snap.id before committing
 
-    result = health_scorer.compute(body.health)
+    result = health_scorer.compute(body.health, body.security, body.transports)
     hc = HealthCheck(
         snapshot_id=snap.id,
         score=result["score"],
