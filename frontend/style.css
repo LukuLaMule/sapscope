@@ -121,12 +121,12 @@ html, body {
   font-size: 12px;
 }
 
-/* Score ring — badge circulaire */
+/* Score ring — badge arrondi comme Lovable (rounded-2xl) */
 .score-ring {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 12px;
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 13px;
@@ -134,6 +134,7 @@ html, body {
   height: 48px;
   border: 2px solid;
   flex-shrink: 0;
+  transition: transform .2s;
 }
 .score-ring-sm {
   width: 36px;
@@ -1746,169 +1747,106 @@ html, body {
 /* ── Section-based overview layout ──────────────────────────────────────── */
 
 .ov-canvas {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 36px;
-  padding: 8px 0 28px;
+  gap: 32px;
+  padding: 24px;
 }
 
-/* A horizontal row of sections */
-.ov-row {
-  display: flex;
-  gap: 16px;
-  align-items: stretch;
-}
+/* Legacy row classes — no-op now */
+.ov-row,
+.ov-row-single,
+.ov-row-landscape,
+.ov-row-pipeline { display: contents; }
 
-/* Single centered section (infra / services) */
-.ov-row-single {
-  justify-content: center;
-}
-.ov-row-single .ov-section {
-  min-width: 320px;
-  max-width: 700px;
-  flex: 1;
-}
-
-/* Three-column landscape row */
-.ov-row-landscape .ov-section {
-  flex: 1;
-  min-width: 160px;
-}
-
-/* Pipeline row — infra + dev + qas + prd alignés horizontalement */
-.ov-row-pipeline {
-  display: flex;
-  gap: 16px;
-  align-items: stretch;
-}
-.ov-row-pipeline .ov-section {
-  flex: 1;
-  min-width: 130px;
-}
-
-/* Section card */
+/* Tier section — juste un label comme Lovable LandscapePage */
 .ov-section {
-  --sc:      #818cf8;
-  --sc-dim:  #1a1a40;
-  --sc-glow: rgba(129,140,248,0.15);
-
-  border: 1px solid var(--border-light);
-  border-top: 3px solid var(--sc);
-  border-radius: var(--radius);
-  background: var(--sc-dim);
-  padding: 14px 14px 16px;
-  transition: transform .15s ease-out;
-}
-.ov-section:hover {
-  transform: translateY(-2px);
+  --sc:      #64748b;
 }
 
-/* Section header */
+/* Section header — texte label seul, pas de card */
 .ov-section-hdr {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 .ov-section-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--sc);
-  flex-shrink: 0;
+  display: none; /* remplacé par le label texte seul */
 }
 .ov-section-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.8px;
-  color: var(--sc);
-  flex: 1;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
 }
 .ov-section-count {
   font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 700;
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  color: var(--sc);
-  border-radius: 10px;
-  padding: 1px 7px;
-  flex-shrink: 0;
+  font-weight: 600;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 20px;
+  padding: 1px 8px;
 }
 
-/* Chips container inside a section */
+/* Chips container inside a section — CSS grid like Lovable */
 .ov-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
 }
 
-/* Individual system chip */
+/* Individual system card (was "chip") — matches SystemCard.tsx */
 .sys-chip {
-  --cc:      #818cf8;
-  --cc-dim:  #1a1a40;
-  --cc-glow: rgba(129,140,248,0.15);
+  --cc:      #38bdf8;
+  --cc-dim:  #0c2033;
+  --cc-glow: rgba(56,189,248,0.15);
 
   cursor: pointer;
-  border: 1px solid var(--border-light);
-  border-left: 4px solid var(--cc);
-  border-radius: calc(var(--radius) - 2px);
-  background: var(--cc-dim);
-  padding: 8px 10px;
-  min-width: 110px;
-  transition: transform .12s ease-out;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  padding: 16px;
+  position: relative;
+  transition: border-color .2s, transform .12s, box-shadow .2s;
 }
 .sys-chip:hover {
-  border-color: var(--cc);
+  border-color: rgba(56,189,248,0.35);
   transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(56,189,248,0.07);
 }
 .sys-chip:active {
   transform: translateY(0);
 }
+
+/* SID — monospace bold, white (like SystemCard font-mono text-lg font-semibold) */
 .sys-chip-sid {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--cc);
+  color: var(--text);
+  font-family: var(--font-mono);
   letter-spacing: -.3px;
   line-height: 1;
 }
+
+/* Hostname — muted mono small */
 .sys-chip-host {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-dim);
-  margin-top: 3px;
-  font-family: 'JetBrains Mono', monospace;
+  margin-top: 4px;
+  font-family: var(--font-mono);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 170px;
-}
-.sys-chip-meta {
-  display: flex;
-  gap: 4px;
-  margin-top: 6px;
-  flex-wrap: wrap;
-}
-.sys-chip-tag {
-  font-size: 9px;
-  padding: 2px 5px;
-  border-radius: 3px;
-  background: rgba(255,255,255,0.05);
-  color: var(--text-dim);
-  letter-spacing: .3px;
 }
 
-.sys-chip-db {
-  font-size: 9px;
-  padding: 2px 5px;
-  border-radius: 3px;
-  border: 1px solid;
-  background: rgba(0,0,0,0.25);
-  letter-spacing: .3px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-}
+/* Legacy (not used in new buildChip) */
+.sys-chip-meta { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.sys-chip-tag  { font-size: 9px; padding: 2px 5px; border-radius: 3px; background: rgba(255,255,255,0.05); color: var(--text-dim); }
+.sys-chip-db   { font-size: 9px; padding: 2px 5px; border-radius: 3px; border: 1px solid; background: rgba(0,0,0,0.25); letter-spacing: .3px; font-family: var(--font-mono); font-weight: 600; }
 
 /* ── Chip selection checkbox ─────────────────────────────────────────────── */
 
