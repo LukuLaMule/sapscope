@@ -8,7 +8,7 @@ GET    /clients/{id}/snapshots/{snap_id}
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..auth import get_client_for_agent, get_client_for_user, get_current_user
 from ..database import get_db
 from .. import health_scorer
+from ..limiter import limiter
 from ..models import Client, HealthCheck, Snapshot, User, UserClient
 from ..schemas import ClientOut, HealthOut, SnapshotCreated, SnapshotDetail, SnapshotIn, SnapshotSummary
 
@@ -47,7 +48,9 @@ async def list_my_clients(
 # ── Agent write ───────────────────────────────────────────────────────────────
 
 @router.post("/api/v1/snapshots", response_model=SnapshotCreated, status_code=status.HTTP_201_CREATED)
+@limiter.limit("60/minute")
 async def ingest_snapshot(
+    request: Request,
     body: SnapshotIn,
     client: Client = Depends(get_client_for_agent),
     db: AsyncSession = Depends(get_db),

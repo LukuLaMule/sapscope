@@ -114,3 +114,85 @@ async def test_get_analysis_not_found(
         headers={"Authorization": f"Bearer {token}"},
     )
     assert resp.status_code == 404
+
+
+async def test_get_analysis_exists(
+    client: AsyncClient, admin_user, agent_token, db: AsyncSession, test_client_obj
+):
+    _, plaintext = agent_token
+    token = await login(client, "admin@example.com", "AdminPass123!")
+    snap_id = await _ingest_and_get_snapshot_id(client, plaintext, token, test_client_obj.id)
+
+    mock_result = ("## Analysis\nSome content.", 700, 150)
+    with patch("app.routers.analysis.analyse", new_callable=AsyncMock, return_value=mock_result):
+        await client.post(
+            f"/api/v1/clients/{test_client_obj.id}/snapshots/{snap_id}/analysis",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    resp = await client.get(
+        f"/api/v1/clients/{test_client_obj.id}/snapshots/{snap_id}/analysis",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["content"] == "## Analysis\nSome content."
+    assert data["input_tokens"] == 700
+    assert data["output_tokens"] == 150
+
+
+async def test_analysis_snapshot_not_found(
+    client: AsyncClient, admin_user, db: AsyncSession, test_client_obj
+):
+    token = await login(client, "admin@example.com", "AdminPass123!")
+    resp = await client.post(
+        f"/api/v1/clients/{test_client_obj.id}/snapshots/00000000-0000-0000-0000-000000000000/analysis",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 404
+
+
+async def test_analysis_claude_error_returns_502(
+    client: AsyncClient, admin_user, agent_token, db: AsyncSession, test_client_obj
+):
+    _, plaintext = agent_token
+    token = await login(client, "admin@example.com", "AdminPass123!")
+    snap_id = await _ingest_and_get_snapshot_id(client, plaintext, token, test_client_obj.id)
+
+    with patch("app.routers.analysis.analyse", new_callable=AsyncMock, side_effect=RuntimeError("API down")):
+        resp = await client.post(
+            f"/api/v1/clients/{test_client_obj.id}/snapshots/{snap_id}/analysis",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert resp.status_code == 502
+
+
+async def test_analysis_requires_auth(
+    client: AsyncClient, agent_token, db: AsyncSession, test_client_obj
+):
+    _, plaintext = agent_token
+    # Need a snapshot — ingest with agent token, then fetch id without auth header
+    await client.post(
+        "/api/v1/snapshots",
+        json=SAMPLE_PAYLOAD,
+        headers={"Authorization": f"Bearer {plaintext}"},
+    )
+    resp = await client.post(
+        f"/api/v1/clients/{test_client_obj.id}/snapshots/any-id/analysis",
+    )
+    assert resp.status_code == 401
+
+
+async def test_analysis_consultant_not_assigned(
+    client: AsyncClient, admin_user, regular_user, agent_token, db: AsyncSession, test_client_obj
+):
+    _, plaintext = agent_token
+    admin_token = await login(client, "admin@example.com", "AdminPass123!")
+    snap_id = await _ingest_and_get_snapshot_id(client, plaintext, admin_token, test_client_obj.id)
+
+    consultant_token = await login(client, "consultant@example.com", "ConsultPass123!")
+    resp = await client.post(
+        f"/api/v1/clients/{test_client_obj.id}/snapshots/{snap_id}/analysis",
+        headers={"Authorization": f"Bearer {consultant_token}"},
+    )
+    assert resp.status_code == 403
