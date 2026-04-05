@@ -15,7 +15,18 @@ class SnapshotIn(BaseModel):
     components: list[dict[str, Any]]
     support_packages: list[dict[str, Any]]
     custom_objects: dict[str, Any]
-    health: dict[str, Any] | None = None   # optional — agents v2+ only
+    # v1 fields
+    health: dict[str, Any] | None = None
+    # v2 fields — agent schema_version "2"
+    instances:       list[dict[str, Any]] | None = None   # topologie AS
+    security:        dict[str, Any] | None = None         # users par défaut, SAP_ALL, RFC
+    transports:      dict[str, Any] | None = None         # queue import, imports récents
+    license_info:    dict[str, Any] | None = None         # expiry, named users
+    performance:     dict[str, Any] | None = None         # response time, buffer hit rates
+    background_jobs: dict[str, Any] | None = None         # actifs, en retard
+    update_info:     dict[str, Any] | None = None         # erreurs SM13
+    spool:           dict[str, Any] | None = None         # requests en attente
+    system_messages: list[dict[str, Any]] | None = None   # SM02
 
 
 # ── Outbound responses ────────────────────────────────────────────────────────
