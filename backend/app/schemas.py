@@ -24,6 +24,12 @@ class SnapshotIn(BaseModel):
     license_info:    dict[str, Any] | None = None         # expiry, named users
     performance:     dict[str, Any] | None = None         # response time, buffer hit rates
     background_jobs: dict[str, Any] | None = None         # actifs, en retard
+    profile_params:  dict[str, Any] | None = None         # paramètres de profil SAP (PAHI)
+    db_stats:        dict[str, Any] | None = None         # stats DB spécifiques (HANA mem, version…)
+    jobs_error_24h:  dict[str, Any] | None = None         # SM37 — jobs abortés 24h
+    sm12_locks:      dict[str, Any] | None = None         # SM12 — entrées bloquées
+    st22_24h:        dict[str, Any] | None = None         # ST22 — dumps 24h détail
+    qrfc_queues:     dict[str, Any] | None = None         # SMQ1/SMQ2 — queues qRFC
     update_info:     dict[str, Any] | None = None         # erreurs SM13
     spool:           dict[str, Any] | None = None         # requests en attente
     system_messages: list[dict[str, Any]] | None = None   # SM02
@@ -68,6 +74,17 @@ class SnapshotSummary(BaseModel):
     update_errors: int | None = None      # nb erreurs SM13
     spool_pending: int | None = None      # spool requests en attente
     avg_response_ms: int | None = None    # temps de réponse dialog moyen
+    # Données opérationnelles détaillées
+    jobs_error_24h_count: int | None = None       # SM37 — jobs abortés 24h
+    jobs_error_24h_list: list[dict] = []           # [{name, user, date, time}]
+    sm12_locks_count: int | None = None            # SM12 — entrées bloquées
+    sm12_locks_list: list[dict] = []               # [{object, user, mode, client}]
+    st22_count_24h: int | None = None              # ST22 — dumps 24h
+    st22_list_24h: list[dict] = []                 # [{date, time, program, user}]
+    qrfc_outbound_total: int | None = None         # SMQ1 — total entrées outbound
+    qrfc_outbound_errors: int | None = None        # SMQ1 — erreurs outbound
+    qrfc_inbound_total: int | None = None          # SMQ2 — total entrées inbound
+    qrfc_inbound_errors: int | None = None         # SMQ2 — erreurs inbound
 
 
 class SnapshotDetail(SnapshotSummary):

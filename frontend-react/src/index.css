@@ -192,23 +192,45 @@
 
 /* ── Print styles (Export PDF) ──────────────────────────────────────────── */
 @media print {
-  body { background: white !important; color: black !important; }
-  .print\:hidden { display: none !important; }
-  nav, aside, [data-sidebar], header { display: none !important; }
-  .section-card {
-    border: 1px solid #ddd !important;
+  /* Force l'impression des couleurs de fond et texte */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
     background: white !important;
+    color: #1a1a2e !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Masquer tout l'UI de navigation */
+  .print\:hidden { display: none !important; }
+  nav, aside, [data-sidebar], header, .sidebar { display: none !important; }
+
+  /* Mise en page A4 */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  /* Saut de page entre sections */
+  #report-root > div {
+    page-break-after: always;
+    break-after: page;
+  }
+  #report-root > div:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* Éviter les coupures dans les cartes d'alerte */
+  .break-inside-avoid {
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  .kpi-card {
-    border: 1px solid #eee !important;
-    background: #fafafa !important;
-  }
+
   a { color: inherit !important; text-decoration: none !important; }
-  /* Report-specific overrides */
-  .report-content { max-width: 100% !important; padding: 0 !important; }
-  table { font-size: 10px !important; }
-  .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
-  h2 { color: #555 !important; }
 }
