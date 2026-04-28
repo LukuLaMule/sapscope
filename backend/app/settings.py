@@ -33,5 +33,10 @@ class Settings(BaseSettings):
     smtp_from: str = "noreply@sapscope.com"
     app_url: str = "https://app.sapscope.com"
 
+    # Rapport journalier automatique
+    report_enabled: bool = True
+    report_hour: int = 7       # heure d'envoi (UTC)
+    report_tz: str = "UTC"     # ex: "Europe/Paris"
+
 
 settings = Settings()

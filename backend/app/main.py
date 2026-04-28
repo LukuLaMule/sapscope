@@ -4,6 +4,8 @@ import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -15,6 +17,7 @@ from .database import engine
 from .license import validate as validate_license
 from .limiter import limiter
 from .models import Base, OnboardingToken, PasswordResetToken
+from .reporter import send_daily_reports
 from .routers import admin, analysis, auth, billing, diff, history, notes, snapshots
 from .settings import settings
 
@@ -58,7 +61,25 @@ async def lifespan(app: FastAPI):
             logger.info(
                 "Self-hosted license OK — org=%s tier=%s", license_info.org, license_info.tier
             )
+
+    # Rapport journalier automatique
+    scheduler = AsyncIOScheduler(timezone=settings.report_tz)
+    if settings.report_enabled:
+        scheduler.add_job(
+            send_daily_reports,
+            CronTrigger(hour=settings.report_hour, minute=0, timezone=settings.report_tz),
+            id="daily_report",
+            replace_existing=True,
+        )
+        logger.info(
+            "Rapport journalier activé — envoi chaque jour à %02dh00 (%s)",
+            settings.report_hour, settings.report_tz,
+        )
+    scheduler.start()
+
     yield
+
+    scheduler.shutdown(wait=False)
 
 
 app = FastAPI(

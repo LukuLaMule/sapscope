@@ -155,11 +155,15 @@ def _to_summary(s: Snapshot) -> SnapshotSummary:
     security_crit  = bool(default_users or sap_all_users)
 
     # Operations summary
-    trans  = s.payload.get("transports") or {}
-    bgjobs = s.payload.get("background_jobs") or {}
-    upd    = s.payload.get("update_info") or {}
-    spool  = s.payload.get("spool") or {}
-    perf   = s.payload.get("performance") or {}
+    trans       = s.payload.get("transports") or {}
+    bgjobs      = s.payload.get("background_jobs") or {}
+    upd         = s.payload.get("update_info") or {}
+    spool       = s.payload.get("spool") or {}
+    perf        = s.payload.get("performance") or {}
+    jobs_err    = s.payload.get("jobs_error_24h") or {}
+    sm12        = s.payload.get("sm12_locks") or {}
+    st22        = s.payload.get("st22_24h") or {}
+    qrfc        = s.payload.get("qrfc_queues") or {}
 
     return SnapshotSummary(
         id=s.id,
@@ -186,6 +190,16 @@ def _to_summary(s: Snapshot) -> SnapshotSummary:
         update_errors=upd.get("update_errors"),
         spool_pending=spool.get("pending_count"),
         avg_response_ms=perf.get("avg_response_ms"),
+        jobs_error_24h_count=jobs_err.get("count"),
+        jobs_error_24h_list=jobs_err.get("jobs") or [],
+        sm12_locks_count=sm12.get("count"),
+        sm12_locks_list=sm12.get("locks") or [],
+        st22_count_24h=st22.get("count"),
+        st22_list_24h=st22.get("dumps") or [],
+        qrfc_outbound_total=qrfc.get("outbound_total"),
+        qrfc_outbound_errors=qrfc.get("outbound_errors"),
+        qrfc_inbound_total=qrfc.get("inbound_total"),
+        qrfc_inbound_errors=qrfc.get("inbound_errors"),
     )
 
 

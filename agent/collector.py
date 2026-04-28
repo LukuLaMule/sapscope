@@ -397,6 +397,312 @@ class SAPCollector:
 
         return result
 
+    def get_jobs_error_24h(self) -> dict[str, Any]:
+        """TBTCO — jobs abortés dans les dernières 24h (SM37)."""
+        result: dict[str, Any] = {}
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="TBTCO",
+                DELIMITER="|",
+                FIELDS=[
+                    {"FIELDNAME": "JOBNAME"},
+                    {"FIELDNAME": "SDLUNAME"},
+                    {"FIELDNAME": "SDLSTRTDT"},
+                    {"FIELDNAME": "SDLSTRTTM"},
+                ],
+                OPTIONS=[
+                    {"TEXT": f"SDLSTRTDT >= '{yesterday}'"},
+                    {"TEXT": " AND STATUS = 'A'"},
+                ],
+                ROWCOUNT=100,
+            )
+            jobs = [
+                {
+                    "name": _trim(r, "JOBNAME"),
+                    "user": _trim(r, "SDLUNAME"),
+                    "date": _trim(r, "SDLSTRTDT"),
+                    "time": _trim(r, "SDLSTRTTM"),
+                }
+                for r in _parse_table(rows)
+                if _trim(r, "JOBNAME")
+            ]
+            result["count"] = len(jobs)
+            result["jobs"]  = jobs[:50]
+        except Exception:
+            logger.debug("SM37: TBTCO (aborted 24h) not readable")
+        return result
+
+    def get_sm12_locks(self) -> dict[str, Any]:
+        """ENQLOCK — entrées bloquées en cours (SM12)."""
+        result: dict[str, Any] = {}
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="ENQLOCK",
+                DELIMITER="|",
+                FIELDS=[
+                    {"FIELDNAME": "GNAME"},
+                    {"FIELDNAME": "GUNAME"},
+                    {"FIELDNAME": "GMODE"},
+                    {"FIELDNAME": "GCLIENT"},
+                ],
+                ROWCOUNT=200,
+            )
+            locks = [
+                {
+                    "object": _trim(r, "GNAME"),
+                    "user":   _trim(r, "GUNAME"),
+                    "mode":   _trim(r, "GMODE"),
+                    "client": _trim(r, "GCLIENT"),
+                }
+                for r in _parse_table(rows)
+                if _trim(r, "GUNAME")
+            ]
+            result["count"] = len(locks)
+            result["locks"] = locks[:50]
+        except Exception:
+            logger.debug("SM12: ENQLOCK not readable")
+        return result
+
+    def get_st22_24h(self) -> dict[str, Any]:
+        """SNAP — short dumps des dernières 24h avec détail programme/user (ST22)."""
+        result: dict[str, Any] = {}
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="SNAP",
+                DELIMITER="|",
+                FIELDS=[
+                    {"FIELDNAME": "DATUM"},
+                    {"FIELDNAME": "UZEIT"},
+                    {"FIELDNAME": "PROG"},
+                    {"FIELDNAME": "UNAME"},
+                    {"FIELDNAME": "MANDT"},
+                ],
+                OPTIONS=[{"TEXT": f"DATUM >= '{yesterday}'"}],
+                ROWCOUNT=100,
+            )
+            dumps = [
+                {
+                    "date":    _trim(r, "DATUM"),
+                    "time":    _trim(r, "UZEIT"),
+                    "program": _trim(r, "PROG"),
+                    "user":    _trim(r, "UNAME"),
+                    "client":  _trim(r, "MANDT"),
+                }
+                for r in _parse_table(rows)
+                if _trim(r, "PROG")
+            ]
+            result["count"] = len(dumps)
+            result["dumps"] = dumps[:50]
+        except Exception:
+            logger.debug("ST22: SNAP detail not readable")
+        return result
+
+    def get_profile_params(self) -> dict[str, Any]:
+        """PAHI — paramètres de profil SAP clés pour l'analyse de dimensionnement."""
+        KEY_PARAMS = [
+            "rdisp/wp_no_dia",
+            "rdisp/wp_no_btc",
+            "rdisp/wp_no_spo",
+            "rdisp/wp_no_vb",
+            "em/initial_size_MB",
+            "em/max_size_MB",
+            "rdisp/ROLL_MAXFS",
+            "abap/heap_area_total",
+            "rdisp/max_wprun_time",
+            "rdisp/tm_max_no",
+        ]
+        result: dict[str, Any] = {}
+        for param in KEY_PARAMS:
+            try:
+                rows = self.conn.call(
+                    "RFC_READ_TABLE",
+                    QUERY_TABLE="PAHI",
+                    DELIMITER="|",
+                    FIELDS=[
+                        {"FIELDNAME": "PARNAME"},
+                        {"FIELDNAME": "PARVAL"},
+                        {"FIELDNAME": "PARMDATE"},
+                    ],
+                    OPTIONS=[{"TEXT": f"PARNAME = '{param}'"}],
+                    ROWCOUNT=10,
+                )
+                parsed = _parse_table(rows)
+                if parsed:
+                    # Prendre la valeur la plus récente (dernière par date)
+                    latest = sorted(parsed, key=lambda r: _trim(r, "PARMDATE"))[-1]
+                    result[param] = _trim(latest, "PARVAL")
+            except Exception:
+                pass
+        return result
+
+    def get_db_stats(self, system_info: dict[str, Any]) -> dict[str, Any]:
+        """
+        Statistiques base de données adaptées au type détecté.
+        - HANA (HDB)  : version, mémoire allouée/utilisée
+        - Oracle (ORA): version DB
+        - DB2 (DB6)   : version DB
+        - Tous        : tentative de lecture version via DBCON / tables système
+        """
+        db_type = system_info.get("rfcdbsys", "").strip().upper()
+        result: dict[str, Any] = {"db_type": db_type}
+
+        # ── HANA : version + mémoire ─────────────────────────────────────────
+        if db_type == "HDB":
+            # Version HANA via M_DATABASE (vue système HANA exposée dans ABAP)
+            try:
+                rows = self.conn.call(
+                    "RFC_READ_TABLE",
+                    QUERY_TABLE="M_DATABASE",
+                    DELIMITER="|",
+                    FIELDS=[
+                        {"FIELDNAME": "VERSION"},
+                        {"FIELDNAME": "SYSTEM_ID"},
+                        {"FIELDNAME": "START_TIME"},
+                    ],
+                    ROWCOUNT=1,
+                )
+                parsed = _parse_table(rows)
+                if parsed:
+                    result["hana_version"]    = _trim(parsed[0], "VERSION")
+                    result["hana_start_time"] = _trim(parsed[0], "START_TIME")
+            except Exception:
+                logger.debug("DB stats: M_DATABASE not readable (HANA)")
+
+            # Mémoire HANA par service via M_SERVICE_MEMORY
+            try:
+                rows = self.conn.call(
+                    "RFC_READ_TABLE",
+                    QUERY_TABLE="M_SERVICE_MEMORY",
+                    DELIMITER="|",
+                    FIELDS=[
+                        {"FIELDNAME": "SERVICE_NAME"},
+                        {"FIELDNAME": "HEAP_MEMORY_ALLOCATED_SIZE"},
+                        {"FIELDNAME": "HEAP_MEMORY_USED_SIZE"},
+                        {"FIELDNAME": "SHARED_MEMORY_ALLOCATED_SIZE"},
+                        {"FIELDNAME": "ALLOCATION_LIMIT"},
+                    ],
+                    ROWCOUNT=20,
+                )
+                services = []
+                total_alloc = 0
+                total_used  = 0
+                alloc_limit = 0
+                for r in _parse_table(rows):
+                    heap_alloc = int(_trim(r, "HEAP_MEMORY_ALLOCATED_SIZE") or 0)
+                    heap_used  = int(_trim(r, "HEAP_MEMORY_USED_SIZE") or 0)
+                    limit      = int(_trim(r, "ALLOCATION_LIMIT") or 0)
+                    total_alloc += heap_alloc
+                    total_used  += heap_used
+                    if limit > alloc_limit:
+                        alloc_limit = limit
+                    services.append({
+                        "service":     _trim(r, "SERVICE_NAME"),
+                        "alloc_gb":    round(heap_alloc / 1_073_741_824, 1),
+                        "used_gb":     round(heap_used  / 1_073_741_824, 1),
+                    })
+                result["hana_services"]    = services
+                result["hana_total_alloc_gb"] = round(total_alloc / 1_073_741_824, 1)
+                result["hana_total_used_gb"]  = round(total_used  / 1_073_741_824, 1)
+                if alloc_limit > 0:
+                    result["hana_alloc_limit_gb"] = round(alloc_limit / 1_073_741_824, 1)
+                    result["hana_used_pct"] = round(total_used / alloc_limit * 100, 1)
+            except Exception:
+                logger.debug("DB stats: M_SERVICE_MEMORY not readable (HANA)")
+
+            # Colonnes HANA delta merge (indicateur de santé column store)
+            try:
+                rows = self.conn.call(
+                    "RFC_READ_TABLE",
+                    QUERY_TABLE="M_CS_TABLES",
+                    DELIMITER="|",
+                    FIELDS=[
+                        {"FIELDNAME": "MEMORY_SIZE_IN_TOTAL"},
+                        {"FIELDNAME": "ESTIMATED_MAX_MEMORY_SIZE_IN_TOTAL"},
+                    ],
+                    ROWCOUNT=1,
+                )
+                parsed = _parse_table(rows)
+                if parsed:
+                    result["hana_column_store_gb"] = round(
+                        int(_trim(parsed[0], "MEMORY_SIZE_IN_TOTAL") or 0) / 1_073_741_824, 1
+                    )
+            except Exception:
+                logger.debug("DB stats: M_CS_TABLES not readable (HANA)")
+
+        # ── Oracle / DB2 : version ────────────────────────────────────────────
+        if db_type in ("ORA", "DB6", "MSS", "SYB", "ADA"):
+            try:
+                rows = self.conn.call(
+                    "RFC_READ_TABLE",
+                    QUERY_TABLE="SVERS",
+                    DELIMITER="|",
+                    FIELDS=[
+                        {"FIELDNAME": "DBVERSION"},
+                        {"FIELDNAME": "COMPONENT"},
+                    ],
+                    OPTIONS=[{"TEXT": "COMPONENT = 'DATABASE'"}],
+                    ROWCOUNT=1,
+                )
+                parsed = _parse_table(rows)
+                if parsed:
+                    result["db_version"] = _trim(parsed[0], "DBVERSION")
+            except Exception:
+                pass
+
+        return result
+
+    def get_qrfc_queues(self) -> dict[str, Any]:
+        """qRFC outbound/inbound queue status — SMQ1 (ARFCSSTATE) / SMQ2 (ARFCRSTATE)."""
+        result: dict[str, Any] = {}
+
+        # Outbound qRFC — SMQ1
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="ARFCSSTATE",
+                DELIMITER="|",
+                FIELDS=[
+                    {"FIELDNAME": "ARFCIPID"},
+                    {"FIELDNAME": "ARFCSTATE"},
+                    {"FIELDNAME": "ARFCDEST"},
+                ],
+                OPTIONS=[{"TEXT": "ARFCSTATE <> 'executed'"}],
+                ROWCOUNT=500,
+            )
+            entries = _parse_table(rows)
+            errors  = [r for r in entries if _trim(r, "ARFCSTATE") == "SYSFAIL"]
+            result["outbound_total"]  = len(entries)
+            result["outbound_errors"] = len(errors)
+        except Exception:
+            logger.debug("SMQ1: ARFCSSTATE not readable")
+
+        # Inbound qRFC — SMQ2
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="ARFCRSTATE",
+                DELIMITER="|",
+                FIELDS=[
+                    {"FIELDNAME": "ARFCIPID"},
+                    {"FIELDNAME": "ARFCSTATE"},
+                ],
+                OPTIONS=[{"TEXT": "ARFCSTATE <> 'executed'"}],
+                ROWCOUNT=500,
+            )
+            entries = _parse_table(rows)
+            errors  = [r for r in entries if _trim(r, "ARFCSTATE") == "SYSFAIL"]
+            result["inbound_total"]  = len(entries)
+            result["inbound_errors"] = len(errors)
+        except Exception:
+            logger.debug("SMQ2: ARFCRSTATE not readable")
+
+        return result
+
     def get_background_jobs(self) -> dict[str, Any]:
         """TBTCO — active, scheduled and delayed background jobs."""
         result: dict[str, Any] = {}
@@ -745,6 +1051,12 @@ class SAPCollector:
         license_info      = self.get_license_info()
         performance       = self.get_performance_stats()
         background_jobs   = self.get_background_jobs()
+        profile_params    = self.get_profile_params()
+        db_stats          = self.get_db_stats(system_info)
+        jobs_error_24h    = self.get_jobs_error_24h()
+        sm12_locks        = self.get_sm12_locks()
+        st22_24h          = self.get_st22_24h()
+        qrfc_queues       = self.get_qrfc_queues()
         update_info       = self.get_update_info()
         spool             = self.get_spool_info()
         system_messages   = self.get_system_messages()
@@ -774,6 +1086,12 @@ class SAPCollector:
             "license_info":     license_info,
             "performance":      performance,
             "background_jobs":  background_jobs,
+            "profile_params":   profile_params,
+            "db_stats":         db_stats,
+            "jobs_error_24h":   jobs_error_24h,
+            "sm12_locks":       sm12_locks,
+            "st22_24h":         st22_24h,
+            "qrfc_queues":      qrfc_queues,
             "update_info":      update_info,
             "spool":            spool,
             "system_messages":  system_messages,

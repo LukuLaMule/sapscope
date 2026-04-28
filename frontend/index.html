@@ -42,26 +42,30 @@
   }
   </script>
 
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #000000;
-      --bg-2:     #0a0a0a;
-      --bg-3:     #111111;
-      --fg:       #f5f5f7;
-      --fg-2:     #a1a1a6;
-      --fg-3:     #6e6e73;
-      --accent:   #2997ff;
-      --green:    #30d158;
-      --orange:   #ff9f0a;
-      --red:      #ff453a;
-      --border:   rgba(255,255,255,0.1);
-      --border-2: rgba(255,255,255,0.06);
-      --card:     rgba(255,255,255,0.04);
-      --r:        16px;
+      --bg:       #0a1628;
+      --bg-2:     #0d1f38;
+      --bg-3:     #112240;
+      --fg:       #dce6f0;
+      --fg-2:     #8da9c4;
+      --fg-3:     #4a7090;
+      --accent:   #4a9eff;
+      --gold:     #c9a84c;
+      --green:    #2dd4a0;
+      --orange:   #f59e0b;
+      --red:      #f87171;
+      --border:   rgba(74,158,255,0.15);
+      --border-2: rgba(74,158,255,0.07);
+      --card:     rgba(255,255,255,0.03);
+      --r:        10px;
     }
 
     html { scroll-behavior: smooth; }
@@ -69,7 +73,7 @@
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'IBM Plex Sans', 'Inter', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
@@ -81,7 +85,7 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       backdrop-filter: saturate(180%) blur(20px);
       -webkit-backdrop-filter: saturate(180%) blur(20px);
-      background: rgba(0,0,0,0.72);
+      background: rgba(10,22,40,0.85);
       border-bottom: 1px solid var(--border-2);
     }
     .nav-inner {
@@ -92,18 +96,18 @@
     .nav-logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
     .nav-logo span { color: var(--accent); }
     .nav-links { display: flex; gap: 32px; }
-    .nav-links a { font-size: 13px; font-weight: 400; color: var(--fg-2); transition: color .2s; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--fg-2); transition: color .2s; }
     .nav-links a:hover { color: var(--fg); }
     .nav-cta { display: flex; align-items: center; gap: 12px; }
     .btn-ghost {
       font-size: 13px; font-weight: 500; color: var(--fg-2);
-      padding: 6px 14px; border-radius: 980px;
+      padding: 6px 14px; border-radius: 8px;
       transition: color .2s;
     }
     .btn-ghost:hover { color: var(--fg); }
     .btn-nav-primary {
       font-size: 13px; font-weight: 500; color: var(--fg);
-      background: var(--accent); padding: 7px 16px; border-radius: 980px;
+      background: var(--accent); padding: 7px 16px; border-radius: 8px;
       transition: opacity .2s;
     }
     .btn-nav-primary:hover { opacity: .85; }
@@ -123,15 +127,24 @@
     .hero-glow {
       position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
       width: 900px; height: 600px;
-      background: radial-gradient(ellipse at center, rgba(41,151,255,.18) 0%, rgba(99,40,255,.08) 40%, transparent 70%);
+      background: radial-gradient(ellipse at center, rgba(74,158,255,.14) 0%, rgba(201,168,76,.05) 45%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(74,158,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,158,255,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
       pointer-events: none;
     }
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 500; color: var(--accent);
-      background: rgba(41,151,255,.1); border: 1px solid rgba(41,151,255,.25);
-      padding: 6px 16px; border-radius: 980px; margin-bottom: 36px;
-      letter-spacing: .02em;
+      font-size: 12px; font-weight: 700; color: var(--gold);
+      background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.25);
+      padding: 5px 14px; border-radius: 4px; margin-bottom: 36px;
+      letter-spacing: .06em; text-transform: uppercase;
     }
     .hero h1 {
       font-size: clamp(52px, 8vw, 96px);
@@ -153,14 +166,14 @@
     .btn-hero-primary {
       font-size: 17px; font-weight: 600;
       background: var(--accent); color: #fff;
-      padding: 16px 32px; border-radius: 980px;
+      padding: 16px 32px; border-radius: 8px;
       transition: transform .2s, box-shadow .2s;
       box-shadow: 0 0 40px rgba(41,151,255,.3);
     }
     .btn-hero-primary:hover { transform: scale(1.03); box-shadow: 0 0 60px rgba(41,151,255,.45); }
     .btn-hero-ghost {
       font-size: 17px; font-weight: 500; color: var(--fg-2);
-      padding: 16px 32px; border-radius: 980px;
+      padding: 16px 32px; border-radius: 8px;
       border: 1px solid var(--border);
       transition: border-color .2s, color .2s;
     }
@@ -172,7 +185,7 @@
       border-radius: 16px; overflow: hidden;
       border: 1px solid var(--border);
       box-shadow: 0 80px 160px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.06);
-      background: #0d0d0d;
+      background: #091525;
       position: relative;
     }
     .mockup-wrap::before {
@@ -183,7 +196,7 @@
     }
     .mockup-titlebar {
       display: flex; align-items: center; gap: 8px;
-      padding: 12px 16px; background: #1a1a1a;
+      padding: 12px 16px; background: #0d1f38;
       border-bottom: 1px solid var(--border-2);
     }
     .dot { width: 12px; height: 12px; border-radius: 50%; }
@@ -193,7 +206,7 @@
     .mockup-url {
       flex: 1; background: #111; border-radius: 6px;
       padding: 4px 12px; font-size: 12px; color: var(--fg-3);
-      font-family: 'JetBrains Mono', monospace; text-align: center;
+      font-family: 'IBM Plex Mono', monospace; text-align: center;
     }
     .mockup-app {
       display: flex; height: 380px; overflow: hidden;
@@ -202,7 +215,7 @@
       display: flex; align-items: center; gap: 12px;
       padding: 0 16px; height: 48px;
       border-bottom: 1px solid var(--border-2);
-      background: #0d0d0d;
+      background: #091525;
       grid-column: 1 / -1;
       position: absolute; top: 50px; left: 0; right: 0;
     }
@@ -227,7 +240,7 @@
       width: 180px; flex-shrink: 0;
       border-right: 1px solid var(--border-2);
       padding: 12px 0;
-      background: #090909;
+      background: #081422;
     }
     .mock-sidebar-hdr {
       font-size: 10px; font-weight: 600; text-transform: uppercase;
@@ -242,7 +255,7 @@
     .mock-sys-item.active { background: rgba(41,151,255,.12); color: var(--accent); }
     .mock-sys-item:not(.active) { color: var(--fg-2); }
     .mock-sys-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .mock-sys-sub { font-size: 10px; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; }
+    .mock-sys-sub { font-size: 10px; color: var(--fg-3); font-family: 'IBM Plex Mono', monospace; }
     .mock-content { flex: 1; padding: 20px; overflow: hidden; }
     .mock-content-hdr {
       display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
@@ -250,7 +263,7 @@
     .mock-content-title { font-size: 14px; font-weight: 600; }
     .mock-badge {
       font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
     }
     .mock-badge-blue { background: rgba(41,151,255,.15); color: var(--accent); }
     .mock-badge-green { background: rgba(48,209,88,.15); color: var(--green); }
@@ -261,7 +274,7 @@
     }
     .mock-analysis-line {
       font-size: 11px; line-height: 1.7; color: var(--fg-2);
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'IBM Plex Mono', monospace;
     }
     .mock-analysis-line.title { color: var(--fg); font-weight: 600; margin-bottom: 6px; }
     .mock-analysis-line.ok { color: var(--green); }
@@ -270,7 +283,7 @@
     .mock-chip {
       font-size: 10px; padding: 3px 8px; border-radius: 4px;
       background: var(--card); border: 1px solid var(--border-2);
-      color: var(--fg-2); font-family: 'JetBrains Mono', monospace;
+      color: var(--fg-2); font-family: 'IBM Plex Mono', monospace;
     }
 
     /* ── STATS BAND ───────────────────────────────────────────────────────── */
@@ -287,8 +300,8 @@
     /* ── FEATURES ─────────────────────────────────────────────────────────── */
     .section { max-width: 1100px; margin: 0 auto; padding: 120px 24px; }
     .section-eyebrow {
-      font-size: 13px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .1em; color: var(--accent); margin-bottom: 16px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--gold); margin-bottom: 16px;
       text-align: center;
     }
     .section-title {
@@ -341,7 +354,7 @@
       display: flex; flex-direction: column; justify-content: center; gap: 12px;
     }
     .code-line {
-      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 13px;
       color: var(--fg-2); display: flex; align-items: flex-start; gap: 10px;
     }
     .code-prompt { color: var(--fg-3); user-select: none; }
@@ -349,19 +362,20 @@
     .code-comment { color: var(--fg-3); font-style: italic; }
     .agent-card {
       display: flex; align-items: center; gap: 14px;
-      background: rgba(48,209,88,.06); border: 1px solid rgba(48,209,88,.15);
-      border-radius: 10px; padding: 14px 18px;
+      background: var(--bg-2);
+      border-left: 3px solid var(--green);
+      border-radius: 0 6px 6px 0; padding: 12px 16px;
     }
-    .agent-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green);
-      box-shadow: 0 0 8px var(--green); flex-shrink: 0; }
-    .agent-label { font-size: 13px; font-weight: 600; color: var(--green); font-family: 'JetBrains Mono', monospace; }
-    .agent-sub { font-size: 11px; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; }
+    .agent-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .agent-label { font-size: 13px; font-weight: 600; color: var(--fg); }
+    .agent-sub { font-size: 11px; color: var(--fg-3); margin-top: 2px; }
     .analysis-preview {
-      background: rgba(41,151,255,.06); border: 1px solid rgba(41,151,255,.15);
-      border-radius: 10px; padding: 18px;
+      background: var(--bg-2);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0; padding: 16px;
     }
-    .analysis-preview-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--fg); }
-    .analysis-preview-line { font-size: 12px; color: var(--fg-2); line-height: 1.8; font-family: 'JetBrains Mono', monospace; }
+    .analysis-preview-title { font-size: 11px; font-weight: 700; margin-bottom: 10px; color: var(--fg-3); letter-spacing: .08em; text-transform: uppercase; }
+    .analysis-preview-line { font-size: 12px; color: var(--fg-2); line-height: 1.9; font-family: 'IBM Plex Mono', monospace; }
     .analysis-preview-line.good { color: var(--green); }
     .analysis-preview-line.warn { color: var(--orange); }
 
@@ -418,12 +432,12 @@
       position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
       font-size: 11px; font-weight: 700; letter-spacing: .08em;
       text-transform: uppercase; color: #fff;
-      background: linear-gradient(90deg, #2997ff, #5b5bd6); padding: 5px 18px; border-radius: 980px;
+      background: linear-gradient(90deg, #4a9eff, #5b5bd6); padding: 5px 18px; border-radius: 8px;
       white-space: nowrap; box-shadow: 0 4px 16px rgba(41,151,255,.4);
     }
     .pricing-tier { font-size: 13px; font-weight: 700; text-transform: uppercase;
       letter-spacing: .1em; color: var(--fg-3); margin-bottom: 20px; }
-    .pricing-tier-featured { color: #2997ff; }
+    .pricing-tier-featured { color: #4a9eff; }
     .pricing-price { margin-bottom: 8px; }
     .pricing-amount { font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
     .pricing-amount span { font-size: 22px; font-weight: 500; color: var(--fg-2); vertical-align: top; margin-top: 10px; display: inline-block; }
@@ -440,7 +454,7 @@
       transition: opacity .2s, transform .2s; margin-bottom: 28px;
     }
     .pricing-cta-primary {
-      background: linear-gradient(135deg, #2997ff 0%, #5b5bd6 100%);
+      background: linear-gradient(135deg, #4a9eff 0%, #5b5bd6 100%);
       color: #fff; box-shadow: 0 4px 20px rgba(41,151,255,.35);
     }
     .pricing-cta-secondary { background: transparent; border: 1px solid var(--border); color: var(--fg); }
@@ -513,15 +527,35 @@
       .btn-hero-primary, .btn-hero-ghost { width: 100%; max-width: 320px; text-align: center; }
       .mockup-app { height: 280px; }
     }
-    .lang-switcher { display:flex; gap:2px; margin-right:4px; }
-    .lang-btn {
-      background:transparent; border:1px solid var(--border-2);
-      color:var(--fg-3); font-size:11px; font-weight:600;
-      padding:4px 8px; border-radius:6px; cursor:pointer;
-      transition:color .15s, border-color .15s, background .15s;
+    .lang-dropdown { position: relative; }
+    .lang-dropdown-btn {
+      display: flex; align-items: center; gap: 5px;
+      background: transparent; border: 1px solid var(--border-2);
+      color: var(--fg-3); font-size: 12px; font-weight: 600;
+      padding: 5px 10px; border-radius: 6px; cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+      transition: color .15s, border-color .15s;
     }
-    .lang-btn:hover { color:var(--fg); border-color:var(--border); }
-    .lang-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .lang-dropdown-btn:hover { color: var(--fg); border-color: var(--border); }
+    .lang-dropdown-btn svg { transition: transform .2s; }
+    .lang-dropdown.open .lang-dropdown-btn svg { transform: rotate(180deg); }
+    .lang-dropdown-menu {
+      display: none; position: absolute; top: calc(100% + 6px); right: 0;
+      background: #0d1f38; border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+      min-width: 80px; z-index: 200;
+    }
+    .lang-dropdown.open .lang-dropdown-menu { display: block; }
+    .lang-dropdown-item {
+      display: block; width: 100%; padding: 8px 16px;
+      font-size: 12px; font-weight: 600; color: var(--fg-2);
+      background: none; border: none; cursor: pointer; text-align: left;
+      font-family: 'IBM Plex Sans', sans-serif;
+      transition: background .15s, color .15s;
+    }
+    .lang-dropdown-item:hover { background: rgba(74,158,255,.08); color: var(--fg); }
+    .lang-dropdown-item.active { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -537,10 +571,16 @@
       <a href="https://app.sapscope.com/docs" data-i18n="nav_docs">Documentation</a>
     </div>
     <div class="nav-cta">
-      <div class="lang-switcher" id="lang-switcher">
-        <button class="lang-btn active" data-lang="en">EN</button>
-        <button class="lang-btn" data-lang="fr">FR</button>
-        <button class="lang-btn" data-lang="de">DE</button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <button class="lang-dropdown-btn" id="lang-dropdown-btn" aria-haspopup="true">
+          <span id="lang-current">EN</span>
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="lang-dropdown-menu" role="menu">
+          <button class="lang-dropdown-item active" data-lang="en" role="menuitem">EN — English</button>
+          <button class="lang-dropdown-item" data-lang="fr" role="menuitem">FR — Français</button>
+          <button class="lang-dropdown-item" data-lang="de" role="menuitem">DE — Deutsch</button>
+        </div>
       </div>
       <a href="https://app.sapscope.com" class="btn-ghost" data-i18n="nav_signin">Sign in</a>
       <a href="https://app.sapscope.com" class="btn-nav-primary" data-i18n="nav_cta">Free trial →</a>
@@ -576,24 +616,24 @@
     </div>
     <div class="mockup-app" style="position:relative">
       <!-- Topbar -->
-      <div style="position:absolute;top:0;left:0;right:0;height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0d0d0d;border-bottom:1px solid rgba(255,255,255,.06);z-index:1">
-        <span style="font-size:14px;font-weight:700">SAP<span style="color:#2997ff">scope</span></span>
-        <div style="width:7px;height:7px;border-radius:50%;background:#30d158;box-shadow:0 0 6px #30d158"></div>
-        <div style="font-size:11px;color:#6e6e73;background:rgba(255,255,255,.05);padding:3px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.06)">Acme Corp</div>
+      <div style="position:absolute;top:0;left:0;right:0;height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;background:#091525;border-bottom:1px solid rgba(74,158,255,.07);z-index:1">
+        <span style="font-size:14px;font-weight:700">SAP<span style="color:#4a9eff">scope</span></span>
+        <div style="width:6px;height:6px;border-radius:50%;background:#2dd4a0"></div>
+        <div style="font-size:11px;color:#4a7090;background:rgba(255,255,255,.04);padding:3px 12px;border-radius:5px;border:1px solid rgba(74,158,255,.07)">Acme Corp</div>
         <div style="flex:1"></div>
         <div style="font-size:10px;color:#6e6e73;background:rgba(255,255,255,.04);padding:3px 8px;border-radius:4px;border:1px solid rgba(255,255,255,.06)">admin</div>
         <div style="font-size:10px;color:#6e6e73">logout</div>
       </div>
       <!-- Sidebar -->
-      <div style="width:180px;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06);padding:60px 0 12px;background:#090909">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#6e6e73;padding:0 14px 10px">Systems</div>
+      <div style="width:180px;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06);padding:60px 0 12px;background:#081422">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#6e6e73;padding:0 14px 10px" data-i18n="mock_systems">Systems</div>
         <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(41,151,255,.12)">
-          <div style="width:6px;height:6px;border-radius:50%;background:#30d158;flex-shrink:0"></div>
-          <span style="font-size:12px;font-weight:600;color:#2997ff">PRD</span>
+          <div style="width:6px;height:6px;border-radius:50%;background:#2dd4a0;flex-shrink:0"></div>
+          <span style="font-size:12px;font-weight:600;color:#4a9eff">PRD</span>
           <span style="font-size:10px;color:#6e6e73;font-family:monospace;margin-left:2px">756</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;padding:8px 14px">
-          <div style="width:6px;height:6px;border-radius:50%;background:#30d158;flex-shrink:0"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:#2dd4a0;flex-shrink:0"></div>
           <span style="font-size:12px;font-weight:500;color:#a1a1a6">QAS</span>
           <span style="font-size:10px;color:#6e6e73;font-family:monospace;margin-left:2px">756</span>
         </div>
@@ -606,22 +646,22 @@
       <!-- Content -->
       <div style="flex:1;padding:60px 20px 20px;overflow:hidden">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <span style="font-size:13px;font-weight:600">Analyse IA — PRD</span>
-          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:rgba(48,209,88,.15);color:#30d158;font-family:monospace">SAP_BASIS 756</span>
-          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:rgba(41,151,255,.15);color:#2997ff;font-family:monospace">HANA 2.0</span>
+          <span style="font-size:13px;font-weight:600" data-i18n="mock_ai_title">AI Analysis — PRD</span>
+          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:rgba(48,209,88,.15);color:#2dd4a0;font-family:monospace">SAP_BASIS 756</span>
+          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:rgba(41,151,255,.15);color:#4a9eff;font-family:monospace">HANA 2.0</span>
         </div>
         <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:14px">
-          <div style="font-size:11px;font-weight:700;color:#f5f5f7;margin-bottom:8px">Statut de maintenance</div>
+          <div style="font-size:11px;font-weight:700;color:#f5f5f7;margin-bottom:8px" data-i18n="mock_maint_title">Maintenance status</div>
           <div style="font-size:11px;color:#a1a1a6;line-height:1.8;font-family:monospace">
-            <span style="color:#30d158">OK</span>&nbsp;&nbsp;SAP_BASIS 756 — maintenance mainstream active<br>
-            <span style="color:#30d158">OK</span>&nbsp;&nbsp;Kernel 785 — version à jour<br>
-            <span style="color:#ff9f0a">&nbsp;!</span>&nbsp;&nbsp;&nbsp;SP Level SAPKB75614 — 3 notes critiques applicables<br>
-            <span style="color:#30d158">OK</span>&nbsp;&nbsp;HANA 2.0 SPS 07 — support actif jusqu'en 2030
+            <span style="color:#2dd4a0">OK</span>&nbsp;&nbsp;SAP_BASIS 756 — <span data-i18n="mock_line1">mainstream maintenance active</span><br>
+            <span style="color:#2dd4a0">OK</span>&nbsp;&nbsp;Kernel 785 — <span data-i18n="mock_line2">up to date</span><br>
+            <span style="color:#ff9f0a">&nbsp;!</span>&nbsp;&nbsp;&nbsp;SP Level SAPKB75614 — <span data-i18n="mock_line3">3 critical notes applicable</span><br>
+            <span style="color:#2dd4a0">OK</span>&nbsp;&nbsp;HANA 2.0 SPS 07 — <span data-i18n="mock_line4">support active until 2030</span>
           </div>
           <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
             <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#a1a1a6;font-family:monospace">SAP_BASIS</span>
             <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#a1a1a6;font-family:monospace">SAP_ABA</span>
-            <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#a1a1a6;font-family:monospace">+14 composants</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#a1a1a6;font-family:monospace" data-i18n="mock_components">+14 components</span>
           </div>
         </div>
       </div>
@@ -722,7 +762,7 @@
           <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">pip install -r requirements.txt</span></div>
           <div class="code-line"><span class="code-prompt">$</span><span class="code-comment"># SAPSCOPE_TOKEN=your_token_here</span></div>
           <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">python agent.py --once</span></div>
-          <div class="code-line"><span class="code-prompt" style="color:#30d158">✓</span><span style="color:#30d158;font-family:monospace;font-size:13px">Snapshot envoyé — PRD, 47 composants</span></div>
+          <div class="code-line"><span class="code-prompt" style="color:#2dd4a0">✓</span><span style="color:#2dd4a0;font-family:monospace;font-size:13px" data-i18n="mock_snapshot_ok">Snapshot sent — PRD, 47 components</span></div>
         </div>
       </div>
 
@@ -736,22 +776,22 @@
           <div class="agent-card">
             <div class="agent-dot"></div>
             <div>
-              <div class="agent-label">agent@PRD — actif</div>
-              <div class="agent-sub">Dernier snapshot: il y a 2h · 47 composants · 1 247 objets custom</div>
+              <div class="agent-label" data-i18n="mock_agent_prd_label">PRD — active</div>
+              <div class="agent-sub" data-i18n="mock_agent_prd_sub">Last snapshot: 2h ago · 47 components · 1,247 custom objects</div>
             </div>
           </div>
           <div class="agent-card">
             <div class="agent-dot"></div>
             <div>
-              <div class="agent-label">agent@QAS — actif</div>
-              <div class="agent-sub">Dernier snapshot: il y a 3h · 47 composants · 1 199 objets custom</div>
+              <div class="agent-label" data-i18n="mock_agent_qas_label">QAS — active</div>
+              <div class="agent-sub" data-i18n="mock_agent_qas_sub">Last snapshot: 3h ago · 47 components · 1,199 custom objects</div>
             </div>
           </div>
-          <div class="agent-card" style="background:rgba(255,159,10,.06);border-color:rgba(255,159,10,.2)">
-            <div class="agent-dot" style="background:#ff9f0a;box-shadow:0 0 8px #ff9f0a"></div>
+          <div class="agent-card" style="background:var(--bg-2);border-left-color:#f59e0b">
+            <div class="agent-dot" style="background:#f59e0b"></div>
             <div>
-              <div class="agent-label" style="color:#ff9f0a">agent@DEV — inactif</div>
-              <div class="agent-sub">Dernier snapshot: il y a 26h · Vérifier le timer</div>
+              <div class="agent-label" data-i18n="mock_agent_dev_label">DEV — inactive</div>
+              <div class="agent-sub" data-i18n="mock_agent_dev_sub">Last snapshot: 26h ago · Check the timer</div>
             </div>
           </div>
         </div>
@@ -765,12 +805,12 @@
         </div>
         <div class="step-visual">
           <div class="analysis-preview">
-            <div class="analysis-preview-title" data-i18n="analysis_title">Priority recommendations</div>
-            <div class="analysis-preview-line good">OK  &nbsp;SAP_BASIS 756 SP14 — maintenance assurée jusqu'en 2027</div>
-            <div class="analysis-preview-line warn">!&nbsp;&nbsp;&nbsp;Note SAP 3089413 critique — planifier l'application</div>
-            <div class="analysis-preview-line warn">!&nbsp;&nbsp;&nbsp;Kernel 785 patch 19 disponible — mise à jour recommandée</div>
-            <div class="analysis-preview-line good">OK  &nbsp;HANA 2.0 SPS07 — version supportée</div>
-            <div class="analysis-preview-line" style="margin-top:6px">Prochaine fenêtre de maintenance conseillée : T2 2026</div>
+            <div class="analysis-preview-title" data-i18n="mock_analysis_title">Priority recommendations</div>
+            <div class="analysis-preview-line good">OK  &nbsp;<span data-i18n="mock_a_line1">SAP_BASIS 756 SP14 — maintenance assured until 2027</span></div>
+            <div class="analysis-preview-line warn">!&nbsp;&nbsp;&nbsp;<span data-i18n="mock_a_line2">SAP Note 3089413 critical — schedule application</span></div>
+            <div class="analysis-preview-line warn">!&nbsp;&nbsp;&nbsp;<span data-i18n="mock_a_line3">Kernel 785 patch 19 available — update recommended</span></div>
+            <div class="analysis-preview-line good">OK  &nbsp;<span data-i18n="mock_a_line4">HANA 2.0 SPS07 — supported version</span></div>
+            <div class="analysis-preview-line" style="margin-top:6px" data-i18n="mock_a_next">Next recommended maintenance window: Q2 2026</div>
           </div>
         </div>
       </div>
@@ -1051,6 +1091,27 @@
       step1_num: 'Step 01',
       step1_title: 'Install the agent on your SAP server',
       step1_text: 'The pyrfc agent deploys in a few commands on any SAP application server. It connects via local RFC to read system metadata — no inbound external access required.',
+      mock_snapshot_ok: 'Snapshot sent — PRD, 47 components',
+      mock_systems: 'Systems',
+      mock_ai_title: 'AI Analysis — PRD',
+      mock_maint_title: 'Maintenance status',
+      mock_line1: 'mainstream maintenance active',
+      mock_line2: 'up to date',
+      mock_line3: '3 critical notes applicable',
+      mock_line4: 'support active until 2030',
+      mock_components: '+14 components',
+      mock_analysis_title: 'Priority recommendations',
+      mock_a_line1: 'SAP_BASIS 756 SP14 — maintenance assured until 2027',
+      mock_a_line2: 'SAP Note 3089413 critical — schedule application',
+      mock_a_line3: 'Kernel 785 patch 19 available — update recommended',
+      mock_a_line4: 'HANA 2.0 SPS07 — supported version',
+      mock_a_next: 'Next recommended maintenance window: Q2 2026',
+      mock_agent_prd_label: 'PRD — active',
+      mock_agent_prd_sub: 'Last snapshot: 2h ago · 47 components · 1,247 custom objects',
+      mock_agent_qas_label: 'QAS — active',
+      mock_agent_qas_sub: 'Last snapshot: 3h ago · 47 components · 1,199 custom objects',
+      mock_agent_dev_label: 'DEV — inactive',
+      mock_agent_dev_sub: 'Last snapshot: 26h ago · Check the timer',
       step2_num: 'Step 02',
       step2_title: 'Data syncs automatically',
       step2_text: 'A systemd timer triggers the agent every 24h. Each run sends a complete snapshot: installed components, support packages, kernel, custom ABAP objects, DB info.',
@@ -1164,6 +1225,27 @@
       hiw_sub: 'Pas de RFC compliqués à configurer. Pas d\'accès BTP. Juste un agent Python, un cron, et c\'est parti.',
       step1_num: 'Étape 01',
       step1_title: 'Installez l\'agent sur votre serveur SAP',
+      mock_snapshot_ok: 'Snapshot envoyé — PRD, 47 composants',
+      mock_systems: 'Systèmes',
+      mock_ai_title: 'Analyse IA — PRD',
+      mock_maint_title: 'Statut de maintenance',
+      mock_line1: 'maintenance mainstream active',
+      mock_line2: 'version à jour',
+      mock_line3: '3 notes critiques applicables',
+      mock_line4: 'support actif jusqu\'en 2030',
+      mock_components: '+14 composants',
+      mock_analysis_title: 'Recommandations prioritaires',
+      mock_a_line1: 'SAP_BASIS 756 SP14 — maintenance assurée jusqu\'en 2027',
+      mock_a_line2: 'Note SAP 3089413 critique — planifier l\'application',
+      mock_a_line3: 'Kernel 785 patch 19 disponible — mise à jour recommandée',
+      mock_a_line4: 'HANA 2.0 SPS07 — version supportée',
+      mock_a_next: 'Prochaine fenêtre de maintenance conseillée : T2 2026',
+      mock_agent_prd_label: 'PRD — actif',
+      mock_agent_prd_sub: 'Dernier snapshot : il y a 2h · 47 composants · 1 247 objets custom',
+      mock_agent_qas_label: 'QAS — actif',
+      mock_agent_qas_sub: 'Dernier snapshot : il y a 3h · 47 composants · 1 199 objets custom',
+      mock_agent_dev_label: 'DEV — inactif',
+      mock_agent_dev_sub: 'Dernier snapshot : il y a 26h · Vérifier le timer',
       step1_text: 'L\'agent pyrfc se déploie en quelques commandes sur n\'importe quel serveur applicatif SAP. Il se connecte en RFC local pour lire les métadonnées système — sans accès externe entrant.',
       step2_num: 'Étape 02',
       step2_title: 'Les données remontent automatiquement',
@@ -1278,6 +1360,27 @@
       hiw_sub: "Kein komplexes RFC-Setup. Kein BTP-Zugang. Nur ein Python-Agent, ein Cron-Job, und los geht's.",
       step1_num: 'Schritt 01',
       step1_title: 'Agent auf dem SAP-Server installieren',
+      mock_snapshot_ok: 'Snapshot gesendet — PRD, 47 Komponenten',
+      mock_systems: 'Systeme',
+      mock_ai_title: 'KI-Analyse — PRD',
+      mock_maint_title: 'Wartungsstatus',
+      mock_line1: 'Mainstream-Wartung aktiv',
+      mock_line2: 'aktuell',
+      mock_line3: '3 kritische Hinweise anwendbar',
+      mock_line4: 'Support aktiv bis 2030',
+      mock_components: '+14 Komponenten',
+      mock_analysis_title: 'Prioritäre Empfehlungen',
+      mock_a_line1: 'SAP_BASIS 756 SP14 — Wartung gesichert bis 2027',
+      mock_a_line2: 'SAP-Hinweis 3089413 kritisch — Anwendung planen',
+      mock_a_line3: 'Kernel 785 Patch 19 verfügbar — Update empfohlen',
+      mock_a_line4: 'HANA 2.0 SPS07 — unterstützte Version',
+      mock_a_next: 'Nächstes empfohlenes Wartungsfenster: Q2 2026',
+      mock_agent_prd_label: 'PRD — aktiv',
+      mock_agent_prd_sub: 'Letzter Snapshot: vor 2h · 47 Komponenten · 1.247 Custom-Objekte',
+      mock_agent_qas_label: 'QAS — aktiv',
+      mock_agent_qas_sub: 'Letzter Snapshot: vor 3h · 47 Komponenten · 1.199 Custom-Objekte',
+      mock_agent_dev_label: 'DEV — inaktiv',
+      mock_agent_dev_sub: 'Letzter Snapshot: vor 26h · Timer prüfen',
       step1_text: 'Der pyrfc-Agent wird mit wenigen Befehlen auf jedem SAP-Applikationsserver bereitgestellt. Er verbindet sich über lokalen RFC, um System-Metadaten zu lesen — ohne eingehenden externen Zugang.',
       step2_num: 'Schritt 02',
       step2_title: 'Daten werden automatisch übertragen',
@@ -1387,9 +1490,11 @@
       if (t[key] !== undefined) el.innerHTML = t[key];
     });
 
-    // Update active button
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    // Update dropdown
+    const cur = document.getElementById('lang-current');
+    if (cur) cur.textContent = lang.toUpperCase();
+    document.querySelectorAll('.lang-dropdown-item').forEach(item => {
+      item.classList.toggle('active', item.getAttribute('data-lang') === lang);
     });
 
     // Persist choice
@@ -1407,12 +1512,22 @@
     applyLang(lang);
   })();
 
-  // Lang switcher click handlers
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      applyLang(btn.getAttribute('data-lang'));
+  // Lang dropdown
+  const dropdown = document.getElementById('lang-dropdown');
+  const dropdownBtn = document.getElementById('lang-dropdown-btn');
+  if (dropdown && dropdownBtn) {
+    dropdownBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
     });
-  });
+    dropdown.querySelectorAll('.lang-dropdown-item').forEach(item => {
+      item.addEventListener('click', () => {
+        applyLang(item.getAttribute('data-lang'));
+        dropdown.classList.remove('open');
+      });
+    });
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
+  }
 </script>
 </body>
 </html>

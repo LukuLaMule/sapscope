@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchSnapshotDetail, fetchAnalysis, requestAnalysis, fetchSnapshots, fetchHistory, fetchNotes, createNote, updateNote, deleteNote, fetchMe } from "@/lib/api";
+import { analyzeSizing } from "@/lib/sizing-analyzer";
+import type { SizingIndicator, DbContext } from "@/lib/sizing-analyzer";
 import type { ApiSnapshotDetail, ApiAnalysis, ApiNote } from "@/lib/api";
 import { DialogResponseChart } from "@/components/charts/DialogResponseChart";
 import { WorkProcessChart } from "@/components/charts/WorkProcessChart";
@@ -11,7 +13,7 @@ import {
 } from "@/lib/sap-utils";
 import {
   ArrowLeft, Shield, Truck, Clock, Server, Cpu, FileText,
-  Activity, Database, Layers, Box, Sparkles, Copy, AlertTriangle, Printer, StickyNote, Pencil, Trash2,
+  Activity, Database, Layers, Box, Sparkles, Copy, AlertTriangle, Printer, StickyNote, Pencil, Trash2, Gauge,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -306,6 +308,9 @@ export default function SystemDetailPage() {
               </div>
             </div>
           )}
+
+          {/* ─── Sizing / Dimensionnement ─── */}
+          <SizingSection payload={snap.payload} />
 
           {/* System information */}
           <div className="section-card">
@@ -625,6 +630,146 @@ export default function SystemDetailPage() {
 
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── DB context badges ─────────────────────────────────────────────────────────
+
+const DB_COLORS: Record<string, { bg: string; text: string }> = {
+  "SAP HANA":              { bg: "rgba(14,165,233,0.15)",  text: "#38bdf8" },
+  "Oracle":                { bg: "rgba(234,88,12,0.15)",   text: "#fb923c" },
+  "IBM DB2":               { bg: "rgba(99,102,241,0.15)",  text: "#818cf8" },
+  "Microsoft SQL Server":  { bg: "rgba(16,185,129,0.15)",  text: "#34d399" },
+  "SAP ASE (Sybase)":      { bg: "rgba(168,85,247,0.15)",  text: "#c084fc" },
+  "SAP MaxDB":             { bg: "rgba(245,158,11,0.15)",  text: "#fbbf24" },
+};
+
+function DbContextBadges({ db }: { db: DbContext }) {
+  if (!db.raw && db.system_type === "Unknown") return null;
+  const colors = DB_COLORS[db.type] ?? { bg: "rgba(100,116,139,0.15)", text: "#94a3b8" };
+  return (
+    <>
+      {db.type !== "Inconnu" && (
+        <span
+          className="text-[10px] font-medium px-2 py-0.5 rounded"
+          style={{ background: colors.bg, color: colors.text }}
+        >
+          {db.type}
+          {db.version && <span className="ml-1 opacity-70 font-mono">{db.version}</span>}
+        </span>
+      )}
+      {db.system_type !== "Unknown" && (
+        <span className="text-[10px] text-muted-foreground border border-border/60 px-2 py-0.5 rounded">
+          {db.system_type}
+        </span>
+      )}
+    </>
+  );
+}
+
+// ── Sizing Section ────────────────────────────────────────────────────────────
+
+function SizingSection({ payload }: { payload: Record<string, any> | null | undefined }) {
+  const sizing = analyzeSizing(payload);
+
+  if (!sizing.has_data) return null;
+
+  const scoreColor =
+    sizing.score >= 80 ? "hsl(var(--status-ok))"
+    : sizing.score >= 50 ? "hsl(var(--status-warning))"
+    : "hsl(var(--status-critical))";
+
+  const hasProfileParams = !!(payload?.profile_params && Object.keys(payload.profile_params).length > 0);
+
+  return (
+    <div className="section-card">
+      <div className="section-header">
+        <div className="section-icon"><Gauge className="w-4 h-4" /></div>
+        <h3 className="text-sm font-semibold text-foreground">Dimensionnement système</h3>
+        <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
+          <DbContextBadges db={sizing.db} />
+          {!hasProfileParams && (
+            <span className="text-[10px] text-muted-foreground border border-border px-2 py-0.5 rounded">
+              agent v3+ requis
+            </span>
+          )}
+          <span className="font-mono text-base font-bold" style={{ color: scoreColor }}>
+            {sizing.score}/100
+          </span>
+        </div>
+      </div>
+
+      {/* Score bar */}
+      <div className="score-bar mb-5">
+        <div
+          className="score-bar-fill"
+          style={{ width: `${sizing.score}%`, backgroundColor: scoreColor, transition: "width 0.7s ease" }}
+        />
+      </div>
+
+      {/* Indicateurs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
+        {sizing.indicators.map((ind: SizingIndicator) => {
+          const ic =
+            ind.status === "OK"       ? "hsl(var(--status-ok))"
+            : ind.status === "WARNING" ? "hsl(var(--status-warning))"
+            : ind.status === "CRITICAL"? "hsl(var(--status-critical))"
+            : "hsl(var(--muted-foreground))";
+
+          return (
+            <div key={ind.label} className="kpi-card">
+              {/* En-tête indicateur */}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ic }} />
+                <span className="text-xs font-medium text-foreground flex-1 leading-tight">{ind.label}</span>
+                <span className="font-mono text-sm font-bold" style={{ color: ic }}>{ind.score}</span>
+              </div>
+
+              {/* Valeur */}
+              <div className="text-xs text-muted-foreground font-mono mb-2">{ind.value}</div>
+
+              {/* Barre de score */}
+              <div className="score-bar mb-2">
+                <div
+                  className="score-bar-fill"
+                  style={{ width: `${ind.score}%`, backgroundColor: ic }}
+                />
+              </div>
+
+              {/* Recommandation */}
+              {ind.recommendation && (
+                <div className="text-[11px] text-muted-foreground leading-relaxed border-t border-border/50 pt-2 mt-1">
+                  {ind.recommendation}
+                  {ind.sap_note && (
+                    <span className="ml-1 text-primary font-mono">({ind.sap_note})</span>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Récap recommandations critiques */}
+      {sizing.indicators.filter(i => i.status === "CRITICAL").length > 0 && (
+        <div className="rounded-lg border border-[hsl(var(--status-critical)/0.3)] bg-[hsl(var(--status-critical)/0.07)] p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-3.5 h-3.5 text-[hsl(var(--status-critical))]" />
+            <span className="text-xs font-semibold text-[hsl(var(--status-critical))]">Actions prioritaires</span>
+          </div>
+          <ul className="space-y-1">
+            {sizing.indicators
+              .filter(i => i.status === "CRITICAL" && i.recommendation)
+              .map(i => (
+                <li key={i.label} className="text-xs text-muted-foreground flex gap-2">
+                  <span className="text-[hsl(var(--status-critical))] flex-shrink-0">›</span>
+                  <span><strong className="text-foreground">{i.label} :</strong> {i.recommendation}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
