@@ -50,6 +50,12 @@ SAPscope est un outil pour le Basis admin, pas un remplacement. Les nouvelles fo
 - Connexion via Message Server (mshost/msserv/r3name) — via systems.yaml
 - Connexion via SAProuter — via systems.yaml (champ `saprouter`)
 - Agent distant multi-systèmes — via systems.yaml (prioritaire sur SAPSCOPE_SYSTEMS)
+- Serveur de licences central — `backend/app/routers/license_server.py` + modèle `License` dans `models.py`
+  - Activer via `IS_LICENSE_SERVER=true` dans l'env et `app.include_router(license_server.router)` dans `main.py`
+  - Endpoints publics : `POST /api/license/validate`, `POST /api/license/activate`
+  - Endpoints admin : `POST /api/admin/licenses`, `GET /api/admin/licenses`
+  - Plans : `trial` (2 users) | `solo` (1) | `team` (5) | `enterprise` (999)
+  - Migration SQL : `backend/migrations/20260429_add_licenses_table.sql`
 
 **En attente d'un système SAP de test :**
 - Surveillance certificats SSL/TLS — ABAP PSE (SSFR_PSE_LIST/GET) + HANA (M_PSE_CERTIFICATES). Non testable sans accès RFC réel. Lib `cryptography` déjà présente dans le container.

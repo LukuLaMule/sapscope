@@ -129,6 +129,128 @@ Accéder à l'application : {app_url}/app
         logger.exception("Échec d'envoi de l'email de bienvenue à %s", to_email)
 
 
+async def send_license_email(
+    to_email: str,
+    plan: str,
+    license_key: str,
+    expires_at: str,
+    org: str = "",
+) -> None:
+    """Email envoyé au client self-hosted après achat — contient sa clé de licence JWT."""
+    plan_label = {"solo": "Solo", "team": "Team", "enterprise": "Enterprise"}.get(plan, plan.capitalize())
+    install_url = "https://sapscope.fr/deploy/INSTALL.md"
+
+    if not settings.smtp_host or not settings.smtp_user:
+        logger.warning("SMTP non configuré — clé de licence pour %s : %s", to_email, license_key)
+        return
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"SAPscope {plan_label} — votre clé de licence"
+    msg["From"]    = settings.smtp_from
+    msg["To"]      = to_email
+
+    text = f"""Bonjour{(' ' + org) if org else ''},
+
+Merci pour votre achat SAPscope {plan_label} !
+
+Votre clé de licence (valable jusqu'au {expires_at}) :
+{license_key}
+
+Pour installer SAPscope sur votre serveur :
+1. Téléchargez les fichiers : curl -O https://sapscope.fr/deploy/docker-compose.yml && curl -O https://sapscope.fr/deploy/nginx.conf && curl -O https://sapscope.fr/deploy/.env.example
+2. cp .env.example .env  (puis remplissez les valeurs)
+3. Ajoutez LICENSE_KEY=<votre clé ci-dessus> dans .env
+4. docker compose up -d
+
+Guide complet : {install_url}
+
+Des questions ? Répondez à cet email ou écrivez à contact@sapscope.fr
+
+— L'équipe SAPscope
+"""
+
+    html = f"""<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 20px">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#141414;border-radius:12px;border:1px solid rgba(255,255,255,.08)">
+        <tr><td style="padding:32px 40px">
+
+          <div style="font-size:20px;font-weight:700;color:#f5f5f7;margin-bottom:4px">
+            SAP<span style="color:#2997ff">scope</span>
+          </div>
+          <div style="font-size:12px;color:#6e6e73;margin-bottom:28px">SAP Landscape Intelligence</div>
+
+          <p style="font-size:16px;font-weight:600;color:#f5f5f7;margin:0 0 8px">
+            Votre licence <span style="color:#2997ff">{plan_label}</span> est prête.
+          </p>
+          <p style="font-size:14px;color:#a1a1a6;margin:0 0 24px">
+            Valable jusqu'au <strong style="color:#f5f5f7">{expires_at}</strong>
+            {(' — ' + org) if org else ''}
+          </p>
+
+          <p style="font-size:13px;color:#a1a1a6;margin:0 0 8px">
+            Votre clé de licence (copiez-la dans votre <code style="color:#f5f5f7">.env</code>) :
+          </p>
+          <div style="background:#0a0a0a;border:1px solid rgba(255,255,255,.12);border-radius:8px;
+                      padding:12px 16px;font-family:monospace;font-size:11px;color:#34d399;
+                      word-break:break-all;margin-bottom:8px">
+            {license_key}
+          </div>
+          <p style="font-size:11px;color:#6e6e73;margin:0 0 24px">
+            Ajoutez <code>LICENSE_KEY=&lt;clé ci-dessus&gt;</code> dans votre fichier <code>.env</code>
+          </p>
+
+          <p style="font-size:13px;font-weight:600;color:#f5f5f7;margin:0 0 12px">Installation en 3 commandes :</p>
+          <div style="background:#0a0a0a;border:1px solid rgba(255,255,255,.12);border-radius:8px;
+                      padding:12px 16px;font-family:monospace;font-size:12px;color:#a1a1a6;
+                      margin-bottom:28px;line-height:1.8">
+            curl -O https://sapscope.fr/deploy/docker-compose.yml<br>
+            curl -O https://sapscope.fr/deploy/nginx.conf<br>
+            curl -O https://sapscope.fr/deploy/.env.example<br>
+            cp .env.example .env<br>
+            <span style="color:#6e6e73"># éditez .env, ajoutez LICENSE_KEY=...</span><br>
+            docker compose up -d
+          </div>
+
+          <a href="{install_url}"
+             style="display:inline-block;background:#2997ff;color:#fff;font-size:13px;
+                    font-weight:600;padding:10px 22px;border-radius:8px;text-decoration:none;margin-bottom:28px">
+            Guide d'installation complet →
+          </a>
+
+          <p style="font-size:12px;color:#6e6e73;margin:0;line-height:1.6">
+            Des questions ? Répondez à cet email ou écrivez à
+            <a href="mailto:contact@sapscope.fr" style="color:#2997ff">contact@sapscope.fr</a>
+          </p>
+
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+    msg.attach(MIMEText(text, "plain"))
+    msg.attach(MIMEText(html, "html"))
+
+    try:
+        await aiosmtplib.send(
+            msg,
+            hostname=settings.smtp_host,
+            port=settings.smtp_port,
+            username=settings.smtp_user,
+            password=settings.smtp_password,
+            start_tls=True,
+        )
+        logger.info("Email de licence envoyé à %s (plan=%s)", to_email, plan)
+    except Exception:
+        logger.exception("Échec d'envoi de l'email de licence à %s", to_email)
+
+
 async def send_reset_email(to_email: str, reset_url: str) -> None:
     """Envoie le lien de réinitialisation de mot de passe."""
     if not settings.smtp_host or not settings.smtp_user:

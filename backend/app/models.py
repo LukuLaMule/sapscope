@@ -244,7 +244,7 @@ class License(Base):
     id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
     )
-    key: Mapped[str] = mapped_column(String(36), unique=True, nullable=False, index=True)
+    key: Mapped[str] = mapped_column(Text, unique=True, nullable=False, index=True)
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     plan: Mapped[str] = mapped_column(String(50), nullable=False)   # trial | solo | team | enterprise
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
