@@ -634,6 +634,9 @@ class SAPCollector:
             except Exception:
                 logger.debug("DB stats: M_CS_TABLES not readable (HANA)")
 
+            # HANA System Replication (HSR) status
+            result["hsr"] = self._get_hana_hsr()
+
         # ── Oracle / DB2 : version ────────────────────────────────────────────
         if db_type in ("ORA", "DB6", "MSS", "SYB", "ADA"):
             try:
@@ -654,6 +657,52 @@ class SAPCollector:
             except Exception:
                 pass
 
+        return result
+
+    def _get_hana_hsr(self) -> dict[str, Any]:
+        """M_SYSTEM_REPLICATION — HANA System Replication status.
+
+        Returns {"configured": False} when HSR is not set up.
+        Returns {"configured": True, "status": "ACTIVE"|..., "mode": "SYNC"|..., "sites": [...]}
+        when HSR is configured.
+        """
+        result: dict[str, Any] = {"configured": False}
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="M_SYSTEM_REPLICATION",
+                DELIMITER="|",
+                FIELDS=[
+                    {"FIELDNAME": "SITE_NAME"},
+                    {"FIELDNAME": "SECONDARY_SITE_NAME"},
+                    {"FIELDNAME": "SECONDARY_HOST"},
+                    {"FIELDNAME": "REPLICATION_STATUS"},
+                    {"FIELDNAME": "REPLICATION_MODE"},
+                    {"FIELDNAME": "SECONDARY_ACTIVE_STATUS"},
+                ],
+                ROWCOUNT=10,
+            )
+            sites = _parse_table(rows)
+            if not sites:
+                return result
+
+            result["configured"] = True
+            result["sites"] = [
+                {
+                    "site_name":       _trim(s, "SITE_NAME"),
+                    "secondary_site":  _trim(s, "SECONDARY_SITE_NAME"),
+                    "secondary_host":  _trim(s, "SECONDARY_HOST"),
+                    "status":          _trim(s, "REPLICATION_STATUS"),
+                    "mode":            _trim(s, "REPLICATION_MODE"),
+                    "secondary_active": _trim(s, "SECONDARY_ACTIVE_STATUS") == "YES",
+                }
+                for s in sites
+            ]
+            statuses = [s["status"] for s in result["sites"]]
+            result["status"] = "ACTIVE" if all(s == "ACTIVE" for s in statuses) else (statuses[0] if statuses else "UNKNOWN")
+            result["mode"] = result["sites"][0]["mode"] if result["sites"] else ""
+        except Exception:
+            logger.debug("HANA HSR: M_SYSTEM_REPLICATION not readable")
         return result
 
     def get_qrfc_queues(self) -> dict[str, Any]:

@@ -135,6 +135,58 @@ python -m agent --dry-run   # vérifie la connexion RFC, affiche le JSON
 python -m agent             # collecte et envoie
 ```
 
+### Modes de connexion
+
+Par défaut, l'agent se connecte directement à un serveur d'application (`mode ashost`). Deux modes supplémentaires sont disponibles pour les déploiements distants ou les landscapes load-balancés.
+
+#### Option 1 — `systems.yaml` (recommandé pour les setups distants ou multi-systèmes)
+
+Créez un fichier `systems.yaml` à côté du package agent :
+
+```yaml
+systems:
+  # Connexion directe au serveur d'application (défaut — agent sur l'AS)
+  - mode: ashost
+    ashost: localhost
+    sysnr: "00"
+    client: "100"
+
+  # Message server — connexion via load balancer (agent sur un hôte séparé)
+  - mode: mshost
+    mshost: sapms.company.com   # nom d'hôte du message server
+    msserv: "3601"              # port ou nom de service (ex. "sapmsP01")
+    r3name: P01                 # SID SAP
+    group: PUBLIC               # logon group (défaut : PUBLIC)
+    client: "100"
+
+  # Connexion directe via un SAProuter
+  - mode: ashost
+    ashost: 10.0.1.5
+    sysnr: "00"
+    saprouter: /H/saprouter.company.com/H/
+    client: "000"
+```
+
+Les credentials (`SAP_USER` / `SAP_PASSWD`) sont toujours lus depuis les variables d'environnement. Des valeurs `user`/`passwd` par entrée sont possibles mais déconseillées.
+
+Le fichier `systems.yaml` est prioritaire sur `SAPSCOPE_SYSTEMS` et la découverte automatique `/usr/sap/`.
+
+#### Option 2 — Variable `SAPSCOPE_SYSTEMS` (multi-systèmes simples sur le même hôte)
+
+```env
+SAPSCOPE_SYSTEMS=P01:00 Q01:01 D01:02
+```
+
+Chaque entrée est `SID:SYSNR`, connexion en `localhost` sur ce numéro de système. À utiliser quand l'agent tourne directement sur le serveur d'application SAP.
+
+#### Priorité de découverte
+
+| Priorité | Source | Cas d'usage |
+|---|---|---|
+| 1 | `systems.yaml` | Hôtes distants, message server, SAProuter |
+| 2 | Variable `SAPSCOPE_SYSTEMS` | Plusieurs SID locaux sur le même hôte |
+| 3 | Découverte auto `/usr/sap/` | Systèmes auto-détectés sur l'hôte local |
+
 ### Utilisateur RFC requis côté SAP
 
 Voir [docs/sap-rfc-user-setup.md](docs/sap-rfc-user-setup.md) pour la création de l'utilisateur de communication et les autorisations minimales requises.

@@ -3,20 +3,21 @@
 SAPscope collection agent.
 
 Usage:
-    python -m agent            # collect all discovered systems, send to backend
+    python -m agent            # collect all configured systems, send to backend
     python -m agent --dry-run  # print JSON, don't send
 
-Environment variables (required):
+Configuration (in priority order):
+  1. systems.yaml  — placed next to this package; supports ashost + mshost + SAProuter
+  2. SAPSCOPE_SYSTEMS env var  — "SID:SYSNR ..." (ashost=localhost, agent runs on AS)
+  3. Auto-discovery from /usr/sap/  (agent runs on AS)
+
+Environment variables (always required):
     SAPSCOPE_BACKEND_URL    e.g. https://app.sapscope.com
     SAPSCOPE_TOKEN          Bearer token issued by the backend
     SAP_USER                RFC username
     SAP_PASSWD              RFC password
 
-System discovery (set by install.sh, override if needed):
-    SAPSCOPE_SYSTEMS        Space-separated list of SID:SYSNR pairs
-                            e.g. "P01:00 D01:01 Q01:00"
-                            Default: auto-discover from /usr/sap/
-
+Variables used when not overridden in systems.yaml:
     SAP_CLIENT              Logon client (default: 000)
     SAP_LANG                Logon language (default: EN)
 
@@ -34,7 +35,7 @@ import sys
 from pathlib import Path
 
 from .collector import SAPCollector
-from .config import AgentConfig, SAPConfig
+from .config import AgentConfig, BackendConfig, SAPConfig
 from .sender import BackendSender
 
 logging.basicConfig(
@@ -46,7 +47,7 @@ logging.basicConfig(
 logger = logging.getLogger("sapscope.agent")
 
 
-# ── System discovery ──────────────────────────────────────────────────────────
+# ── System discovery (env-based / filesystem) ─────────────────────────────────
 
 def discover_systems() -> list[tuple[str, str]]:
     """
@@ -62,7 +63,6 @@ def discover_systems() -> list[tuple[str, str]]:
         for entry in env.split():
             if ":" in entry:
                 sid, sysnr = entry.split(":", 1)
-                # Connect via localhost — we're on the AS
                 systems.append(("localhost", sysnr.zfill(2)))
             else:
                 logger.warning("Ignoring malformed entry in SAPSCOPE_SYSTEMS: %s", entry)
@@ -112,42 +112,51 @@ def _find_sysnr(sid_dir: Path) -> str | None:
 # ── Collection loop ───────────────────────────────────────────────────────────
 
 def run(dry_run: bool = False) -> None:
-    systems = discover_systems()
+    yaml_path = Path(__file__).parent / "systems.yaml"
 
-    if not systems:
-        logger.error("No SAP systems found. Set SAPSCOPE_SYSTEMS or run on an AS.")
-        sys.exit(1)
+    if yaml_path.exists():
+        from .config import load_systems_from_yaml
+        sap_configs = load_systems_from_yaml(yaml_path)
+        logger.info("Loaded %d system(s) from systems.yaml", len(sap_configs))
+        if not sap_configs:
+            logger.error("systems.yaml found but contains no systems")
+            sys.exit(1)
+    else:
+        raw_systems = discover_systems()
+        if not raw_systems:
+            logger.error(
+                "No SAP systems found. Set SAPSCOPE_SYSTEMS, create systems.yaml, or run on an AS."
+            )
+            sys.exit(1)
+        sap_configs = [
+            SAPConfig(
+                ashost = ashost,
+                sysnr  = sysnr,
+                client = os.getenv("SAP_CLIENT", "000"),
+                user   = os.environ["SAP_USER"],
+                passwd = os.environ["SAP_PASSWD"],
+                lang   = os.getenv("SAP_LANG", "EN"),
+            )
+            for ashost, sysnr in raw_systems
+        ]
+        logger.info("Collecting %d system(s)…", len(sap_configs))
 
-    logger.info("Collecting %d system(s)…", len(systems))
-
-    # BackendSender is shared across all systems
-    from .config import BackendConfig
     backend_cfg = BackendConfig()
-
     errors = 0
-    for ashost, sysnr in systems:
-        sap_cfg = SAPConfig(
-            ashost=ashost,
-            sysnr=sysnr,
-            client=os.getenv("SAP_CLIENT", "000"),
-            user=os.environ["SAP_USER"],
-            passwd=os.environ["SAP_PASSWD"],
-            lang=os.getenv("SAP_LANG", "EN"),
-        )
+    for sap_cfg in sap_configs:
         cfg = AgentConfig(sap=sap_cfg)
-
         try:
             _collect_one(cfg, backend_cfg, dry_run)
         except Exception as exc:
-            logger.error("Failed for ashost=%s sysnr=%s: %s", ashost, sysnr, exc)
+            logger.error("Failed for %r: %s", sap_cfg, exc)
             errors += 1
 
     if errors:
-        logger.warning("%d/%d systems failed.", errors, len(systems))
+        logger.warning("%d/%d systems failed.", errors, len(sap_configs))
         sys.exit(1)
 
 
-def _collect_one(cfg: AgentConfig, backend_cfg, dry_run: bool) -> None:
+def _collect_one(cfg: AgentConfig, backend_cfg: BackendConfig, dry_run: bool) -> None:
     with SAPCollector(cfg) as collector:
         snapshot = collector.collect()
 

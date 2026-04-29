@@ -26,12 +26,14 @@ _WEIGHTS: dict[str, float] = {
     "security_ops":   0.20,   # v2 — default users, SAP_ALL, RFC
     "security":       0.05,   # locked users (informative)
     "transports":     0.05,   # import queue
+    "hsr":            0.15,   # HANA System Replication — only scored when configured
 }
 
 
 def compute(health_data: dict[str, Any] | None,
             security_data: dict[str, Any] | None = None,
-            transport_data: dict[str, Any] | None = None) -> dict[str, Any]:
+            transport_data: dict[str, Any] | None = None,
+            db_stats_data: dict[str, Any] | None = None) -> dict[str, Any]:
     """
     Compute global score + per-domain indicators from the 'health' key of a snapshot payload.
     Returns a dict ready to be stored in health_checks.indicators.
@@ -190,6 +192,28 @@ def compute(health_data: dict[str, Any] | None,
             "import_queue_count": queue,
             "recent_imports_count": transport_data.get("recent_imports_count", 0),
         }
+
+    # ── HANA System Replication (HSR) ────────────────────────────────────────
+    if db_stats_data:
+        hsr = db_stats_data.get("hsr", {})
+        if hsr and hsr.get("configured"):
+            hsr_status = hsr.get("status", "UNKNOWN")
+            if hsr_status == "ACTIVE":
+                s = 100
+            elif hsr_status in ("SYNCING", "INITIALIZING"):
+                s = 60
+            else:
+                s = 10
+            sites = hsr.get("sites", [])
+            secondary_host = sites[0].get("secondary_host", "") if sites else ""
+            domain_scores["hsr"] = s
+            indicators["hsr"] = {
+                "status":               _label(s),
+                "score":                s,
+                "replication_status":   hsr_status,
+                "replication_mode":     hsr.get("mode", ""),
+                "secondary_host":       secondary_host,
+            }
 
     if not domain_scores:
         return {"score": 0, "status": "UNKNOWN", "indicators": {}}
