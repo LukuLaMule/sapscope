@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     # Absent → SaaS mode (no license check)
     license_key: str | None = None
 
+    # License server mode (sapscope.com only — exposes /api/license/* endpoints)
+    is_license_server: bool = False
+
     # Stripe (SaaS billing)
     stripe_secret_key: str | None = None
     stripe_webhook_secret: str | None = None
