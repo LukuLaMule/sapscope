@@ -123,9 +123,48 @@ export default function OverviewPage() {
       <div className="space-y-4">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Your Clients</h2>
         {filtered.length === 0 ? (
-          <div className="section-card flex items-center justify-center py-12 text-muted-foreground text-sm">
-            {search ? `No clients matching "${search}"` : "No clients yet."}
-          </div>
+          search ? (
+            <div className="section-card flex items-center justify-center py-12 text-muted-foreground text-sm">
+              {`No clients matching "${search}"`}
+            </div>
+          ) : (
+            <div className="section-card flex flex-col items-center justify-center py-14 gap-6 text-center">
+              <div>
+                <h2 className="text-xl font-bold text-foreground mb-1">Welcome to SAPscope</h2>
+                <p className="text-sm text-muted-foreground">Follow these steps to start monitoring your SAP landscape.</p>
+              </div>
+              <ol className="space-y-3 text-left w-full max-w-md">
+                {[
+                  "An admin creates your SAP client in the Admin panel",
+                  "A token is generated and given to you",
+                  "Install the agent on your SAP server with the token",
+                ].map((text, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-mono font-bold text-primary flex-shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-foreground">{text}</span>
+                  </li>
+                ))}
+              </ol>
+              <div className="flex gap-3 flex-wrap justify-center">
+                {me?.is_admin && (
+                  <button
+                    onClick={() => navigate("/admin")}
+                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    Go to Admin panel
+                  </button>
+                )}
+                <button
+                  onClick={() => navigate("/onboarding")}
+                  className="px-4 py-2 rounded-md border border-border text-sm font-medium text-foreground hover:bg-[hsl(var(--surface-1))] transition-colors"
+                >
+                  View setup guide
+                </button>
+              </div>
+            </div>
+          )
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {filtered.map(client => (

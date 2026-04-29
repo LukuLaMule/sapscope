@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchOnboarding } from "@/lib/api";
@@ -33,11 +33,6 @@ export default function OnboardingPage() {
     staleTime: Infinity,
     retry:     false,
   });
-
-  // Skip directly to token step if already past welcome
-  useEffect(() => {
-    if (!activated && step === 0) setStep(1);
-  }, [activated]);
 
   function copy(text: string) {
     navigator.clipboard.writeText(text).then(() => {
@@ -86,11 +81,15 @@ export default function OnboardingPage() {
                 <Rocket className="w-8 h-8 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Subscription activated!</h1>
+                <h1 className="text-2xl font-bold text-foreground">
+                  {activated ? "Subscription activated!" : "Welcome to SAPscope"}
+                </h1>
                 <p className="text-muted-foreground mt-2">
-                  {clientName
-                    ? <>Your client <span className="text-foreground font-semibold">{clientName}</span> has been created. Let's set up your first SAP agent.</>
-                    : "Let's set up your first SAP agent."
+                  {activated
+                    ? (clientName
+                        ? <>Your client <span className="text-foreground font-semibold">{clientName}</span> has been created. Let's set up your first SAP agent.</>
+                        : "Let's set up your first SAP agent.")
+                    : "Welcome to SAPscope. Let's connect your first SAP system."
                   }
                 </p>
               </div>
