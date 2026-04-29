@@ -257,7 +257,7 @@ export default function SystemDetailPage() {
                 <h3 className="text-sm font-semibold text-foreground">Health Score Breakdown</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {DOMAINS.filter(d => hc.indicators[d.key]).map(d => {
+                {DOMAINS.filter(d => hc.indicators[d.key] != null).map(d => {
                   const ind = hc.indicators[d.key];
                   const barColor = ind.score >= 80 ? "hsl(var(--status-ok))"
                     : ind.score >= 50 ? "hsl(var(--status-warning))"

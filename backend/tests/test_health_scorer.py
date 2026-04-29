@@ -114,3 +114,88 @@ def test_status_thresholds():
     # Score < 50 → CRITICAL  (10 dumps → score 20)
     r = health_scorer.compute({"dumps_7d": 10})
     assert r["status"] == "CRITICAL"
+
+
+# ── HANA System Replication (HSR) tests ─────────────────────────────────────
+
+def _hsr_db_stats(hsr_status: str, configured: bool = True) -> dict:
+    """Helper: build a minimal db_stats_data dict for HSR tests."""
+    return {
+        "hsr": {
+            "configured": configured,
+            "status": hsr_status,
+            "mode": "SYNC",
+            "sites": [{"secondary_host": "hana-secondary"}],
+        }
+    }
+
+
+def test_hsr_active_score_100():
+    result = health_scorer.compute(
+        {"dumps_7d": 0},
+        db_stats_data=_hsr_db_stats("ACTIVE"),
+    )
+    ind = result["indicators"]["hsr"]
+    assert ind["score"] == 100
+    assert ind["status"] == "OK"
+    assert ind["replication_status"] == "ACTIVE"
+
+
+def test_hsr_error_score_10():
+    result = health_scorer.compute(
+        {"dumps_7d": 0},
+        db_stats_data=_hsr_db_stats("ERROR"),
+    )
+    ind = result["indicators"]["hsr"]
+    assert ind["score"] == 10
+    assert ind["status"] == "CRITICAL"
+
+
+def test_hsr_syncing_score_60():
+    result = health_scorer.compute(
+        {"dumps_7d": 0},
+        db_stats_data=_hsr_db_stats("SYNCING"),
+    )
+    ind = result["indicators"]["hsr"]
+    assert ind["score"] == 60
+    assert ind["status"] == "WARNING"
+
+
+def test_hsr_initializing_score_60():
+    result = health_scorer.compute(
+        {"dumps_7d": 0},
+        db_stats_data=_hsr_db_stats("INITIALIZING"),
+    )
+    ind = result["indicators"]["hsr"]
+    assert ind["score"] == 60
+    assert ind["status"] == "WARNING"
+
+
+def test_hsr_not_configured_domain_absent():
+    """configured=False → hsr domain must not appear in indicators."""
+    result = health_scorer.compute(
+        {"dumps_7d": 0},
+        db_stats_data=_hsr_db_stats("ACTIVE", configured=False),
+    )
+    assert "hsr" not in result["indicators"]
+
+
+def test_hsr_absent_in_db_stats_no_effect():
+    """db_stats_data with no 'hsr' key → hsr domain absent, no crash."""
+    result = health_scorer.compute(
+        {"dumps_7d": 0},
+        db_stats_data={"disk": {"used_pct": 30}},
+    )
+    assert "hsr" not in result["indicators"]
+    # Stability domain still scored
+    assert result["indicators"]["stability"]["score"] == 100
+
+
+def test_hsr_none_db_stats_no_effect():
+    """db_stats_data=None (non-HANA system) → hsr domain absent."""
+    result = health_scorer.compute(
+        {"dumps_7d": 0},
+        db_stats_data=None,
+    )
+    assert "hsr" not in result["indicators"]
+    assert result["score"] == 100

@@ -123,7 +123,7 @@ export function snapshotToSystem(snap: ApiSnapshot, clientId = ""): SAPSystem {
     tier,
     systemType:           detectSystemType(
                             snap.payload?.system_type,
-                            snap.payload?.components ?? [],
+                            Array.isArray(snap.payload?.components) ? snap.payload.components : [],
                             snap.system_sid,
                           ),
     transportLine:        resolveTransportLine(snap.system_sid, snap.system_release, snap.payload?.stms_domain ?? null),

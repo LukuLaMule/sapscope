@@ -76,7 +76,7 @@ export default function InventoryPage() {
           basisSP:       s.basis_sp,
           dbType:        s.db_type || "—",
           score:         s.health?.score ?? 0,
-          status:        s.health?.status ?? "UNKNOWN",
+          status:        s.health?.status === "UNKNOWN" ? "WARNING" : (s.health?.status ?? "WARNING"),
           lastSnapshot:  s.collected_at,
           snapId:        `${c.id}__${s.id}`,
         };
