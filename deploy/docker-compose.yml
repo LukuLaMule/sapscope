@@ -18,7 +18,7 @@ services:
       - internal
 
   backend:
-    image: ghcr.io/sapscope/backend:latest
+    image: ghcr.io/lukulamule/sapscope-backend:latest
     restart: unless-stopped
     depends_on:
       db:
@@ -51,7 +51,7 @@ services:
       - internal
 
   frontend:
-    image: ghcr.io/sapscope/frontend:latest
+    image: ghcr.io/lukulamule/sapscope-frontend:latest
     restart: unless-stopped
     depends_on:
       - backend
