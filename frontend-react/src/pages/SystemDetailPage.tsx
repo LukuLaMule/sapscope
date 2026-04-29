@@ -14,6 +14,7 @@ import {
 import {
   ArrowLeft, Shield, Truck, Clock, Server, Cpu, FileText,
   Activity, Database, Layers, Box, Sparkles, Copy, AlertTriangle, Printer, StickyNote, Pencil, Trash2, Gauge,
+  GitFork,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +73,7 @@ const DOMAINS: { key: string; label: string; icon: React.ReactNode }[] = [
   { key: "security",       label: "Security",       icon: <Shield className="w-4 h-4" /> },
   { key: "security_ops",   label: "Security Ops",   icon: <Shield className="w-4 h-4" /> },
   { key: "transports",     label: "Transports",     icon: <Truck className="w-4 h-4" /> },
+  { key: "hsr",            label: "HANA Replication", icon: <GitFork className="w-4 h-4" /> },
 ];
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -336,6 +338,9 @@ export default function SystemDetailPage() {
               ))}
             </div>
           </div>
+
+          {/* HANA System Replication */}
+          <HsrSection payload={snap.payload} />
 
           {/* Custom objects */}
           {snap.payload?.custom_objects?.total > 0 && (
@@ -812,6 +817,63 @@ function QuickKPI({ label, value, warn }: { label: string; value: string; warn?:
     <div className="kpi-card text-center min-w-[80px]">
       <div className={`font-mono text-sm font-bold ${warn ? "text-[hsl(var(--status-warning))]" : "text-foreground"}`}>{value}</div>
       <div className="text-[10px] text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function HsrSection({ payload }: { payload: Record<string, any> | null | undefined }) {
+  const hsr = payload?.db_stats?.hsr;
+  if (!hsr?.configured) return null;
+
+  const status = hsr.status ?? "UNKNOWN";
+  const isActive = status === "ACTIVE";
+  const isSyncing = status === "SYNCING" || status === "INITIALIZING";
+  const statusColor = isActive
+    ? "hsl(var(--status-ok))"
+    : isSyncing
+    ? "hsl(var(--status-warning))"
+    : "hsl(var(--status-critical))";
+  const statusBg = isActive
+    ? "bg-[hsl(var(--status-ok))]/10 border-[hsl(var(--status-ok))]/20"
+    : isSyncing
+    ? "bg-[hsl(var(--status-warning))]/10 border-[hsl(var(--status-warning))]/20"
+    : "bg-[hsl(var(--status-critical))]/10 border-[hsl(var(--status-critical))]/20";
+
+  const sites: any[] = hsr.sites ?? [];
+
+  return (
+    <div className="section-card">
+      <div className="section-header">
+        <div className="section-icon"><GitFork className="w-4 h-4" /></div>
+        <h3 className="text-sm font-semibold text-foreground">HANA System Replication</h3>
+        <span
+          className={`ml-auto text-xs font-mono font-bold px-2.5 py-1 rounded border ${statusBg}`}
+          style={{ color: statusColor }}
+        >
+          {status}
+        </span>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="kpi-card">
+          <div className="text-[11px] text-muted-foreground mb-1">Status</div>
+          <div className="text-sm font-mono font-semibold" style={{ color: statusColor }}>{status}</div>
+        </div>
+        <div className="kpi-card">
+          <div className="text-[11px] text-muted-foreground mb-1">Mode</div>
+          <div className="text-sm font-mono text-foreground">{hsr.mode || "—"}</div>
+        </div>
+        {sites.map((site, i) => (
+          <div key={i} className="kpi-card">
+            <div className="text-[11px] text-muted-foreground mb-1">
+              {site.site_name || `Site ${i + 1}`} → {site.secondary_site || "secondary"}
+            </div>
+            <div className="text-sm font-mono text-foreground truncate">{site.secondary_host || "—"}</div>
+            <div className="text-[10px] text-muted-foreground mt-0.5">
+              {site.secondary_active ? "active" : "inactive"}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

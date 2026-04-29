@@ -135,6 +135,58 @@ python -m agent --dry-run   # check RFC connection, print JSON
 python -m agent             # collect and send
 ```
 
+### Connection modes
+
+By default the agent connects directly to an application server (`ashost` mode). Two additional modes are supported for remote deployments or load-balanced landscapes.
+
+#### Option 1 — `systems.yaml` (recommended for remote / multi-system setups)
+
+Create a `systems.yaml` file next to the agent package:
+
+```yaml
+systems:
+  # Direct connection to application server (default — agent runs on the AS)
+  - mode: ashost
+    ashost: localhost
+    sysnr: "00"
+    client: "100"
+
+  # Message server — connect via load balancer (agent runs on a separate host)
+  - mode: mshost
+    mshost: sapms.company.com   # message server hostname
+    msserv: "3601"              # port or service name (e.g. "sapmsP01")
+    r3name: P01                 # SAP System ID
+    group: PUBLIC               # logon group (default: PUBLIC)
+    client: "100"
+
+  # Direct connection through a SAProuter
+  - mode: ashost
+    ashost: 10.0.1.5
+    sysnr: "00"
+    saprouter: /H/saprouter.company.com/H/
+    client: "000"
+```
+
+Credentials (`SAP_USER` / `SAP_PASSWD`) are always read from environment variables. Per-entry `user`/`passwd` overrides are supported but not recommended.
+
+The `systems.yaml` file takes priority over `SAPSCOPE_SYSTEMS` and `/usr/sap/` auto-discovery.
+
+#### Option 2 — `SAPSCOPE_SYSTEMS` env var (simple multi-system on the same host)
+
+```env
+SAPSCOPE_SYSTEMS=P01:00 Q01:01 D01:02
+```
+
+Each entry is `SID:SYSNR`, connecting to `localhost` on that system number. Suitable when the agent runs directly on the SAP application server.
+
+#### Discovery priority
+
+| Priority | Source | Use case |
+|---|---|---|
+| 1 | `systems.yaml` | Remote hosts, message server, SAProuter |
+| 2 | `SAPSCOPE_SYSTEMS` env var | Multiple local SIDs on same host |
+| 3 | Auto-discovery from `/usr/sap/` | Single-host auto-detected systems |
+
 ### Required RFC user on the SAP side
 
 See [docs/sap-rfc-user-setup.md](docs/sap-rfc-user-setup.md) for creating the communication user and the minimum required authorisations.
