@@ -208,6 +208,7 @@ export default function DiffPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <CalendarDays className="w-4 h-4 text-muted-foreground" />
                   <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Before</span>
+                  {!snapAId && <span className="text-[10px] text-muted-foreground/60 border border-border px-1.5 py-0.5 rounded ml-auto">auto</span>}
                 </div>
                 <Select value={effectiveA} onValueChange={setSnapAId}>
                   <SelectTrigger className="bg-[hsl(var(--surface-1))] border-border font-mono">
@@ -239,6 +240,7 @@ export default function DiffPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <CalendarDays className="w-4 h-4 text-primary" />
                   <span className="text-xs font-semibold uppercase tracking-wider text-primary">After</span>
+                  {!snapBId && <span className="text-[10px] text-muted-foreground/60 border border-border px-1.5 py-0.5 rounded ml-auto">auto</span>}
                 </div>
                 <Select value={effectiveB} onValueChange={setSnapBId}>
                   <SelectTrigger className="bg-[hsl(var(--surface-1))] border-border font-mono">
