@@ -18,7 +18,7 @@ from .license import validate as validate_license
 from .limiter import limiter
 from .models import Base, OnboardingToken, PasswordResetToken
 from .reporter import send_daily_reports
-from .routers import admin, analysis, auth, billing, diff, history, notes, snapshots
+from .routers import admin, analysis, auth, billing, diff, history, license_server, license_status, notes, snapshots
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -122,6 +122,9 @@ app.include_router(history.router)
 app.include_router(notes.router)
 app.include_router(admin.router)
 app.include_router(billing.router)
+app.include_router(license_status.router)
+if settings.is_license_server:
+    app.include_router(license_server.router)
 
 
 @app.get("/healthz", tags=["ops"])

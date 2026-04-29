@@ -235,3 +235,22 @@ class SystemNote(Base):
     __table_args__ = (
         Index("ix_system_notes_client_sid", "client_id", "system_sid"),
     )
+
+
+class License(Base):
+    """Licence self-hosted émise par le serveur de licences central."""
+    __tablename__ = "licenses"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    key: Mapped[str] = mapped_column(String(36), unique=True, nullable=False, index=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    plan: Mapped[str] = mapped_column(String(50), nullable=False)   # trial | solo | team | enterprise
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    instance_id: Mapped[str | None] = mapped_column(String(255), nullable=True)  # UUID de l'instance activée
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
