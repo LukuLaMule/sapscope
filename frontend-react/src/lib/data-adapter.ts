@@ -137,7 +137,7 @@ export function snapshotToSystem(snap: ApiSnapshot, clientId = ""): SAPSystem {
     basisSP:              sp,
     kernelVersion:        kern,
     dbType:               snap.db_type ?? "—",
-    dbVersion:            "—",
+    dbVersion:            snap.payload?.db_stats?.hana_version ?? snap.payload?.db_stats?.db_version ?? "—",
     healthScore:          score,
     healthStatus:         status,
     avgDialogResponse:    snap.avg_response_ms ?? 0,

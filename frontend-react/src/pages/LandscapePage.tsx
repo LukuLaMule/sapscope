@@ -124,6 +124,10 @@ export default function LandscapePage() {
       {/* ── Contenu ───────────────────────────────────────────── */}
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">Loading systems…</div>
+      ) : !selectedClient ? (
+        <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+          Select a client to view its landscape.
+        </div>
       ) : clientSystems.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
           No snapshots yet for this client.
