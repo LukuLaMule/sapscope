@@ -1,8 +1,9 @@
-import { Home, GitCompare, Settings, Columns2, Table2, SlidersHorizontal } from "lucide-react";
+import { Home, GitCompare, Settings, Columns2, Table2, SlidersHorizontal, BadgeCheck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
@@ -10,6 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import type { LicenseStatus } from "@/lib/api";
 
 const items = [
   { title: "Overview",  url: "/",          icon: Home             },
@@ -20,9 +22,24 @@ const items = [
   { title: "Admin",     url: "/admin",     icon: Settings         },
 ];
 
-export function AppSidebar() {
+const TIER_LABEL: Record<string, string> = {
+  solo:       "Solo",
+  team:       "Team",
+  enterprise: "Enterprise",
+  trial:      "Trial",
+};
+
+interface Props {
+  license?: LicenseStatus;
+}
+
+export function AppSidebar({ license }: Props) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+
+  const showBadge = license?.configured && license.valid && license.plan;
+  const tierLabel = license?.plan ? (TIER_LABEL[license.plan] ?? license.plan) : null;
+  const isExpiringSoon = (license?.days_remaining ?? 999) <= 30;
 
   return (
     <Sidebar collapsible="icon">
@@ -44,6 +61,29 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {showBadge && (
+        <SidebarFooter className="border-t border-border pt-3 pb-3">
+          <div className={`flex items-center gap-2 px-3 ${collapsed ? "justify-center" : ""}`}>
+            <BadgeCheck className={`w-4 h-4 shrink-0 ${isExpiringSoon ? "text-[hsl(var(--status-warning))]" : "text-[hsl(var(--status-ok))]"}`} />
+            {!collapsed && (
+              <div className="min-w-0">
+                <div className={`text-xs font-semibold ${isExpiringSoon ? "text-[hsl(var(--status-warning))]" : "text-[hsl(var(--status-ok))]"}`}>
+                  {tierLabel}
+                </div>
+                {license?.expires_at && (
+                  <div className="text-[10px] text-muted-foreground truncate">
+                    {isExpiringSoon
+                      ? `Expires in ${license.days_remaining}d`
+                      : `Until ${new Date(license.expires_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" })}`
+                    }
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }

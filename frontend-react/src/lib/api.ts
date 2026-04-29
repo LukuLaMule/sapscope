@@ -218,3 +218,21 @@ export const assignClient = (userId: string, clientId: string): Promise<void> =>
 
 export const unassignClient = (userId: string, clientId: string): Promise<void> =>
   apiFetch(`/api/v1/admin/users/${userId}/clients/${clientId}`, { method: "DELETE" });
+
+// ── License ───────────────────────────────────────────────────────────────────
+
+export interface LicenseStatus {
+  configured:    boolean;
+  valid:         boolean;
+  plan:          string | null;
+  expires_at:    string | null;
+  days_remaining: number | null;
+  grace_mode:    boolean;
+  reason:        string | null;
+}
+
+export async function fetchLicenseStatus(): Promise<LicenseStatus> {
+  const res = await fetch(`${BASE}/api/license/status`);
+  if (!res.ok) return { configured: false, valid: false, plan: null, expires_at: null, days_remaining: null, grace_mode: false, reason: null };
+  return res.json();
+}
