@@ -26,6 +26,7 @@ class Client(Base):
         UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    logo_b64: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

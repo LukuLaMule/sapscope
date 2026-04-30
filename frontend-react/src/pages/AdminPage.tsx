@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchAdminClients, createAdminClient, deleteAdminClient,
+  updateClientLogo,
   fetchUsers, createUser, assignClient, unassignClient,
   fetchTokens, issueToken, revokeToken,
   type ApiClient, type ApiUser, type ApiToken, type ApiTokenCreated,
@@ -13,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/sap-utils";
-import { Plus, Copy, Terminal, Users, Key, Building2, Trash2, RefreshCw } from "lucide-react";
+import { Plus, Copy, Terminal, Users, Key, Building2, Trash2, RefreshCw, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminPage() {
@@ -92,6 +93,7 @@ function ClientsTab() {
             <thead>
               <tr className="bg-[hsl(var(--surface-2))] text-xs text-muted-foreground uppercase tracking-wider">
                 <th className="text-left px-4 py-2.5 font-medium">Client</th>
+                <th className="text-left px-4 py-2.5 font-medium">Logo</th>
                 <th className="text-left px-4 py-2.5 font-medium">Created</th>
                 <th className="text-left px-4 py-2.5 font-medium">Actions</th>
               </tr>
@@ -100,6 +102,9 @@ function ClientsTab() {
               {clients.map((c, i) => (
                 <tr key={c.id} className={i % 2 === 0 ? "bg-card" : "bg-[hsl(var(--surface-1))]"}>
                   <td className="px-4 py-2.5 font-medium text-foreground">{c.name}</td>
+                  <td className="px-4 py-2.5">
+                    <LogoUploadCell client={c} onUpdated={() => { qc.invalidateQueries({ queryKey: ["admin-clients"] }); qc.invalidateQueries({ queryKey: ["clients"] }); }} />
+                  </td>
                   <td className="px-4 py-2.5 text-muted-foreground">{formatDate(c.created_at)}</td>
                   <td className="px-4 py-2.5 flex items-center gap-2">
                     <Button variant="ghost" size="sm" onClick={() => setWizard(wizard === c.id ? null : c.id)} className="text-xs">
@@ -169,6 +174,90 @@ function TokenWizard({ clientId, clients, onClose }: { clientId: string; clients
           <p className="text-[11px] text-muted-foreground">This token will not be shown again.</p>
         </>
       )}
+    </div>
+  );
+}
+
+// ── Logo upload cell ──────────────────────────────────────────────────────────
+
+function LogoUploadCell({ client, onUpdated }: { client: ApiClient; onUpdated: () => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("File must be an image"); return; }
+    if (file.size > 375_000) { toast.error("Image too large (max 375 KB)"); return; }
+    setLoading(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const b64 = reader.result as string; // data:image/...;base64,...
+        await updateClientLogo(client.id, b64);
+        toast.success("Logo updated");
+        onUpdated();
+      } catch (e: any) {
+        toast.error(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemove = async () => {
+    setLoading(true);
+    try {
+      await updateClientLogo(client.id, null);
+      toast.success("Logo removed");
+      onUpdated();
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {client.logo_b64 ? (
+        <>
+          <img src={client.logo_b64} alt="logo" className="h-7 max-w-[80px] object-contain rounded" />
+          <button
+            title="Remove logo"
+            disabled={loading}
+            onClick={handleRemove}
+            className="text-muted-foreground hover:text-destructive transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </>
+      ) : (
+        <button
+          title="Upload logo"
+          disabled={loading}
+          onClick={() => inputRef.current?.click()}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ImagePlus className="w-3.5 h-3.5" />
+          {loading ? "…" : "Add logo"}
+        </button>
+      )}
+      {client.logo_b64 && !loading && (
+        <button
+          title="Change logo"
+          onClick={() => inputRef.current?.click()}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ImagePlus className="w-3.5 h-3.5" />
+        </button>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
+      />
     </div>
   );
 }

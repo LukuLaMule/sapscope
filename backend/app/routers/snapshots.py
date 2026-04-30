@@ -42,7 +42,70 @@ async def list_my_clients(
             .order_by(Client.name)
             .limit(limit)
         )
-    return [ClientOut(id=c.id, name=c.name, created_at=c.created_at) for c in rows.scalars()]
+    return [ClientOut(id=c.id, name=c.name, logo_b64=c.logo_b64, created_at=c.created_at) for c in rows.scalars()]
+
+
+# ── Cross-client latest snapshots (for cross-system diff) ────────────────────
+
+@router.get("/api/v1/snapshots/latest")
+async def list_latest_snapshots(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+):
+    """
+    Returns the most recent snapshot per (client, SID) pair across all clients
+    accessible to the current user. Used for cross-system diff selection.
+    Response items: {id, client_id, client_name, system_sid, collected_at, health}
+    """
+    # Collect accessible clients
+    if user.is_admin:
+        rows = await db.execute(select(Client).order_by(Client.name))
+        clients_list = list(rows.scalars())
+    else:
+        rows = await db.execute(
+            select(Client)
+            .join(UserClient, UserClient.client_id == Client.id)
+            .where(UserClient.user_id == user.id)
+            .order_by(Client.name)
+        )
+        clients_list = list(rows.scalars())
+
+    client_map = {c.id: c.name for c in clients_list}
+    if not client_map:
+        return []
+
+    # Fetch recent snapshots for those clients (over-fetch then deduplicate)
+    q = (
+        select(Snapshot)
+        .options(selectinload(Snapshot.health_check))
+        .where(Snapshot.client_id.in_(list(client_map.keys())))
+        .order_by(Snapshot.collected_at.desc())
+        .limit(limit * 10)
+    )
+    rows = await db.execute(q)
+    all_snaps = list(rows.scalars())
+
+    # Keep only the latest per (client_id, system_sid)
+    seen: dict[tuple[str, str], bool] = {}
+    result = []
+    for s in all_snaps:
+        key = (s.client_id, s.system_sid)
+        if key not in seen:
+            seen[key] = True
+            hc = s.health_check
+            result.append({
+                "id":           s.id,
+                "client_id":    s.client_id,
+                "client_name":  client_map.get(s.client_id, ""),
+                "system_sid":   s.system_sid,
+                "collected_at": s.collected_at.isoformat(),
+                "health":       {"score": hc.score, "status": hc.status} if hc else None,
+            })
+            if len(result) >= limit:
+                break
+
+    return result
 
 
 # ── Agent write ───────────────────────────────────────────────────────────────

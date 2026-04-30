@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..auth import get_current_user, hash_password
 from ..database import get_db
 from ..models import AgentToken, Client, User, UserClient
-from ..schemas import AdminToggle, ClientOut, PasswordReset, TokenCreated, TokenOut, UserCreate, UserOut
+from ..schemas import AdminToggle, ClientOut, LogoUpdateRequest, PasswordReset, TokenCreated, TokenOut, UserCreate, UserOut
 from ..settings import settings
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -37,7 +37,7 @@ async def create_client(
     db.add(client)
     await db.commit()
     await db.refresh(client)
-    return ClientOut(id=client.id, name=client.name, created_at=client.created_at)
+    return ClientOut(id=client.id, name=client.name, logo_b64=client.logo_b64, created_at=client.created_at)
 
 
 @router.get("/clients", response_model=list[ClientOut])
@@ -50,7 +50,25 @@ async def list_clients(
     rows = await db.execute(
         select(Client).order_by(Client.name).limit(limit).offset(offset)
     )
-    return [ClientOut(id=c.id, name=c.name, created_at=c.created_at) for c in rows.scalars()]
+    return [ClientOut(id=c.id, name=c.name, logo_b64=c.logo_b64, created_at=c.created_at) for c in rows.scalars()]
+
+
+@router.patch("/clients/{client_id}/logo", status_code=status.HTTP_204_NO_CONTENT)
+async def update_client_logo(
+    client_id: str,
+    body: LogoUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(_require_admin),
+):
+    row = await db.execute(select(Client).where(Client.id == client_id))
+    client = row.scalar_one_or_none()
+    if client is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    # Limit logo size: base64 string max ~680KB (≈ 500KB image)
+    if body.logo_b64 is not None and len(body.logo_b64) > 680_000:
+        raise HTTPException(status_code=413, detail="Logo too large (max 500 KB)")
+    client.logo_b64 = body.logo_b64
+    await db.commit()
 
 
 @router.delete("/clients/{client_id}", status_code=status.HTTP_204_NO_CONTENT)

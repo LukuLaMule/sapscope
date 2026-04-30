@@ -197,9 +197,18 @@ export default function ReportPage() {
                 SAP Landscape Intelligence
               </div>
             </div>
-            <div style={{ fontSize: 11, color: "#4a7ab5", textAlign: "right" }}>
-              <div>Rapport généré le</div>
-              <div style={{ color: "#8ab4d4", marginTop: 2 }}>{generatedDate}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+              {clientInfo?.logo_b64 && (
+                <img
+                  src={clientInfo.logo_b64}
+                  alt="Logo client"
+                  style={{ maxHeight: 48, maxWidth: 160, objectFit: "contain" }}
+                />
+              )}
+              <div style={{ fontSize: 11, color: "#4a7ab5", textAlign: "right" }}>
+                <div>Rapport généré le</div>
+                <div style={{ color: "#8ab4d4", marginTop: 2 }}>{generatedDate}</div>
+              </div>
             </div>
           </div>
 

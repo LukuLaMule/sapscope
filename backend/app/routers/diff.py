@@ -1,9 +1,12 @@
 """
 GET /api/v1/clients/{client_id}/snapshots/{snapshot_id}/diff?base={snap_id}
+GET /api/v1/clients/{client_id}/snapshots/{snapshot_id}/diff?base={snap_id}&cross_system=true
+    &base_client_id={other_client_id}
 
-Returns a structured comparison between two snapshots of the same SID.
-snap_a = snapshot_id  (newer, "after")
-snap_b = base         (older, "before")
+Standard diff: compares two snapshots of the SAME SID.
+Cross-system diff: compares two snapshots from different SAP systems (or different clients).
+  - cross_system=true  disables the same-SID check
+  - base_client_id     (optional) lets base snapshot belong to a different client
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -21,31 +24,47 @@ router = APIRouter(tags=["diff"])
 async def get_diff(
     client_id: str,
     snapshot_id: str,
-    base: str = Query(..., description="Snapshot ID to compare against (the older one)"),
+    base: str = Query(..., description="Snapshot ID to compare against (the older/reference one)"),
+    cross_system: bool = Query(False, description="Allow comparing snapshots from different SAP systems"),
+    base_client_id: str | None = Query(None, description="Client ID owning the base snapshot (for cross-client diffs)"),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     client = await get_client_for_user(client_id, user, db)
 
-    async def _load(sid: str) -> Snapshot:
+    async def _load(snap_id: str, owner_client_id: str) -> Snapshot:
         row = await db.execute(
-            select(Snapshot).where(Snapshot.id == sid, Snapshot.client_id == client.id)
+            select(Snapshot).where(Snapshot.id == snap_id, Snapshot.client_id == owner_client_id)
         )
         snap = row.scalar_one_or_none()
         if snap is None:
-            raise HTTPException(status_code=404, detail=f"Snapshot {sid} not found")
+            raise HTTPException(status_code=404, detail=f"Snapshot {snap_id} not found")
         return snap
 
-    snap_a = await _load(snapshot_id)
-    snap_b = await _load(base)
+    snap_a = await _load(snapshot_id, client.id)
 
-    if snap_a.system_sid != snap_b.system_sid:
+    # The base snapshot may belong to a different client (cross-system scenario).
+    # We verify the user has access to that client before loading.
+    if base_client_id and base_client_id != client_id:
+        base_client = await get_client_for_user(base_client_id, user, db)
+        snap_b = await _load(base, base_client.id)
+    else:
+        snap_b = await _load(base, client.id)
+
+    if not cross_system and snap_a.system_sid != snap_b.system_sid:
         raise HTTPException(
             status_code=400,
             detail="Cannot diff snapshots from different SAP systems",
         )
 
-    return _compute_diff(snap_a, snap_b)
+    result = _compute_diff(snap_a, snap_b)
+
+    if cross_system:
+        result["cross_system"] = True
+        result["system_a"] = snap_a.system_sid
+        result["system_b"] = snap_b.system_sid
+
+    return result
 
 
 # ── Diff computation ──────────────────────────────────────────────────────────
