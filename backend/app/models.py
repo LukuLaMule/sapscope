@@ -239,6 +239,23 @@ class SystemNote(Base):
     )
 
 
+class TrialRequest(Base):
+    """Demande d'essai self-hosted — enregistre l'email, l'org et la clé de licence associée."""
+    __tablename__ = "trial_requests"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    org: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    license_key: Mapped[str] = mapped_column(String(36), nullable=False)  # UUID de la licence
+    requested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class License(Base):
     """Licence self-hosted émise par le serveur de licences central."""
     __tablename__ = "licenses"

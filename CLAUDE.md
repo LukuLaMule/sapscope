@@ -55,6 +55,11 @@ SAPscope est un outil pour le Basis admin, pas un remplacement. Les nouvelles fo
   - Backend : `GET /api/v1/clients/{id}/snapshots/{id}/diff?cross_system=true&base_client_id={id}` — paramètre `cross_system=false` par défaut (comportement inchangé) ; `base_client_id` optionnel pour cross-client
   - Nouveau endpoint : `GET /api/v1/snapshots/latest?limit=50` — dernier snapshot par (client, SID) pour tous les clients accessibles ; retourne `{id, client_id, client_name, system_sid, collected_at, health}`
   - Frontend : `DiffPage.tsx` — deux onglets : "Same System" (diff temporel inchangé) et "Cross-System" (sélecteur parmi tous les systèmes disponibles, résultats avec badge `PRD vs QAS`, tableaux composants/SP/custom objects)
+- Kit d'essai self-hosted automatisé — endpoint public `POST /api/v1/trial/request` (body `{email, org, name}`) ; 201 = kit envoyé, 409 = email déjà utilisé ; rate-limit 3/h
+  - Modèle `TrialRequest` dans `models.py` + migration `backend/migrations/20260430_trial_requests.sql`
+  - Router : `backend/app/routers/trial.py` — crée une `License` plan=trial 30j + un `TrialRequest`, envoie le kit par email en background
+  - Mailer : `send_trial_kit_email()` + `send_trial_reminder_email()` dans `mailer.py`
+  - Job APScheduler `trial_reminders` à 9h00 dans `trial_reminder.py` — rappel J+25 (expiration dans 4-6 jours)
 - Serveur de licences central — `backend/app/routers/license_server.py` + modèle `License` dans `models.py`
   - Activer via `IS_LICENSE_SERVER=true` dans l'env et `app.include_router(license_server.router)` dans `main.py`
   - Endpoints publics : `POST /api/license/validate`, `POST /api/license/activate`

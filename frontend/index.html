@@ -504,6 +504,50 @@
     .footer-links a:hover { color: var(--fg); }
     .footer-copy { font-size: 13px; color: var(--fg-3); }
 
+    /* ── FREE TRIAL FORM ─────────────────────────────────────────────────── */
+    #trial { background: var(--bg-2); border-top: 1px solid var(--border-2); }
+    .trial-card {
+      max-width: 480px; margin: 0 auto;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 44px 40px;
+      box-shadow: 0 0 48px rgba(74,158,255,.08), 0 24px 64px rgba(0,0,0,.35);
+    }
+    .trial-form { display: flex; flex-direction: column; gap: 14px; margin-top: 32px; }
+    .trial-input {
+      width: 100%; padding: 13px 16px;
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--fg);
+      font-family: 'IBM Plex Sans', sans-serif; font-size: 15px;
+      transition: border-color .2s, background .2s;
+      outline: none;
+    }
+    .trial-input::placeholder { color: var(--fg-3); }
+    .trial-input:focus { border-color: rgba(74,158,255,.55); background: rgba(74,158,255,.06); }
+    .trial-btn {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, #4a9eff 0%, #5b5bd6 100%);
+      color: #fff; border: none; border-radius: 10px;
+      font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 600;
+      cursor: pointer; margin-top: 4px;
+      transition: opacity .2s, transform .2s;
+      box-shadow: 0 4px 20px rgba(74,158,255,.35);
+    }
+    .trial-btn:hover:not(:disabled) { opacity: .88; transform: scale(1.02); }
+    .trial-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .trial-success {
+      display: none; text-align: center; padding: 20px 0 4px;
+      font-size: 17px; font-weight: 600; color: var(--green); line-height: 1.5;
+    }
+    .trial-error {
+      display: none;
+      padding: 12px 16px; border-radius: 8px;
+      background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.25);
+      color: var(--red); font-size: 14px; text-align: center;
+    }
+    @media (max-width: 560px) {
+      .trial-card { padding: 32px 20px; }
+    }
+
     /* ── ANIMATIONS ───────────────────────────────────────────────────────── */
     .fade-up {
       opacity: 0; transform: translateY(32px);
@@ -567,6 +611,7 @@
     <div class="nav-links">
       <a href="#features" data-i18n="nav_features">Features</a>
       <a href="#how" data-i18n="nav_how">How it works</a>
+      <a href="#trial" data-i18n="nav_trial">Free Trial</a>
       <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
       <a href="https://app.sapscope.com/docs" data-i18n="nav_docs">Documentation</a>
     </div>
@@ -900,6 +945,52 @@
   </div>
 </div>
 
+<!-- ── FREE TRIAL ────────────────────────────────────────────────────────────── -->
+<div id="trial">
+  <div class="section">
+    <div class="section-eyebrow fade-up" data-i18n="trial_eyebrow">Free Trial</div>
+    <h2 class="section-title fade-up" data-i18n="trial_title">Try SAPscope free for 30 days</h2>
+    <p class="section-sub fade-up" data-i18n="trial_sub">Self-hosted on your servers. No credit card required.</p>
+
+    <div class="trial-card fade-up">
+      <form class="trial-form" id="trial-form" novalidate>
+        <input
+          class="trial-input"
+          type="text"
+          id="trial-name"
+          name="name"
+          autocomplete="name"
+          data-i18n-placeholder="trial_name_placeholder"
+          placeholder="Your name (optional)"
+        >
+        <input
+          class="trial-input"
+          type="text"
+          id="trial-org"
+          name="org"
+          autocomplete="organization"
+          required
+          data-i18n-placeholder="trial_org_placeholder"
+          placeholder="Company name"
+        >
+        <input
+          class="trial-input"
+          type="email"
+          id="trial-email"
+          name="email"
+          autocomplete="email"
+          required
+          data-i18n-placeholder="trial_email_placeholder"
+          placeholder="Professional email"
+        >
+        <div class="trial-error" id="trial-error-msg"></div>
+        <button type="submit" class="trial-btn" id="trial-submit-btn" data-i18n="trial_btn">Get my free trial →</button>
+      </form>
+      <div class="trial-success" id="trial-success-msg" data-i18n="trial_success">✓ Check your email! Your trial kit is on its way.</div>
+    </div>
+  </div>
+</div>
+
 <!-- ── PRICING ────────────────────────────────────────────────────────────────── -->
 <div id="pricing">
   <div class="section">
@@ -1055,6 +1146,7 @@
       og_locale: 'en_US',
       nav_features: 'Features',
       nav_how: 'How it works',
+      nav_trial: 'Free Trial',
       nav_pricing: 'Pricing',
       nav_docs: 'Documentation',
       nav_signin: 'Sign in',
@@ -1132,6 +1224,16 @@
       faq6_a: 'Yes, no commitment, no fees. You can cancel from your account or by contacting us at <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. Cancellation takes effect at the end of the current period. We also offer a <strong>14-day money-back guarantee</strong>.',
       faq7_q: 'Is there an on-premise / self-hosted option?',
       faq7_a: 'Yes, <strong>SAPscope is exclusively self-hosted</strong> — your SAP data never leaves your infrastructure. You install SAPscope with Docker Compose on your own server. <a href="mailto:contact@sapscope.fr">Contact us</a> for a custom quote.',
+      trial_eyebrow: 'Free Trial',
+      trial_title: 'Try SAPscope free for 30 days',
+      trial_sub: 'Self-hosted on your servers. No credit card required.',
+      trial_name_placeholder: 'Your name (optional)',
+      trial_org_placeholder: 'Company name',
+      trial_email_placeholder: 'Professional email',
+      trial_btn: 'Get my free trial →',
+      trial_success: '✓ Check your email! Your trial kit is on its way.',
+      trial_error_409: 'This email already has an active trial.',
+      trial_error: 'Something went wrong. Try again.',
       pricing_eyebrow: 'Pricing',
       pricing_title: 'Self-hosted. Your data stays on your servers.',
       pricing_sub: 'Annual license. Deploy in 5 minutes with Docker. No cloud dependency.',
@@ -1191,6 +1293,7 @@
       og_locale: 'fr_FR',
       nav_features: 'Fonctionnalités',
       nav_how: 'Comment ça marche',
+      nav_trial: 'Essai gratuit',
       nav_pricing: 'Tarifs',
       nav_docs: 'Documentation',
       nav_signin: 'Se connecter',
@@ -1268,6 +1371,16 @@
       faq6_a: 'Oui, sans engagement ni frais. Vous pouvez résilier depuis votre espace client ou en nous contactant à <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. La résiliation prend effet à la fin de la période en cours. Nous proposons également une <strong>garantie satisfait ou remboursé de 14 jours</strong>.',
       faq7_q: 'Existe-t-il une offre on-premise / self-hosted ?',
       faq7_a: 'Oui, <strong>SAPscope est exclusivement self-hosted</strong> — vos données SAP ne quittent jamais votre infrastructure. Vous installez SAPscope avec Docker Compose sur votre propre serveur. <a href="mailto:contact@sapscope.fr">Contactez-nous</a> pour un devis personnalisé.',
+      trial_eyebrow: 'Essai gratuit',
+      trial_title: 'Testez SAPscope gratuitement pendant 30 jours',
+      trial_sub: 'Sur vos serveurs. Sans carte bancaire.',
+      trial_name_placeholder: 'Votre nom (optionnel)',
+      trial_org_placeholder: "Nom de l'entreprise",
+      trial_email_placeholder: 'Email professionnel',
+      trial_btn: 'Obtenir mon essai gratuit →',
+      trial_success: '✓ Vérifiez vos emails ! Votre kit d\'essai arrive.',
+      trial_error_409: 'Cet email a déjà un essai en cours.',
+      trial_error: 'Une erreur s\'est produite. Réessayez.',
       pricing_eyebrow: 'Tarifs',
       pricing_title: 'Self-hosted. Vos données restent sur vos serveurs.',
       pricing_sub: 'Licence annuelle. Déploiement en 5 minutes avec Docker. Aucune dépendance cloud.',
@@ -1327,6 +1440,7 @@
       og_locale: 'de_DE',
       nav_features: 'Funktionen',
       nav_how: "So funktioniert's",
+      nav_trial: 'Kostenlos testen',
       nav_pricing: 'Preise',
       nav_docs: 'Dokumentation',
       nav_signin: 'Anmelden',
@@ -1404,6 +1518,16 @@
       faq6_a: 'Ja, ohne Vertragsbindung und ohne Gebühren. Sie können über Ihr Kundenkonto kündigen oder uns unter <a href="mailto:contact@sapscope.com">contact@sapscope.com</a> kontaktieren. Die Kündigung tritt am Ende des laufenden Zeitraums in Kraft. Wir bieten auch eine <strong>14-tägige Geld-zurück-Garantie</strong>.',
       faq7_q: 'Gibt es eine On-Premise / Self-Hosted-Option?',
       faq7_a: 'Ja, <strong>SAPscope ist ausschließlich self-hosted</strong> — Ihre SAP-Daten verlassen niemals Ihre Infrastruktur. Sie installieren SAPscope mit Docker Compose auf Ihrem eigenen Server. <a href="mailto:contact@sapscope.fr">Kontaktieren Sie uns</a> für ein individuelles Angebot.',
+      trial_eyebrow: 'Kostenlose Testversion',
+      trial_title: '30 Tage kostenlos testen',
+      trial_sub: 'Auf Ihren Servern. Keine Kreditkarte erforderlich.',
+      trial_name_placeholder: 'Ihr Name (optional)',
+      trial_org_placeholder: 'Unternehmensname',
+      trial_email_placeholder: 'Geschäftliche E-Mail',
+      trial_btn: 'Kostenlos testen →',
+      trial_success: '✓ Prüfen Sie Ihre E-Mails! Ihr Testpaket ist unterwegs.',
+      trial_error_409: 'Diese E-Mail hat bereits eine aktive Testversion.',
+      trial_error: 'Etwas ist schiefgelaufen. Versuchen Sie es erneut.',
       pricing_eyebrow: 'Preise',
       pricing_title: 'Self-hosted. Ihre Daten bleiben auf Ihren Servern.',
       pricing_sub: 'Jahreslizenz. Deployment in 5 Minuten mit Docker. Keine Cloud-Abhängigkeit.',
@@ -1490,6 +1614,12 @@
       if (t[key] !== undefined) el.innerHTML = t[key];
     });
 
+    // Apply placeholder translations
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (t[key] !== undefined) el.placeholder = t[key];
+    });
+
     // Update dropdown
     const cur = document.getElementById('lang-current');
     if (cur) cur.textContent = lang.toUpperCase();
@@ -1510,6 +1640,85 @@
                : supported.includes(browser) ? browser
                : 'en';
     applyLang(lang);
+  })();
+
+  // ── Free Trial form ───────────────────────────────────────────────────────
+  (function() {
+    const form      = document.getElementById('trial-form');
+    const btn       = document.getElementById('trial-submit-btn');
+    const errMsg    = document.getElementById('trial-error-msg');
+    const successEl = document.getElementById('trial-success-msg');
+    if (!form) return;
+
+    function getCurrentLang() {
+      return localStorage.getItem('sapscope_lang_landing') || 'en';
+    }
+
+    function showError(msg) {
+      errMsg.textContent = msg;
+      errMsg.style.display = 'block';
+    }
+
+    function hideError() {
+      errMsg.style.display = 'none';
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    }
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      hideError();
+
+      const name  = document.getElementById('trial-name').value.trim();
+      const org   = document.getElementById('trial-org').value.trim();
+      const email = document.getElementById('trial-email').value.trim();
+      const t     = TRANSLATIONS[getCurrentLang()] || TRANSLATIONS['en'];
+
+      // Validation
+      if (!org) {
+        showError(t.trial_org_placeholder + ' — ' + (getCurrentLang() === 'fr' ? 'champ requis' : getCurrentLang() === 'de' ? 'Pflichtfeld' : 'required field'));
+        document.getElementById('trial-org').focus();
+        return;
+      }
+      if (!email || !isValidEmail(email)) {
+        showError(t.trial_email_placeholder + ' — ' + (getCurrentLang() === 'fr' ? 'format invalide' : getCurrentLang() === 'de' ? 'ungültiges Format' : 'invalid format'));
+        document.getElementById('trial-email').focus();
+        return;
+      }
+
+      // Loading state
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = getCurrentLang() === 'fr' ? 'Envoi en cours…' : getCurrentLang() === 'de' ? 'Wird gesendet…' : 'Sending…';
+
+      try {
+        const res = await fetch('/api/v1/trial/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, org, name })
+        });
+
+        if (res.status === 201) {
+          form.style.display = 'none';
+          successEl.style.display = 'block';
+          successEl.textContent = t.trial_success;
+        } else if (res.status === 409) {
+          showError(t.trial_error_409);
+          btn.disabled = false;
+          btn.textContent = originalText;
+        } else {
+          showError(t.trial_error);
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      } catch (err) {
+        showError((TRANSLATIONS[getCurrentLang()] || TRANSLATIONS['en']).trial_error);
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
   })();
 
   // Lang dropdown
