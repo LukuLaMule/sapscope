@@ -311,6 +311,21 @@ async def billing_status(
     sub = row.scalar_one_or_none()
     if not sub:
         return {"subscribed": False}
+
+    if sub.tier == "trial":
+        now = datetime.now(timezone.utc)
+        days_remaining = max(0, (sub.trial_ends_at - now).days)
+        if days_remaining == 0 and sub.status == "active":
+            sub.status = "expired"
+            await db.commit()
+        return {
+            "subscribed": True,
+            "tier": "trial",
+            "status": sub.status,
+            "trial_ends_at": sub.trial_ends_at.isoformat(),
+            "days_remaining": days_remaining,
+        }
+
     return {
         "subscribed": True,
         "tier": sub.tier,

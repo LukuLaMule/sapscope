@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAPscope — Preview nouvelle identité</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* ── Nouvelle palette SAP-world ── */
+      --bg:       #0a1628;   /* navy profond — plus #000 Apple */
+      --bg-2:     #0d1f38;
+      --bg-3:     #112240;
+      --fg:       #dce6f0;   /* bleu-gris doux — plus #f5f5f7 Apple */
+      --fg-2:     #8da9c4;
+      --fg-3:     #4a7090;
+      --accent:   #4a9eff;   /* saphir — plus #2997ff Apple */
+      --gold:     #c9a84c;   /* nouveau — Enterprise + highlights */
+      --green:    #2dd4a0;
+      --orange:   #f59e0b;
+      --red:      #f87171;
+      --border:   rgba(74,158,255,0.15);
+      --border-2: rgba(74,158,255,0.07);
+      --card:     rgba(255,255,255,0.03);
+      --r:        10px;      /* moins arrondi qu'Apple */
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: saturate(160%) blur(16px);
+      background: rgba(10,22,40,0.82);
+      border-bottom: 1px solid var(--border-2);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 54px;
+    }
+    .nav-logo {
+      font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
+      display: flex; align-items: center; gap: 2px;
+    }
+    .nav-logo .logo-sap { color: var(--fg); }
+    .nav-logo .logo-scope { color: var(--accent); }
+    .nav-logo .logo-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--gold); margin: 0 1px 6px;
+    }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--fg-2);
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--fg); }
+    .nav-cta { display: flex; align-items: center; gap: 10px; }
+    .btn-ghost {
+      font-size: 13px; font-weight: 500; color: var(--fg-2);
+      padding: 6px 14px; border-radius: 6px;
+      transition: color .2s, background .2s;
+    }
+    .btn-ghost:hover { color: var(--fg); background: rgba(255,255,255,.04); }
+    .btn-nav-primary {
+      font-size: 13px; font-weight: 600; color: #fff;
+      background: var(--accent); padding: 7px 16px; border-radius: 6px;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-nav-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 120px 24px 80px;
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .hero-glow {
+      position: absolute; top: -180px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 600px;
+      background: radial-gradient(ellipse at center,
+        rgba(74,158,255,.14) 0%,
+        rgba(201,168,76,.05) 45%,
+        transparent 70%);
+      pointer-events: none;
+    }
+    /* Ligne de grille subtile en fond — rappelle les outils enterprise */
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(74,158,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,158,255,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; color: var(--gold);
+      background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.25);
+      padding: 5px 14px; border-radius: 4px; margin-bottom: 36px;
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(48px, 7vw, 84px);
+      font-weight: 700; line-height: 1.06;
+      letter-spacing: -2px; margin-bottom: 28px;
+      /* Gradient navy → saphir, pas blanc → transparent Apple */
+      background: linear-gradient(160deg, #dce6f0 0%, #8da9c4 60%, #4a9eff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: clamp(16px, 2vw, 19px); font-weight: 400;
+      color: var(--fg-2); max-width: 580px; line-height: 1.65;
+      margin: 0 auto 44px;
+    }
+    .hero-actions {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 72px;
+    }
+    .btn-hero-primary {
+      font-size: 16px; font-weight: 600;
+      background: var(--accent); color: #fff;
+      padding: 14px 28px; border-radius: 8px;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 0 32px rgba(74,158,255,.3);
+    }
+    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 40px rgba(74,158,255,.45); }
+    .btn-hero-ghost {
+      font-size: 16px; font-weight: 500; color: var(--fg-2);
+      padding: 14px 28px; border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: border-color .2s, color .2s;
+    }
+    .btn-hero-ghost:hover { color: var(--fg); border-color: rgba(74,158,255,.4); }
+
+    /* ── MOCKUP ── */
+    .mockup-wrap {
+      width: 100%; max-width: 880px;
+      border-radius: 10px; overflow: hidden;
+      border: 1px solid rgba(74,158,255,.2);
+      box-shadow: 0 60px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(74,158,255,.08);
+      background: #091525;
+    }
+    .mockup-titlebar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 16px; background: #0d1f38;
+      border-bottom: 1px solid var(--border-2);
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28ca41; }
+    .mockup-url {
+      flex: 1; background: rgba(255,255,255,.05); border-radius: 5px;
+      padding: 4px 12px; font-size: 11px; color: var(--fg-3);
+      font-family: 'IBM Plex Mono', monospace; text-align: center;
+    }
+    .mockup-app { display: flex; height: 360px; overflow: hidden; position: relative; }
+
+    /* ── STATS ── */
+    .stats { background: var(--bg-3); border-top: 1px solid var(--border-2); border-bottom: 1px solid var(--border-2); }
+    .stats-inner {
+      max-width: 1100px; margin: 0 auto; padding: 56px 24px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 52px; font-weight: 700; letter-spacing: -2px; color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-value span { color: var(--accent); }
+    .stat-label { font-size: 14px; color: var(--fg-2); margin-top: 6px; }
+
+    /* ── SECTIONS ── */
+    .section { max-width: 1100px; margin: 0 auto; padding: 110px 24px; }
+    .section-eyebrow {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--gold); margin-bottom: 14px;
+      text-align: center;
+    }
+    .section-title {
+      font-size: clamp(32px, 4.5vw, 52px); font-weight: 700;
+      letter-spacing: -1.5px; line-height: 1.1; text-align: center;
+      margin-bottom: 18px; color: var(--fg);
+    }
+    .section-sub {
+      font-size: 17px; color: var(--fg-2); text-align: center;
+      max-width: 540px; margin: 0 auto 56px; line-height: 1.65;
+    }
+
+    /* ── FEATURE CARDS ── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    }
+    .feature-card {
+      background: var(--card); border: 1px solid var(--border-2);
+      border-radius: var(--r); padding: 28px;
+      transition: border-color .25s, transform .25s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(74,158,255,.3), transparent);
+      opacity: 0; transition: opacity .25s;
+    }
+    .feature-card:hover { border-color: rgba(74,158,255,.25); transform: translateY(-3px); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 8px;
+      background: rgba(74,158,255,.1); border: 1px solid rgba(74,158,255,.18);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 18px; color: var(--accent);
+    }
+    .feature-title { font-size: 17px; font-weight: 600; margin-bottom: 10px; letter-spacing: -.3px; }
+    .feature-text { font-size: 14px; color: var(--fg-2); line-height: 1.65; }
+
+    /* ── HOW IT WORKS ── */
+    .hiw-bg { background: var(--bg-2); }
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 72px;
+      align-items: center; padding: 72px 0;
+      border-bottom: 1px solid var(--border-2);
+    }
+    .step:last-child { border-bottom: none; }
+    .step.reverse { direction: rtl; }
+    .step.reverse > * { direction: ltr; }
+    .step-num {
+      font-size: 11px; font-weight: 700; color: var(--gold);
+      letter-spacing: .12em; text-transform: uppercase; margin-bottom: 14px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .step-title { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 14px; }
+    .step-text { font-size: 16px; color: var(--fg-2); line-height: 1.7; }
+    .step-visual {
+      background: var(--card); border: 1px solid var(--border-2);
+      border-radius: var(--r); padding: 28px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .code-line {
+      font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+      color: var(--fg-2); display: flex; align-items: flex-start; gap: 10px;
+    }
+    .code-prompt { color: var(--fg-3); user-select: none; }
+    .code-cmd { color: var(--green); }
+    .code-comment { color: var(--fg-3); font-style: italic; }
+    .agent-card {
+      display: flex; align-items: center; gap: 14px;
+      background: #0d1f38;
+      border-left: 3px solid var(--green);
+      border-radius: 0 6px 6px 0; padding: 12px 16px;
+    }
+    .agent-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+      flex-shrink: 0;
+    }
+    .agent-label { font-size: 13px; font-weight: 600; color: var(--fg); font-family: 'IBM Plex Sans', sans-serif; }
+    .agent-sub { font-size: 11px; color: var(--fg-3); font-family: 'IBM Plex Sans', sans-serif; margin-top: 2px; }
+    .analysis-preview {
+      background: #0d1f38;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0; padding: 16px;
+    }
+    .analysis-preview-title { font-size: 11px; font-weight: 700; margin-bottom: 10px; color: var(--fg-3); letter-spacing: .08em; text-transform: uppercase; font-family: 'IBM Plex Sans', sans-serif; }
+    .analysis-preview-line { font-size: 12px; color: var(--fg-2); line-height: 1.9; font-family: 'IBM Plex Mono', monospace; }
+    .analysis-preview-line.good { color: var(--green); }
+    .analysis-preview-line.warn { color: var(--orange); }
+
+    /* ── PRICING ── */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      align-items: start;
+    }
+    .pricing-card {
+      background: var(--card); border: 1px solid var(--border-2);
+      border-radius: var(--r); padding: 32px; position: relative;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.3); }
+    .pricing-card.featured {
+      background: linear-gradient(160deg, rgba(74,158,255,.08) 0%, rgba(74,158,255,.03) 100%);
+      border-color: rgba(74,158,255,.45);
+      box-shadow: 0 0 40px rgba(74,158,255,.15);
+      transform: scale(1.03);
+    }
+    .pricing-card.featured:hover { transform: scale(1.03) translateY(-4px); }
+    .pricing-card.enterprise {
+      border-color: rgba(201,168,76,.3);
+      background: linear-gradient(160deg, rgba(201,168,76,.06) 0%, rgba(201,168,76,.02) 100%);
+    }
+    .pricing-popular {
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: #fff;
+      background: var(--accent); padding: 4px 16px; border-radius: 4px;
+      white-space: nowrap;
+    }
+    .pricing-tier {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--fg-3); margin-bottom: 18px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .pricing-tier-featured { color: var(--accent); }
+    .pricing-tier-enterprise { color: var(--gold); }
+    .pricing-amount { font-size: 52px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
+    .pricing-amount span { font-size: 20px; font-weight: 500; color: var(--fg-2); vertical-align: top; margin-top: 8px; display: inline-block; }
+    .pricing-period { font-size: 13px; color: var(--fg-3); margin-top: 4px; }
+    .pricing-desc { font-size: 14px; color: var(--fg-2); line-height: 1.6; margin: 18px 0; }
+    .pricing-divider { border: none; border-top: 1px solid var(--border-2); margin: 18px 0; }
+    .pricing-cta {
+      display: block; width: 100%; text-align: center;
+      padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      transition: opacity .2s, transform .15s; margin-bottom: 24px;
+    }
+    .pricing-cta-primary { background: var(--accent); color: #fff; }
+    .pricing-cta-enterprise { background: var(--gold); color: #0a1628; }
+    .pricing-cta-secondary { background: transparent; border: 1px solid var(--border); color: var(--fg); }
+    .pricing-cta:hover { opacity: .88; transform: translateY(-1px); }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .pricing-features li { font-size: 13px; color: var(--fg-2); display: flex; align-items: center; gap: 10px; }
+    .pricing-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; }
+    .faq-item {
+      border: 1px solid var(--border-2); border-radius: 8px;
+      overflow: hidden; transition: border-color .2s;
+    }
+    .faq-item.open { border-color: rgba(74,158,255,.3); }
+    .faq-q {
+      width: 100%; background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; font-size: 14px; font-weight: 600; color: var(--fg);
+      text-align: left; gap: 16px; font-family: 'IBM Plex Sans', sans-serif;
+    }
+    .faq-q:hover { background: rgba(255,255,255,.02); }
+    .faq-icon {
+      flex-shrink: 0; width: 20px; height: 20px; border-radius: 4px;
+      background: var(--card); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--accent);
+      transition: transform .25s;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-a { max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s; padding: 0 20px; }
+    .faq-a-inner { padding-bottom: 16px; font-size: 13px; color: var(--fg-2); line-height: 1.75; }
+    .faq-a-inner a { color: var(--accent); }
+    .faq-item.open .faq-a { max-height: 400px; }
+
+    /* ── FINAL CTA ── */
+    .cta-section {
+      text-align: center; padding: 110px 24px;
+      background: var(--bg-2);
+      border-top: 1px solid var(--border-2);
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse at bottom, rgba(74,158,255,.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 {
+      font-size: clamp(32px, 4.5vw, 56px); font-weight: 700;
+      letter-spacing: -1.5px; margin-bottom: 18px; color: var(--fg);
+    }
+    .cta-section h2 em { font-style: normal; color: var(--accent); }
+    .cta-section p { font-size: 17px; color: var(--fg-2); margin-bottom: 40px; }
+    .cta-section small { display: block; margin-top: 18px; font-size: 12px; color: var(--fg-3); }
+
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--border-2); padding: 44px 24px; }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 20px;
+    }
+    .footer-logo { font-size: 15px; font-weight: 700; }
+    .footer-logo .logo-scope { color: var(--accent); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: var(--fg-3); transition: color .2s; }
+    .footer-links a:hover { color: var(--fg); }
+    .footer-copy { font-size: 12px; color: var(--fg-3); }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity .65s cubic-bezier(.2,.8,.2,1), transform .65s cubic-bezier(.2,.8,.2,1);
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .fade-up.delay-1 { transition-delay: .1s; }
+    .fade-up.delay-2 { transition-delay: .2s; }
+    .fade-up.delay-3 { transition-delay: .3s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .step { grid-template-columns: 1fr; gap: 28px; }
+      .step.reverse { direction: ltr; }
+      .stats-inner { grid-template-columns: 1fr; gap: 20px; }
+      .nav-links { display: none; }
+    }
+
+    /* ── PREVIEW BANNER ── */
+    .preview-banner {
+      position: fixed; bottom: 16px; right: 16px; z-index: 999;
+      background: var(--gold); color: #0a1628;
+      font-size: 11px; font-weight: 700; padding: 8px 14px;
+      border-radius: 6px; letter-spacing: .05em;
+      box-shadow: 0 4px 16px rgba(201,168,76,.4);
+    }
+  </style>
+</head>
+<body>
+
+<div class="preview-banner">⚠ PREVIEW — nouvelle identité</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <span class="logo-sap">SAP</span><span class="logo-scope">scope</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#">Documentation</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#" class="btn-ghost">Sign in</a>
+      <a href="#" class="btn-nav-primary">Free trial →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">Open Beta — free access</div>
+  <h1>Master your<br>SAP landscape.</h1>
+  <p>SAPscope automatically collects data from your SAP systems and generates precise architecture diagnostics powered by AI. In seconds.</p>
+  <div class="hero-actions">
+    <a href="#" class="btn-hero-primary">Get started for free →</a>
+    <a href="#features" class="btn-hero-ghost">Discover features</a>
+  </div>
+
+  <!-- Mockup CSS -->
+  <div class="mockup-wrap">
+    <div class="mockup-titlebar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <div class="mockup-url">app.sapscope.com</div>
+    </div>
+    <div class="mockup-app">
+      <!-- Topbar -->
+      <div style="position:absolute;top:0;left:0;right:0;height:46px;display:flex;align-items:center;gap:10px;padding:0 16px;background:#091525;border-bottom:1px solid rgba(74,158,255,.08);z-index:1">
+        <span style="font-size:13px;font-weight:700;font-family:'IBM Plex Sans',sans-serif">SAP<span style="color:#4a9eff">scope</span></span>
+        <div style="width:6px;height:6px;border-radius:50%;background:#2dd4a0;box-shadow:0 0 5px #2dd4a0"></div>
+        <div style="font-size:11px;color:#4a7090;background:rgba(255,255,255,.04);padding:3px 10px;border-radius:5px;border:1px solid rgba(74,158,255,.07);font-family:'IBM Plex Mono',monospace">Acme Corp</div>
+        <div style="flex:1"></div>
+        <div style="font-size:10px;color:#4a7090;font-family:'IBM Plex Mono',monospace">admin</div>
+      </div>
+      <!-- Sidebar -->
+      <div style="width:170px;flex-shrink:0;border-right:1px solid rgba(74,158,255,.07);padding:52px 0 12px;background:#081422">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#4a7090;padding:0 14px 10px;font-family:'IBM Plex Mono',monospace">Systems</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 14px;background:rgba(74,158,255,.1);border-left:2px solid #4a9eff">
+          <div style="width:5px;height:5px;border-radius:50%;background:#2dd4a0;flex-shrink:0"></div>
+          <span style="font-size:12px;font-weight:600;color:#4a9eff;font-family:'IBM Plex Mono',monospace">PRD</span>
+          <span style="font-size:10px;color:#4a7090;font-family:'IBM Plex Mono',monospace;margin-left:auto">756</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 14px">
+          <div style="width:5px;height:5px;border-radius:50%;background:#2dd4a0;flex-shrink:0"></div>
+          <span style="font-size:12px;font-weight:500;color:#8da9c4;font-family:'IBM Plex Mono',monospace">QAS</span>
+          <span style="font-size:10px;color:#4a7090;font-family:'IBM Plex Mono',monospace;margin-left:auto">756</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 14px">
+          <div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
+          <span style="font-size:12px;font-weight:500;color:#8da9c4;font-family:'IBM Plex Mono',monospace">DEV</span>
+          <span style="font-size:10px;color:#4a7090;font-family:'IBM Plex Mono',monospace;margin-left:auto">755</span>
+        </div>
+      </div>
+      <!-- Content -->
+      <div style="flex:1;padding:52px 18px 16px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px">
+          <span style="font-size:12px;font-weight:600;font-family:'IBM Plex Sans',sans-serif">AI Analysis — PRD</span>
+          <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(45,212,160,.12);color:#2dd4a0;font-family:'IBM Plex Mono',monospace">SAP_BASIS 756</span>
+          <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(74,158,255,.12);color:#4a9eff;font-family:'IBM Plex Mono',monospace">HANA 2.0</span>
+        </div>
+        <div style="background:rgba(255,255,255,.02);border:1px solid rgba(74,158,255,.08);border-radius:7px;padding:12px">
+          <div style="font-size:10px;font-weight:700;color:#dce6f0;margin-bottom:8px;font-family:'IBM Plex Sans',sans-serif">Maintenance status</div>
+          <div style="font-size:10px;color:#8da9c4;line-height:1.9;font-family:'IBM Plex Mono',monospace">
+            <span style="color:#2dd4a0">OK</span>&nbsp;&nbsp;SAP_BASIS 756 — mainstream maintenance active<br>
+            <span style="color:#2dd4a0">OK</span>&nbsp;&nbsp;Kernel 785 — up to date<br>
+            <span style="color:#f59e0b">&nbsp;!</span>&nbsp;&nbsp;&nbsp;SP SAPKB75614 — 3 critical notes applicable<br>
+            <span style="color:#2dd4a0">OK</span>&nbsp;&nbsp;HANA 2.0 SPS07 — support until 2030
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="fade-up">
+      <div class="stat-value" data-target="30" data-suffix="s">0s</div>
+      <div class="stat-label">To analyze a complete system</div>
+    </div>
+    <div class="fade-up delay-1">
+      <div class="stat-value" data-target="100" data-suffix="%">0%</div>
+      <div class="stat-label">Automated — zero manual input</div>
+    </div>
+    <div class="fade-up delay-2">
+      <div class="stat-value" data-target="360" data-suffix="°">0°</div>
+      <div class="stat-label">Components, patches, custom objects</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div id="features">
+  <div class="section">
+    <div class="section-eyebrow fade-up">Features</div>
+    <h2 class="section-title fade-up">Everything a Basis consultant<br>always wanted.</h2>
+    <p class="section-sub fade-up">No more running SM51, SE16, SPAM one after another to reconstruct a picture of your system.</p>
+    <div class="features-grid">
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 16v6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M16 12h6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg>
+        </div>
+        <div class="feature-title">Automatic RFC collection</div>
+        <div class="feature-text">An agent runs on your SAP server and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.</div>
+      </div>
+      <div class="feature-card fade-up delay-1">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h7M7 16h5"/></svg>
+        </div>
+        <div class="feature-title">AI-powered diagnostics</div>
+        <div class="feature-text">Every snapshot generates a structured report: maintenance status, identified risks, prioritized recommendations, actions to schedule.</div>
+      </div>
+      <div class="feature-card fade-up delay-2">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="feature-title">Snapshot comparison</div>
+        <div class="feature-text">See exactly what changed between two dates: added or updated components, applied patches, evolution of custom objects.</div>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="9" height="9" rx="1"/><rect x="13" y="3" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect x="13" y="13" width="9" height="9" rx="1"/></svg>
+        </div>
+        <div class="feature-title">Multi-client, multi-system</div>
+        <div class="feature-text">Manage multiple SAP clients from a single interface. Each scope is isolated, with its own agent tokens and assigned consultants.</div>
+      </div>
+      <div class="feature-card fade-up delay-1">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="feature-title">Isolation &amp; confidentiality</div>
+        <div class="feature-text">Single-use agent tokens, read-only consultant access. Your SAP data stays within your perimeter — never exposed to the outside.</div>
+      </div>
+      <div class="feature-card fade-up delay-2">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="feature-title">Continuous history</div>
+        <div class="feature-text">Every snapshot is archived. Go back to any date, compare periods, track drift before it becomes an incident.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="hiw-bg" id="how">
+  <div class="section">
+    <div class="section-eyebrow fade-up">How it works</div>
+    <h2 class="section-title fade-up">Up and running in 10 minutes.</h2>
+    <p class="section-sub fade-up">No complex RFC setup. No BTP access. Just a Python agent, a cron job, and you're done.</p>
+    <div class="steps">
+      <div class="step fade-up">
+        <div>
+          <div class="step-num">Step 01</div>
+          <h3 class="step-title">Install the agent on your SAP server</h3>
+          <p class="step-text">The pyrfc agent deploys in a few commands on any SAP application server. It connects via local RFC to read system metadata — no inbound external access required.</p>
+        </div>
+        <div class="step-visual">
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">curl -O https://app.sapscope.com/dist/agent.tar.gz</span></div>
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">tar -xzf agent.tar.gz && cd sap-agent</span></div>
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">pip install -r requirements.txt</span></div>
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-comment"># SAPSCOPE_TOKEN=your_token_here</span></div>
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">python agent.py --once</span></div>
+          <div class="code-line"><span class="code-prompt" style="color:#2dd4a0">✓</span><span style="color:#2dd4a0;font-family:'IBM Plex Mono',monospace;font-size:12px">Snapshot sent — PRD, 47 components</span></div>
+        </div>
+      </div>
+      <div class="step reverse fade-up">
+        <div>
+          <div class="step-num">Step 02</div>
+          <h3 class="step-title">Data syncs automatically</h3>
+          <p class="step-text">A systemd timer triggers the agent every 24h. Each run sends a complete snapshot: installed components, support packages, kernel, custom ABAP objects, DB info.</p>
+        </div>
+        <div class="step-visual" style="gap:12px">
+          <div class="agent-card">
+            <div class="agent-dot"></div>
+            <div>
+              <div class="agent-label">PRD — active</div>
+              <div class="agent-sub">Last snapshot: 2h ago · 47 components · 1,247 custom objects</div>
+            </div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-dot"></div>
+            <div>
+              <div class="agent-label">QAS — active</div>
+              <div class="agent-sub">Last snapshot: 3h ago · 47 components · 1,199 custom objects</div>
+            </div>
+          </div>
+          <div class="agent-card" style="background:#0d1f38;border-left-color:#f59e0b">
+            <div class="agent-dot" style="background:#f59e0b"></div>
+            <div>
+              <div class="agent-label">DEV — inactive</div>
+              <div class="agent-sub">Last snapshot: 26h ago · Check the timer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step fade-up">
+        <div>
+          <div class="step-num">Step 03</div>
+          <h3 class="step-title">Consult the AI analysis from anywhere</h3>
+          <p class="step-text">Claude analyzes each snapshot and generates a structured report: maintenance status, identified risks, prioritized recommendations. Accessible on desktop, tablet or mobile.</p>
+        </div>
+        <div class="step-visual">
+          <div class="analysis-preview">
+            <div class="analysis-preview-title">Priority recommendations</div>
+            <div class="analysis-preview-line good">OK  &nbsp;SAP_BASIS 756 SP14 — maintenance until 2027</div>
+            <div class="analysis-preview-line warn">!&nbsp;&nbsp;&nbsp;SAP Note 3089413 critical — schedule application</div>
+            <div class="analysis-preview-line warn">!&nbsp;&nbsp;&nbsp;Kernel 785 patch 19 available — update recommended</div>
+            <div class="analysis-preview-line good">OK  &nbsp;HANA 2.0 SPS07 — supported version</div>
+            <div class="analysis-preview-line" style="margin-top:8px;color:#4a7090">Next recommended maintenance window: Q2 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div id="pricing">
+  <div class="section">
+    <div class="section-eyebrow fade-up">Pricing</div>
+    <h2 class="section-title fade-up">Simple, transparent pricing.</h2>
+    <p class="section-sub fade-up">Start free. Scale when you need it.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card fade-up">
+        <div class="pricing-tier">Solo</div>
+        <div class="pricing-amount">49<span>€</span></div>
+        <div class="pricing-period">/ month</div>
+        <div class="pricing-desc">For freelance Basis consultants managing a handful of systems.</div>
+        <hr class="pricing-divider">
+        <a href="#" class="pricing-cta pricing-cta-secondary">Get started</a>
+        <ul class="pricing-features">
+          <li>Up to 5 systems</li>
+          <li>Daily snapshots</li>
+          <li>AI diagnostics</li>
+          <li>Snapshot comparison</li>
+          <li>90-day history</li>
+        </ul>
+      </div>
+      <div class="pricing-card featured fade-up delay-1">
+        <div class="pricing-popular">Most popular</div>
+        <div class="pricing-tier pricing-tier-featured">Team</div>
+        <div class="pricing-amount">199<span>€</span></div>
+        <div class="pricing-period">/ month</div>
+        <div class="pricing-desc">For consulting firms and multi-client environments.</div>
+        <hr class="pricing-divider">
+        <a href="#" class="pricing-cta pricing-cta-primary">Get started</a>
+        <ul class="pricing-features">
+          <li>Up to 25 systems</li>
+          <li>Multi-client management</li>
+          <li>Consultant access roles</li>
+          <li>Export CSV / PDF</li>
+          <li>1-year history</li>
+          <li>Priority support</li>
+        </ul>
+      </div>
+      <div class="pricing-card enterprise fade-up delay-2">
+        <div class="pricing-tier pricing-tier-enterprise">Enterprise</div>
+        <div class="pricing-amount" style="font-size:36px;letter-spacing:-1px">Custom</div>
+        <div class="pricing-period">self-hosted or SaaS</div>
+        <div class="pricing-desc">For large accounts with compliance requirements.</div>
+        <hr class="pricing-divider">
+        <a href="mailto:contact@luku.fr" class="pricing-cta pricing-cta-enterprise">Contact us</a>
+        <ul class="pricing-features">
+          <li>Unlimited systems</li>
+          <li>Self-hosted deployment</li>
+          <li>RS256 license key</li>
+          <li>SSO / LDAP</li>
+          <li>SLA & dedicated support</li>
+          <li>Custom integrations</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div id="faq">
+  <div class="section">
+    <div class="section-eyebrow fade-up">FAQ</div>
+    <h2 class="section-title fade-up">Frequently asked questions</h2>
+    <div class="faq-list">
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Is SAPscope compatible with all SAP versions?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Yes. SAPscope is compatible with <strong>SAP ECC 6.0, S/4HANA, BW and Solution Manager</strong>. Collection is done via RFC/SM59, with no modification to the SAP system.</div></div>
+      </div>
+      <div class="faq-item fade-up delay-1">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Does the agent access production data?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">No. The agent only reads technical metadata: installed components, kernel version, support packages. It never accesses business data (FI, HR, MM, etc.).</div></div>
+      </div>
+      <div class="faq-item fade-up delay-2">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Can I self-host SAPscope?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Yes. The Enterprise plan includes a self-hosted Docker deployment option with an RS256 license key. Contact us for details.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL CTA -->
+<div class="cta-section">
+  <h2>Start monitoring your<br><em>SAP landscape today.</em></h2>
+  <p>Free trial — no credit card required.</p>
+  <a href="#" class="btn-hero-primary">Get started for free →</a>
+  <small>Takes less than 10 minutes to set up · Cancel anytime</small>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">SAP<span class="logo-scope">scope</span></div>
+    <div class="footer-links">
+      <a href="#">Documentation</a>
+      <a href="#">Pricing</a>
+      <a href="#">Privacy</a>
+      <a href="mailto:contact@luku.fr">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 SAPscope</div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Counter animation
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    const duration = 1200;
+    const start = performance.now();
+    function update(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * ease) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  const counterObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.target.dataset.target) {
+        animateCounter(e.target);
+        counterObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-target]').forEach(el => counterObserver.observe(el));
+
+  // FAQ
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    item.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

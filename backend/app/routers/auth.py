@@ -15,7 +15,7 @@ from ..auth import create_jwt, get_current_user, hash_password, verify_password
 from ..database import get_db
 from ..limiter import limiter
 from ..mailer import send_reset_email
-from ..models import PasswordResetToken, User
+from ..models import PasswordResetToken, Subscription, User
 from ..settings import settings
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -93,6 +93,16 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
     db.add(user)
     await db.commit()
     await db.refresh(user)
+
+    trial_sub = Subscription(
+        user_id=user.id,
+        stripe_customer_id=None,
+        tier="trial",
+        status="active",
+        trial_ends_at=datetime.now(timezone.utc) + timedelta(days=30),
+    )
+    db.add(trial_sub)
+    await db.commit()
 
     return LoginResponse(
         token=create_jwt(user.id),
