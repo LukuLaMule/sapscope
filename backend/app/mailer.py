@@ -251,6 +251,230 @@ Des questions ? Répondez à cet email ou écrivez à contact@sapscope.fr
         logger.exception("Échec d'envoi de l'email de licence à %s", to_email)
 
 
+async def send_trial_kit_email(
+    to_email: str,
+    org: str,
+    name: str | None,
+    license_key: str,
+    expires_at_str: str,
+) -> None:
+    """Email envoyé après une demande d'essai self-hosted — contient la clé de licence et les instructions d'installation."""
+    if not settings.smtp_host or not settings.smtp_user:
+        logger.warning("SMTP non configuré — clé de licence trial pour %s : %s", to_email, license_key)
+        return
+
+    greeting = f"Hi {name}" if name else "Hi"
+    docs_url  = "https://sapscope.com/docs"
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "SAPscope — Your 30-day free trial is ready"
+    msg["From"]    = settings.smtp_from
+    msg["To"]      = to_email
+
+    text = f"""{greeting},
+
+Your 30-day SAPscope trial is ready for {org}.
+
+License key (valid until {expires_at_str}):
+{license_key}
+
+Installation:
+  curl -O https://sapscope.com/deploy/docker-compose.yml
+  curl -O https://sapscope.com/deploy/nginx.conf
+  curl -O https://sapscope.com/deploy/.env.example
+  cp .env.example .env
+  # Edit .env, add LICENSE_KEY={license_key}
+  docker compose up -d
+
+Full documentation: {docs_url}
+
+Questions? Reply to this email or write to contact@sapscope.com
+
+— The SAPscope team
+"""
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 20px">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#141414;border-radius:12px;border:1px solid rgba(255,255,255,.08)">
+        <tr><td style="padding:32px 40px">
+
+          <div style="font-size:20px;font-weight:700;color:#f5f5f7;margin-bottom:4px">
+            SAP<span style="color:#2997ff">scope</span>
+          </div>
+          <div style="font-size:12px;color:#6e6e73;margin-bottom:28px">SAP Landscape Intelligence</div>
+
+          <p style="font-size:16px;font-weight:600;color:#f5f5f7;margin:0 0 8px">
+            {greeting}, your 30-day trial is ready.
+          </p>
+          <p style="font-size:14px;color:#a1a1a6;margin:0 0 24px">
+            Organisation: <strong style="color:#f5f5f7">{org}</strong>
+            &nbsp;—&nbsp; expires <strong style="color:#f5f5f7">{expires_at_str}</strong>
+          </p>
+
+          <p style="font-size:13px;color:#a1a1a6;margin:0 0 8px">
+            Your license key — add it to your <code style="color:#f5f5f7">.env</code> as <code style="color:#f5f5f7">LICENSE_KEY</code>:
+          </p>
+          <div style="background:#0a0a0a;border:1px solid rgba(255,255,255,.12);border-radius:8px;
+                      padding:12px 16px;font-family:monospace;font-size:13px;color:#34d399;
+                      word-break:break-all;margin-bottom:24px">
+            {license_key}
+          </div>
+
+          <p style="font-size:13px;font-weight:600;color:#f5f5f7;margin:0 0 12px">Deploy in minutes:</p>
+          <div style="background:#0a0a0a;border:1px solid rgba(255,255,255,.12);border-radius:8px;
+                      padding:12px 16px;font-family:monospace;font-size:12px;color:#a1a1a6;
+                      margin-bottom:28px;line-height:1.8">
+            curl -O https://sapscope.com/deploy/docker-compose.yml<br>
+            curl -O https://sapscope.com/deploy/nginx.conf<br>
+            curl -O https://sapscope.com/deploy/.env.example<br>
+            cp .env.example .env<br>
+            <span style="color:#6e6e73"># Edit .env, add LICENSE_KEY={license_key}</span><br>
+            docker compose up -d
+          </div>
+
+          <a href="{docs_url}"
+             style="display:inline-block;background:#2997ff;color:#fff;font-size:13px;
+                    font-weight:600;padding:10px 22px;border-radius:8px;text-decoration:none;margin-bottom:28px">
+            Read the documentation →
+          </a>
+
+          <p style="font-size:12px;color:#6e6e73;margin:0;line-height:1.6">
+            Questions? Reply to this email or write to
+            <a href="mailto:contact@sapscope.com" style="color:#2997ff">contact@sapscope.com</a>
+          </p>
+
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+    msg.attach(MIMEText(text, "plain"))
+    msg.attach(MIMEText(html, "html"))
+
+    try:
+        await aiosmtplib.send(
+            msg,
+            hostname=settings.smtp_host,
+            port=settings.smtp_port,
+            username=settings.smtp_user,
+            password=settings.smtp_password,
+            start_tls=True,
+        )
+        logger.info("Trial kit email sent to %s (org=%s)", to_email, org)
+    except Exception:
+        logger.exception("Failed to send trial kit email to %s", to_email)
+
+
+async def send_trial_reminder_email(
+    to_email: str,
+    org: str,
+    name: str | None,
+    license_key: str,
+    days_remaining: int,
+) -> None:
+    """Email de rappel J+25 — informe que l'essai expire bientôt et invite à passer à un plan payant."""
+    if not settings.smtp_host or not settings.smtp_user:
+        logger.warning("SMTP non configuré — rappel trial pour %s (J-%d)", to_email, days_remaining)
+        return
+
+    greeting    = f"Hi {name}" if name else "Hi"
+    pricing_url = "https://sapscope.com/#pricing"
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"SAPscope — {days_remaining} days left on your trial"
+    msg["From"]    = settings.smtp_from
+    msg["To"]      = to_email
+
+    text = f"""{greeting},
+
+Your SAPscope trial for {org} expires in {days_remaining} days.
+
+Your license key:
+{license_key}
+
+To keep using SAPscope after your trial ends, upgrade to a paid plan:
+{pricing_url}
+
+— The SAPscope team
+"""
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 20px">
+      <table width="520" cellpadding="0" cellspacing="0"
+             style="background:#141414;border-radius:12px;border:1px solid rgba(255,255,255,.08)">
+        <tr><td style="padding:32px 40px">
+
+          <div style="font-size:20px;font-weight:700;color:#f5f5f7;margin-bottom:4px">
+            SAP<span style="color:#2997ff">scope</span>
+          </div>
+          <div style="font-size:12px;color:#6e6e73;margin-bottom:28px">SAP Landscape Intelligence</div>
+
+          <p style="font-size:16px;font-weight:600;color:#f5f5f7;margin:0 0 8px">
+            {greeting} — your trial expires in
+            <span style="color:#2997ff">{days_remaining} days</span>.
+          </p>
+          <p style="font-size:14px;color:#a1a1a6;margin:0 0 24px">
+            Organisation: <strong style="color:#f5f5f7">{org}</strong>
+          </p>
+
+          <p style="font-size:14px;color:#a1a1a6;line-height:1.6;margin:0 0 24px">
+            Your SAPscope trial is nearing its end. To keep your SAP landscape
+            monitored without interruption, upgrade to a paid plan today.
+          </p>
+
+          <p style="font-size:13px;color:#a1a1a6;margin:0 0 8px">Your license key:</p>
+          <div style="background:#0a0a0a;border:1px solid rgba(255,255,255,.12);border-radius:8px;
+                      padding:12px 16px;font-family:monospace;font-size:13px;color:#34d399;
+                      word-break:break-all;margin-bottom:28px">
+            {license_key}
+          </div>
+
+          <a href="{pricing_url}"
+             style="display:inline-block;background:#2997ff;color:#fff;font-size:13px;
+                    font-weight:600;padding:10px 22px;border-radius:8px;text-decoration:none;margin-bottom:28px">
+            Upgrade now →
+          </a>
+
+          <p style="font-size:12px;color:#6e6e73;margin:0;line-height:1.6">
+            Questions? Reply to this email or write to
+            <a href="mailto:contact@sapscope.com" style="color:#2997ff">contact@sapscope.com</a>
+          </p>
+
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+    msg.attach(MIMEText(text, "plain"))
+    msg.attach(MIMEText(html, "html"))
+
+    try:
+        await aiosmtplib.send(
+            msg,
+            hostname=settings.smtp_host,
+            port=settings.smtp_port,
+            username=settings.smtp_user,
+            password=settings.smtp_password,
+            start_tls=True,
+        )
+        logger.info("Trial reminder email sent to %s (%d days left)", to_email, days_remaining)
+    except Exception:
+        logger.exception("Failed to send trial reminder email to %s", to_email)
+
+
 async def send_reset_email(to_email: str, reset_url: str) -> None:
     """Envoie le lien de réinitialisation de mot de passe."""
     if not settings.smtp_host or not settings.smtp_user:
