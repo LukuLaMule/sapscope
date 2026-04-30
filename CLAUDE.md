@@ -51,6 +51,10 @@ SAPscope est un outil pour le Basis admin, pas un remplacement. Les nouvelles fo
 - Connexion via SAProuter — via systems.yaml (champ `saprouter`)
 - Agent distant multi-systèmes — via systems.yaml (prioritaire sur SAPSCOPE_SYSTEMS)
 - White-label logo client — champ `logo_b64` (TEXT, nullable) sur le modèle `Client` ; endpoint `PATCH /api/v1/admin/clients/{id}/logo` (max 500 KB image / 680 KB base64) ; upload via AdminPage (colonne Logo dans l'onglet Clients) ; affiché en haut à droite du bandeau navy dans ReportPage (PDF). Migration : `backend/migrations/20260430_client_logo.sql`
+- Diff cross-systèmes — compare les stacks techniques (composants, support packages, paramètres système) entre deux SIDs différents, même issus de clients différents.
+  - Backend : `GET /api/v1/clients/{id}/snapshots/{id}/diff?cross_system=true&base_client_id={id}` — paramètre `cross_system=false` par défaut (comportement inchangé) ; `base_client_id` optionnel pour cross-client
+  - Nouveau endpoint : `GET /api/v1/snapshots/latest?limit=50` — dernier snapshot par (client, SID) pour tous les clients accessibles ; retourne `{id, client_id, client_name, system_sid, collected_at, health}`
+  - Frontend : `DiffPage.tsx` — deux onglets : "Same System" (diff temporel inchangé) et "Cross-System" (sélecteur parmi tous les systèmes disponibles, résultats avec badge `PRD vs QAS`, tableaux composants/SP/custom objects)
 - Serveur de licences central — `backend/app/routers/license_server.py` + modèle `License` dans `models.py`
   - Activer via `IS_LICENSE_SERVER=true` dans l'env et `app.include_router(license_server.router)` dans `main.py`
   - Endpoints publics : `POST /api/license/validate`, `POST /api/license/activate`
