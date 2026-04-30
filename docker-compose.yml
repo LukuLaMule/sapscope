@@ -56,6 +56,9 @@ services:
       REPORT_ENABLED: ${REPORT_ENABLED:-true}
       REPORT_HOUR:    ${REPORT_HOUR:-7}
       REPORT_TZ:      ${REPORT_TZ:-Europe/Paris}
+      # Licence server
+      IS_LICENSE_SERVER:      ${IS_LICENSE_SERVER:-false}
+      LICENSE_PRIVATE_KEY_B64: ${LICENSE_PRIVATE_KEY_B64:-}
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')\" || exit 1"]
       interval: 10s
