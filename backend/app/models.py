@@ -160,10 +160,11 @@ class Subscription(Base):
     user_id: Mapped[str] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
     )
-    stripe_customer_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    stripe_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    tier: Mapped[str] = mapped_column(String(50), nullable=False)   # solo | team
-    status: Mapped[str] = mapped_column(String(50), nullable=False)  # active | canceled | past_due
+    tier: Mapped[str] = mapped_column(String(50), nullable=False)   # trial | solo | team | enterprise
+    status: Mapped[str] = mapped_column(String(50), nullable=False)  # active | canceled | past_due | expired
+    trial_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

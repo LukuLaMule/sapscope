@@ -6,6 +6,7 @@ import { LogOut, Shield, AlertTriangle, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLicenseStatus } from "@/lib/api";
+import { TrialBanner } from "@/components/TrialBanner";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { logout, isAdmin } = useAuth();
@@ -43,6 +44,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <LogOut className="w-3.5 h-3.5" />Logout
             </Button>
           </header>
+
+          <TrialBanner />
 
           {showInvalid && (
             <div className="flex items-center gap-2 px-4 py-2.5 bg-[hsl(var(--status-critical))]/10 border-b border-[hsl(var(--status-critical))]/30 text-[hsl(var(--status-critical))] text-xs">
