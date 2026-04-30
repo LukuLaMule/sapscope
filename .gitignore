@@ -40,3 +40,11 @@ nwrfcsdk/
 backend/sapscope_license.pem
 sapscope_license.pem
 *.pem
+
+# Backups DB
+backups/
+
+# Claude Code internals
+.claude/worktrees/
+.agents/
+skills-lock.json
