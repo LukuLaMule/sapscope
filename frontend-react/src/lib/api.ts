@@ -67,7 +67,7 @@ export const fetchHistory = (clientId: string, days = 30): Promise<ApiHistoryRes
 
 // ── Clients ───────────────────────────────────────────────────────────────────
 
-export interface ApiClient { id: string; name: string; created_at: string }
+export interface ApiClient { id: string; name: string; logo_b64?: string | null; created_at: string }
 
 export const fetchClients = (): Promise<ApiClient[]> =>
   apiFetch("/api/v1/clients?limit=200");
@@ -117,6 +117,43 @@ export const fetchSnapshots = (clientId: string): Promise<ApiSnapshot[]> =>
 
 export const fetchSnapshotDetail = (clientId: string, snapId: string): Promise<ApiSnapshotDetail> =>
   apiFetch(`/api/v1/clients/${clientId}/snapshots/${snapId}`);
+
+// ── Cross-system / latest snapshots ──────────────────────────────────────────
+
+export interface ApiLatestSnapshot {
+  id:           string;
+  client_id:    string;
+  client_name:  string;
+  system_sid:   string;
+  collected_at: string;
+  health:       { score: number; status: string } | null;
+}
+
+export const fetchLatestSnapshots = (limit = 50): Promise<ApiLatestSnapshot[]> =>
+  apiFetch(`/api/v1/snapshots/latest?limit=${limit}`);
+
+export interface ApiCrossSystemDiff {
+  snap_a:           { id: string; collected_at: string; system_sid: string };
+  snap_b:           { id: string; collected_at: string; system_sid: string };
+  cross_system:     boolean;
+  system_a:         string;
+  system_b:         string;
+  system_changes:   { field: string; label: string; old: string; new: string }[];
+  components:       { added: any[]; removed: any[]; changed: any[] };
+  support_packages: { added: any[]; removed: any[]; changed: any[] };
+  custom_objects:   { total_delta: number; by_type_delta: Record<string, number> };
+}
+
+export const fetchCrossSystemDiff = (
+  clientIdA: string,
+  snapIdA: string,
+  snapIdB: string,
+  clientIdB?: string,
+): Promise<ApiCrossSystemDiff> => {
+  const params = new URLSearchParams({ base: snapIdB, cross_system: "true" });
+  if (clientIdB && clientIdB !== clientIdA) params.set("base_client_id", clientIdB);
+  return apiFetch(`/api/v1/clients/${clientIdA}/snapshots/${snapIdA}/diff?${params}`);
+};
 
 // ── Analysis ──────────────────────────────────────────────────────────────────
 
@@ -197,6 +234,9 @@ export const createAdminClient = (name: string): Promise<ApiClient> =>
 
 export const deleteAdminClient = (id: string): Promise<void> =>
   apiFetch(`/api/v1/admin/clients/${id}`, { method: "DELETE" });
+
+export const updateClientLogo = (id: string, logo_b64: string | null): Promise<void> =>
+  apiFetch(`/api/v1/admin/clients/${id}/logo`, { method: "PATCH", body: JSON.stringify({ logo_b64 }) });
 
 export const fetchUsers = (): Promise<ApiUser[]> =>
   apiFetch("/api/v1/admin/users?limit=200");

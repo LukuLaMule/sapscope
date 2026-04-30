@@ -94,7 +94,12 @@ class SnapshotDetail(SnapshotSummary):
 class ClientOut(BaseModel):
     id: str
     name: str
+    logo_b64: str | None = None
     created_at: datetime
+
+
+class LogoUpdateRequest(BaseModel):
+    logo_b64: str | None = None
 
 
 class UserCreate(BaseModel):

@@ -50,6 +50,7 @@ SAPscope est un outil pour le Basis admin, pas un remplacement. Les nouvelles fo
 - Connexion via Message Server (mshost/msserv/r3name) — via systems.yaml
 - Connexion via SAProuter — via systems.yaml (champ `saprouter`)
 - Agent distant multi-systèmes — via systems.yaml (prioritaire sur SAPSCOPE_SYSTEMS)
+- White-label logo client — champ `logo_b64` (TEXT, nullable) sur le modèle `Client` ; endpoint `PATCH /api/v1/admin/clients/{id}/logo` (max 500 KB image / 680 KB base64) ; upload via AdminPage (colonne Logo dans l'onglet Clients) ; affiché en haut à droite du bandeau navy dans ReportPage (PDF). Migration : `backend/migrations/20260430_client_logo.sql`
 - Serveur de licences central — `backend/app/routers/license_server.py` + modèle `License` dans `models.py`
   - Activer via `IS_LICENSE_SERVER=true` dans l'env et `app.include_router(license_server.router)` dans `main.py`
   - Endpoints publics : `POST /api/license/validate`, `POST /api/license/activate`
