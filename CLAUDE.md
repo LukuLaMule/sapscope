@@ -66,6 +66,16 @@ SAPscope est un outil pour le Basis admin, pas un remplacement. Les nouvelles fo
   - Endpoints admin : `POST /api/admin/licenses`, `GET /api/admin/licenses`
   - Plans : `trial` (2 users) | `solo` (1) | `team` (5) | `enterprise` (999)
   - Migration SQL : `backend/migrations/20260429_add_licenses_table.sql`
+- Rapports PDF automatiques par client — WeasyPrint HTML→PDF, envoi planifiable
+  - Modèle `ClientReportConfig` dans `models.py` — `enabled`, `recipient_emails` (JSONB), `schedule` (daily|weekly|monthly), `schedule_day`, `language` (fr|en), `last_sent_at` ; relation 1-1 avec `Client`
+  - Migration : `backend/migrations/20260430_client_report_config.sql`
+  - Générateur : `backend/app/pdf_report.py` — `generate_client_pdf(client, snapshots_data, language, report_date)` → bytes PDF ; template Jinja2 inline, rendu WeasyPrint ; page couverture (fond sombre, logo ou "SAPscope", score global coloré), sections par système (domaines RAG + barres de progression, métriques clés, analyse IA tronquée à 300 mots, tendance ↑/↓ vs snapshot précédent) ; footer `@page` CSS (client name, date, page X/Y, "Powered by SAPscope")
+  - Router : `backend/app/routers/reports.py` — `GET/PATCH /api/v1/clients/{id}/report-config`, `GET /api/v1/clients/{id}/report/pdf` (download blob nommé `rapport-{client}-{date}.pdf`), `POST /api/v1/clients/{id}/report/send` (envoi immédiat, admin only)
+  - Mailer : `send_report_pdf_email(recipients, client_name, pdf_bytes, report_date, sender_name)` dans `mailer.py` — email sobre avec PDF en `MIMEApplication` attachment
+  - Scheduler : job APScheduler `scheduled_reports` toutes les heures (CronTrigger(minute=0)) dans `main.py` ; logique dans `backend/app/scheduled_reports.py` — anti-doublon 20h, `_should_send()` vérifie daily/weekly(weekday)/monthly(day)
+  - Dépendances : `weasyprint>=61.0`, `jinja2>=3.1.0` dans `requirements.txt` ; libs système dans `Dockerfile` (`libpango-1.0-0 libharfbuzz0b libfontconfig1 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info`)
+  - Données indicateurs connues : `stability.{dumps_7d, jobs_aborted_7d}`, `performance.{wp_priv, wp_stopped}`, `connectivity.{trfc_errors}`, `infrastructure.{max_used_pct, warning:[], critical:[]}`, `security.{users_locked}`, `security_ops.{sap_all_count}`, `transports.{import_queue_count}`
+  - Frontend attendu : `src/hooks/useReportConfig.ts`, `src/components/ReportConfigPanel.tsx`, bouton "Télécharger PDF" dans `ReportPage.tsx`, panneau Rapports dans `AdminPage.tsx`, fonctions API dans `lib/api.ts`
 
 **En attente d'un système SAP de test :**
 - Surveillance certificats SSL/TLS — ABAP PSE (SSFR_PSE_LIST/GET) + HANA (M_PSE_CERTIFICATES). Non testable sans accès RFC réel. Lib `cryptography` déjà présente dans le container.

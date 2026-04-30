@@ -19,7 +19,9 @@ from .limiter import limiter
 from .models import Base, OnboardingToken, PasswordResetToken
 from .reporter import send_daily_reports
 from .routers import admin, analysis, auth, billing, diff, history, license_server, license_status, notes, snapshots
+from .routers.reports import router as reports_router
 from .routers.trial import router as trial_router
+from .scheduled_reports import send_scheduled_reports
 from .trial_reminder import send_trial_reminders
 from .settings import settings
 
@@ -83,6 +85,13 @@ async def lifespan(app: FastAPI):
         id="trial_reminders",
         replace_existing=True,
     )
+    scheduler.add_job(
+        send_scheduled_reports,
+        CronTrigger(minute=0),
+        id="scheduled_reports",
+        replace_existing=True,
+    )
+    logger.info("Job 'scheduled_reports' enregistré (toutes les heures)")
     scheduler.start()
 
     yield
@@ -132,6 +141,7 @@ app.include_router(admin.router)
 app.include_router(billing.router)
 app.include_router(license_status.router)
 app.include_router(trial_router)
+app.include_router(reports_router)
 if settings.is_license_server:
     app.include_router(license_server.router)
 

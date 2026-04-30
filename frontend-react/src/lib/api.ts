@@ -259,6 +259,53 @@ export const assignClient = (userId: string, clientId: string): Promise<void> =>
 export const unassignClient = (userId: string, clientId: string): Promise<void> =>
   apiFetch(`/api/v1/admin/users/${userId}/clients/${clientId}`, { method: "DELETE" });
 
+// ── Report config ─────────────────────────────────────────────────────────────
+
+export interface ApiReportConfig {
+  enabled: boolean;
+  recipient_emails: string[];
+  schedule: "daily" | "weekly" | "monthly";
+  schedule_day: number;
+  language: "fr" | "en";
+  last_sent_at: string | null;
+}
+
+export const fetchReportConfig = (clientId: string): Promise<ApiReportConfig> =>
+  apiFetch(`/api/v1/clients/${clientId}/report-config`);
+
+export const updateReportConfig = (clientId: string, data: Partial<ApiReportConfig>): Promise<ApiReportConfig> =>
+  apiFetch(`/api/v1/clients/${clientId}/report-config`, { method: "PATCH", body: JSON.stringify(data) });
+
+export const sendReportNow = (clientId: string): Promise<void> =>
+  apiFetch(`/api/v1/clients/${clientId}/report/send`, { method: "POST" });
+
+export async function downloadReportPdf(clientId: string, clientName: string): Promise<void> {
+  const BASE = window.location.origin;
+  const token = sessionStorage.getItem("sapscope_token") || "";
+  const res = await fetch(`${BASE}/api/v1/clients/${clientId}/report/pdf`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401) {
+    sessionStorage.removeItem("sapscope_token");
+    window.location.reload();
+    throw new Error("Session expirée");
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as any).detail || `HTTP ${res.status}`);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const date = new Date().toISOString().slice(0, 10);
+  a.download = `rapport-${clientName.replace(/\s+/g, "-")}-${date}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // ── License ───────────────────────────────────────────────────────────────────
 
 export interface LicenseStatus {
