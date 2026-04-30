@@ -4,6 +4,7 @@ On utilise aiosmtplib pour ne pas bloquer la boucle asyncio.
 """
 
 import logging
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -556,3 +557,104 @@ Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.
         # On log l'erreur mais on ne la propage pas — l'utilisateur verra toujours "email envoyé"
         # pour éviter d'exposer des infos sur l'infrastructure mail
         logger.exception("Échec d'envoi du mail de reset à %s", to_email)
+
+
+async def send_report_pdf_email(
+    recipients: list[str],
+    client_name: str,
+    pdf_bytes: bytes,
+    report_date: str,
+    sender_name: str,
+) -> None:
+    """
+    Envoie le rapport PDF de santé SAP par email aux destinataires.
+    Le PDF est envoyé en pièce jointe (application/pdf).
+    """
+    if not settings.smtp_host or not settings.smtp_user:
+        logger.warning(
+            "SMTP non configuré — rapport PDF pour %s non envoyé (%d destinataire(s))",
+            client_name, len(recipients),
+        )
+        return
+
+    safe_name = client_name.replace(" ", "_").replace("/", "-")
+    filename  = f"rapport-{safe_name}-{report_date.replace('/', '-')}.pdf"
+    subject   = f"SAPscope · Rapport de santé SAP — {client_name} — {report_date}"
+
+    text_body = (
+        f"Bonjour,\n\n"
+        f"Veuillez trouver en pièce jointe le rapport de santé SAP Basis pour {client_name} "
+        f"en date du {report_date}.\n\n"
+        f"Ce rapport a été généré automatiquement par SAPscope.\n\n"
+        f"— L'équipe SAPscope"
+    )
+
+    html_body = f"""<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 20px">
+      <table width="520" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:10px;border:1px solid #e5e7eb">
+        <tr><td style="padding:32px 40px">
+
+          <div style="font-size:20px;font-weight:700;color:#1a1a2e;margin-bottom:4px">
+            SAP<span style="color:#2563eb">scope</span>
+          </div>
+          <div style="font-size:11px;color:#9ca3af;margin-bottom:28px">SAP Basis Health Report</div>
+
+          <p style="font-size:15px;font-weight:600;color:#1a1a2e;margin:0 0 8px">
+            Rapport de santé SAP — {client_name}
+          </p>
+          <p style="font-size:13px;color:#6b7280;margin:0 0 24px">
+            Date : <strong style="color:#1a1a2e">{report_date}</strong>
+          </p>
+
+          <p style="font-size:13px;color:#4b5563;line-height:1.7;margin:0 0 24px">
+            Veuillez trouver en pièce jointe le rapport de santé SAP Basis pour
+            <strong>{client_name}</strong>. Ce document inclut les scores de santé de vos systèmes
+            SAP, les indicateurs clés par domaine, et les analyses IA pour chaque système.
+          </p>
+
+          <p style="font-size:11px;color:#9ca3af;border-top:1px solid #f3f4f6;padding-top:16px;margin:0;line-height:1.6">
+            Ce rapport a été généré automatiquement par SAPscope.<br>
+            Pour modifier la configuration des rapports, contactez votre administrateur SAPscope.
+          </p>
+
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+    for recipient in recipients:
+        msg = MIMEMultipart("mixed")
+        msg["Subject"] = subject
+        msg["From"]    = settings.smtp_from
+        msg["To"]      = recipient
+
+        # Corps de l'email (texte + HTML)
+        body_part = MIMEMultipart("alternative")
+        body_part.attach(MIMEText(text_body, "plain"))
+        body_part.attach(MIMEText(html_body, "html"))
+        msg.attach(body_part)
+
+        # Pièce jointe PDF
+        pdf_part = MIMEApplication(pdf_bytes, _subtype="pdf")
+        pdf_part.add_header("Content-Disposition", "attachment", filename=filename)
+        msg.attach(pdf_part)
+
+        try:
+            await aiosmtplib.send(
+                msg,
+                hostname=settings.smtp_host,
+                port=settings.smtp_port,
+                username=settings.smtp_user,
+                password=settings.smtp_password,
+                start_tls=True,
+            )
+            logger.info("Rapport PDF envoyé à %s (client=%s)", recipient, client_name)
+        except Exception:
+            logger.exception("Échec d'envoi du rapport PDF à %s", recipient)

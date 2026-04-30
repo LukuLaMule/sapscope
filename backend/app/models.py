@@ -1,12 +1,13 @@
 """
 SQLAlchemy ORM models.
 
-clients       — one row per customer organisation
-agent_tokens  — write-only tokens issued to agents (POST snapshots only)
-users         — consultant accounts (read dashboard)
-user_clients  — which consultants can see which clients
-snapshots     — one row per collection run, raw payload stored as JSONB
-analyses      — Claude-generated assessment for a snapshot
+clients              — one row per customer organisation
+client_report_configs— PDF report scheduling config per client
+agent_tokens         — write-only tokens issued to agents (POST snapshots only)
+users                — consultant accounts (read dashboard)
+user_clients         — which consultants can see which clients
+snapshots            — one row per collection run, raw payload stored as JSONB
+analyses             — Claude-generated assessment for a snapshot
 """
 
 import hashlib
@@ -34,6 +35,28 @@ class Client(Base):
     tokens: Mapped[list["AgentToken"]] = relationship(back_populates="client", cascade="all, delete-orphan")
     snapshots: Mapped[list["Snapshot"]] = relationship(back_populates="client", cascade="all, delete-orphan")
     user_links: Mapped[list["UserClient"]] = relationship(back_populates="client", cascade="all, delete-orphan")
+    report_config: Mapped["ClientReportConfig | None"] = relationship(
+        back_populates="client", uselist=False, cascade="all, delete-orphan"
+    )
+
+
+class ClientReportConfig(Base):
+    __tablename__ = "client_report_configs"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    client_id: Mapped[str] = mapped_column(
+        ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    recipient_emails: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    schedule: Mapped[str] = mapped_column(String(20), nullable=False, default="weekly")  # daily | weekly | monthly
+    schedule_day: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0)   # 0=lundi pour weekly
+    language: Mapped[str] = mapped_column(String(5), nullable=False, default="fr")
+    last_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    client: Mapped["Client"] = relationship(back_populates="report_config")
 
 
 class AgentToken(Base):

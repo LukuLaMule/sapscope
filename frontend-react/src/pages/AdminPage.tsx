@@ -14,8 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/sap-utils";
-import { Plus, Copy, Terminal, Users, Key, Building2, Trash2, RefreshCw, ImagePlus, X } from "lucide-react";
+import { Plus, Copy, Terminal, Users, Key, Building2, Trash2, RefreshCw, ImagePlus, X, FileText } from "lucide-react";
 import { toast } from "sonner";
+import ReportConfigPanel from "@/components/ReportConfigPanel";
 
 export default function AdminPage() {
   return (
@@ -44,9 +45,10 @@ export default function AdminPage() {
 
 function ClientsTab() {
   const qc = useQueryClient();
-  const [newName, setNewName]   = useState("");
-  const [open, setOpen]         = useState(false);
-  const [wizard, setWizard]     = useState<string | null>(null); // clientId
+  const [newName, setNewName]         = useState("");
+  const [open, setOpen]               = useState(false);
+  const [wizard, setWizard]           = useState<string | null>(null); // clientId
+  const [reportPanel, setReportPanel] = useState<string | null>(null); // clientId
 
   const { data: clients = [], isLoading } = useQuery({ queryKey: ["admin-clients"], queryFn: fetchAdminClients });
 
@@ -110,6 +112,14 @@ function ClientsTab() {
                     <Button variant="ghost" size="sm" onClick={() => setWizard(wizard === c.id ? null : c.id)} className="text-xs">
                       <Terminal className="w-3.5 h-3.5 mr-1" />Install Agent
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setReportPanel(reportPanel === c.id ? null : c.id)}
+                      className={`text-xs ${reportPanel === c.id ? "text-primary" : ""}`}
+                    >
+                      <FileText className="w-3.5 h-3.5 mr-1" />Rapports
+                    </Button>
                     <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive"
                       onClick={() => { if (confirm(`Delete client "${c.name}"?`)) deleteMut.mutate(c.id); }}>
                       <Trash2 className="w-3.5 h-3.5" />
@@ -123,6 +133,22 @@ function ClientsTab() {
       )}
 
       {wizard && <TokenWizard clientId={wizard} clients={clients} onClose={() => setWizard(null)} />}
+
+      {reportPanel && (
+        <div className="rounded-lg border border-primary/30 bg-[hsl(var(--surface-1))] p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+              <FileText className="w-4 h-4 text-primary" />
+              Rapports PDF — {clients.find(c => c.id === reportPanel)?.name}
+            </h3>
+            <Button variant="ghost" size="sm" onClick={() => setReportPanel(null)}>Fermer</Button>
+          </div>
+          <ReportConfigPanel
+            clientId={reportPanel}
+            clientName={clients.find(c => c.id === reportPanel)?.name}
+          />
+        </div>
+      )}
     </div>
   );
 }

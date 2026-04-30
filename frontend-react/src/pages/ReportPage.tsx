@@ -4,8 +4,11 @@ import { fetchClients, fetchSnapshots } from "@/lib/api";
 import { snapshotToSystem } from "@/lib/data-adapter";
 import { getScoreColor, getStatusBadgeClass, getTierBadgeClass } from "@/lib/sap-utils";
 import { getKernelStatus, getKernelStatusLabel, VERSION_STATUS_CLASS } from "@/lib/sap-versions";
-import { Printer, ArrowLeft, FileText } from "lucide-react";
+import { Printer, ArrowLeft, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { downloadReportPdf } from "@/lib/api";
+import { toast } from "sonner";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -104,9 +107,22 @@ function TierPill({ tier }: { tier: string }) {
 export default function ReportPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
+  const [downloading, setDownloading] = useState(false);
 
   const { data: clients = [] } = useQuery({ queryKey: ["clients"], queryFn: fetchClients });
   const clientInfo = clients.find(c => c.id === clientId);
+
+  const handleDownloadPdf = async () => {
+    if (!clientId) return;
+    setDownloading(true);
+    try {
+      await downloadReportPdf(clientId, clientInfo?.name || clientId);
+    } catch (e: any) {
+      toast.error(e.message || "Erreur lors du téléchargement");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const { data: rawSnapshots = [], isLoading } = useQuery({
     queryKey: ["snapshots", clientId],
@@ -158,9 +174,19 @@ export default function ReportPage() {
         <span className="text-sm font-medium text-foreground flex-1">
           Rapport paysage SAP — {clientInfo?.name || clientId}
         </span>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleDownloadPdf}
+          disabled={downloading}
+          className="gap-1.5"
+        >
+          <Download className="w-3.5 h-3.5" />
+          {downloading ? "Génération…" : "Télécharger PDF"}
+        </Button>
         <Button size="sm" onClick={() => window.print()} className="gap-1.5">
           <Printer className="w-3.5 h-3.5" />
-          Télécharger PDF
+          Imprimer
         </Button>
       </div>
 
