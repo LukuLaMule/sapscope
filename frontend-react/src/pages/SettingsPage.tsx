@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { User, KeyRound, Shield, CheckCircle } from "lucide-react";
+import { User, KeyRound, Shield, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 
@@ -51,6 +51,33 @@ function AccountSection() {
   );
 }
 
+function PwdInput({ value, onChange, placeholder }: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative mt-1.5">
+      <Input
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder ?? "••••••••••••"}
+        className="bg-background border-border pr-10"
+      />
+      <button
+        type="button"
+        onClick={() => setShow(v => !v)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+        tabIndex={-1}
+      >
+        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
+
 function PasswordSection() {
   const [current, setCurrent]     = useState("");
   const [next, setNext]           = useState("");
@@ -85,20 +112,18 @@ function PasswordSection() {
       <div className="space-y-3 max-w-sm">
         <div>
           <Label className="text-xs text-muted-foreground uppercase tracking-wider">Current password</Label>
-          <Input type="password" value={current} onChange={e => setCurrent(e.target.value)}
-            placeholder="••••••••••••" className="mt-1.5 bg-background border-border" />
+          <PwdInput value={current} onChange={setCurrent} />
         </div>
         <div>
           <Label className="text-xs text-muted-foreground uppercase tracking-wider">New password</Label>
-          <Input type="password" value={next} onChange={e => setNext(e.target.value)}
-            placeholder="••••••••••••" className="mt-1.5 bg-background border-border" />
+          <PwdInput value={next} onChange={setNext} />
           {tooShort && <p className="text-xs text-[hsl(var(--status-warning))] mt-1">Minimum 12 characters</p>}
         </div>
         <div>
           <Label className="text-xs text-muted-foreground uppercase tracking-wider">Confirm new password</Label>
-          <Input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
-            placeholder="••••••••••••"
-            className={`mt-1.5 bg-background border-border ${mismatch ? "border-[hsl(var(--status-critical))]" : ""}`} />
+          <div className={mismatch ? "[&_input]:border-[hsl(var(--status-critical))]" : ""}>
+            <PwdInput value={confirm} onChange={setConfirm} />
+          </div>
           {mismatch && <p className="text-xs text-[hsl(var(--status-critical))] mt-1">Passwords do not match</p>}
         </div>
 
