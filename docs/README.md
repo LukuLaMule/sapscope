@@ -4,6 +4,7 @@
 
 | # | Guide | 🇬🇧 English | 🇫🇷 Français |
 |---|---|---|---|
+| 00 | Self-Hosted Installation | [EN](guide-00-installation.md) | [FR](guide-00-installation.fr.md) |
 | 01 | Login | [EN](guide-01-connexion.md) | [FR](guide-01-connexion.fr.md) |
 | 02 | Landscape View | [EN](guide-02-landscape.md) | [FR](guide-02-landscape.fr.md) |
 | 03 | System Detail | [EN](guide-03-detail-systeme.md) | [FR](guide-03-detail-systeme.fr.md) |

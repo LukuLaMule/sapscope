@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     smtp_from: str = "noreply@sapscope.com"
     app_url: str = "https://app.sapscope.com"
 
+    # Compte admin créé automatiquement au premier démarrage (self-hosted)
+    admin_email: str | None = None
+    admin_password: str | None = None
+
     # Rapport journalier automatique
     report_enabled: bool = True
     report_hour: int = 7       # heure d'envoi (UTC)
