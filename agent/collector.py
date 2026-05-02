@@ -1079,6 +1079,92 @@ class SAPCollector:
 
         return "Unknown"
 
+    def get_certificates(self, db_type: str = "") -> dict[str, Any]:
+        """SSL/TLS certificate expiry from ABAP PSEs (STRUST) and HANA M_PSE_CERTIFICATES."""
+        result: dict[str, Any] = {"abap": [], "hana": []}
+        today = datetime.now(timezone.utc).date()
+
+        # ── ABAP: liste des PSEs via SSFR_PSE_LIST, détails via SSFR_PSE_GET ──
+        try:
+            pse_list = self.conn.call("SSFR_PSE_LIST").get("PSELIST", [])
+        except Exception:
+            logger.debug("Certificates: SSFR_PSE_LIST not callable")
+            pse_list = []
+
+        for pse_entry in pse_list:
+            ctx    = str(pse_entry.get("PSE_CONTEXT", "")).strip()
+            applic = str(pse_entry.get("PSE_APPLIC",  "")).strip()
+            desc   = str(pse_entry.get("DESCRIPTION", "")).strip()
+            if not ctx:
+                continue
+            try:
+                info    = self.conn.call("SSFR_PSE_GET", PSE_CONTEXT=ctx, PSE_APPLIC=applic)
+                subject = str(info.get("SUBJECT", "")).strip()
+                issuer  = str(info.get("ISSUER",  "")).strip()
+                begda   = info.get("BEGDA")
+                endda   = info.get("ENDDA")
+                if not subject or endda is None:
+                    continue
+                # Skip SAP's "no expiry" sentinel 9999-12-31
+                if hasattr(endda, "year") and endda.year >= 9999:
+                    continue
+                days = _cert_days_remaining(endda, today)
+                result["abap"].append({
+                    "pse_context":    ctx,
+                    "pse_applic":     applic,
+                    "description":    desc,
+                    "subject":        subject,
+                    "issuer":         issuer,
+                    "valid_from":     str(begda) if begda else "",
+                    "valid_to":       str(endda),
+                    "days_remaining": days,
+                    "status":         _cert_status(days),
+                })
+            except Exception:
+                logger.debug("Certificates: SSFR_PSE_GET failed for %s/%s", ctx, applic)
+
+        # ── HANA: M_PSE_CERTIFICATES ─────────────────────────────────────────
+        if db_type == "HDB":
+            try:
+                rows = self.conn.call(
+                    "RFC_READ_TABLE",
+                    QUERY_TABLE="M_PSE_CERTIFICATES",
+                    DELIMITER="|",
+                    FIELDS=[
+                        {"FIELDNAME": "PSE_NAME"},
+                        {"FIELDNAME": "SUBJECT"},
+                        {"FIELDNAME": "ISSUER"},
+                        {"FIELDNAME": "VALID_FROM"},
+                        {"FIELDNAME": "VALID_UNTIL"},
+                        {"FIELDNAME": "PURPOSE"},
+                    ],
+                    ROWCOUNT=200,
+                )
+                for row in _parse_table(rows):
+                    valid_until = _trim(row, "VALID_UNTIL").strip()
+                    days = _cert_days_remaining(valid_until, today)
+                    result["hana"].append({
+                        "pse_name":       _trim(row, "PSE_NAME"),
+                        "subject":        _trim(row, "SUBJECT"),
+                        "issuer":         _trim(row, "ISSUER"),
+                        "valid_from":     _trim(row, "VALID_FROM").strip(),
+                        "valid_to":       valid_until,
+                        "days_remaining": days,
+                        "status":         _cert_status(days),
+                    })
+            except Exception:
+                logger.debug("Certificates: M_PSE_CERTIFICATES not readable")
+
+        all_certs = result["abap"] + result["hana"]
+        result["summary"] = {
+            "total":    len(all_certs),
+            "expired":  sum(1 for c in all_certs if c["status"] == "EXPIRED"),
+            "critical": sum(1 for c in all_certs if c["status"] == "CRITICAL"),
+            "warning":  sum(1 for c in all_certs if c["status"] == "WARNING"),
+            "ok":       sum(1 for c in all_certs if c["status"] == "OK"),
+        }
+        return result
+
     # ------------------------------------------------------------------
     # Full snapshot
     # ------------------------------------------------------------------
@@ -1109,6 +1195,7 @@ class SAPCollector:
         update_info       = self.get_update_info()
         spool             = self.get_spool_info()
         system_messages   = self.get_system_messages()
+        certificates      = self.get_certificates(system_info.get("rfcdbsys", ""))
 
         sid = system_info.get("rfcsysid", "?")
         logger.info(
@@ -1144,6 +1231,7 @@ class SAPCollector:
             "update_info":      update_info,
             "spool":            spool,
             "system_messages":  system_messages,
+            "certificates":     certificates,
         }
 
 
@@ -1181,3 +1269,36 @@ def _parse_table(rfc_result: dict) -> list[dict[str, str]]:
 
 def _trim(row: dict[str, str], key: str) -> str:
     return row.get(key, "").strip()
+
+
+def _cert_days_remaining(end_date: Any, today: Any) -> int:
+    """Days until certificate expiry.
+
+    Accepts a Python datetime.date (pyrfc type D) or a string
+    in YYYY-MM-DD[...] (HANA timestamp) or YYYYMMDD (SAP date) format.
+    Returns 9999 when the date cannot be parsed.
+    """
+    from datetime import date as _date
+    try:
+        if isinstance(end_date, _date):
+            return (end_date - today).days
+        s = str(end_date).strip()
+        if len(s) >= 10 and s[4] == "-":        # YYYY-MM-DD (HANA timestamp)
+            d = _date(int(s[:4]), int(s[5:7]), int(s[8:10]))
+        elif len(s) == 8 and s.isdigit():        # YYYYMMDD
+            d = _date(int(s[:4]), int(s[4:6]), int(s[6:8]))
+        else:
+            return 9999
+        return (d - today).days
+    except Exception:
+        return 9999
+
+
+def _cert_status(days: int) -> str:
+    if days <= 0:
+        return "EXPIRED"
+    if days <= 7:
+        return "CRITICAL"
+    if days <= 30:
+        return "WARNING"
+    return "OK"
