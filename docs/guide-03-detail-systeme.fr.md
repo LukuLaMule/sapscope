@@ -32,12 +32,27 @@ Score par domaine (0–100) avec indicateurs individuels :
 | Security Ops | Utilisateurs par défaut actifs (SAP\*, DDIC), détenteurs de SAP_ALL, RFC sans logon |
 | Transports | Taille de la queue d'import (STMS) |
 | HANA Replication | Statut de réplication HSR — visible uniquement sur les systèmes HANA avec HSR configuré |
+| Certificates | Expiration des certificats SSL/TLS (PSEs ABAP via STRUST + HANA M\_PSE\_CERTIFICATES) — visible uniquement si les PSEs sont lisibles |
+
+Les domaines sont inclus dans le score uniquement si les données sont disponibles. Les domaines absents sont exclus de la moyenne pondérée.
 
 ### Dimensionnement système
 Analyse automatique du dimensionnement basée sur les paramètres de profil (RZ10/RZ11) et les métriques mémoire HANA :
 - Nombre de work processes (dialog, background, spool, update)
 - Extended memory (EM)
 - Utilisation et limite d'allocation mémoire HANA
+
+### Certificats SSL/TLS
+Visible quand l'agent peut lire les PSEs via `SSFR_PSE_LIST` / `SSFR_PSE_GET` (ABAP) ou `M_PSE_CERTIFICATES` (HANA).
+
+| Statut | Signification |
+|---|---|
+| `OK` | Certificat valide plus de 30 jours |
+| `WARNING` | Expire dans 7–30 jours |
+| `CRITICAL` | Expire dans moins de 7 jours |
+| `EXPIRED` | Déjà expiré |
+
+Les certificats sont triés par date d'expiration (les plus urgents en premier). Le CN du sujet et le contexte PSE (ex. `SSLS/` pour le certificat serveur ICM) sont affichés pour chaque entrée.
 
 ### Réplication système HANA (HSR)
 Visible uniquement sur les systèmes HANA où HSR est configuré.
@@ -56,8 +71,6 @@ Tableau complet des composants SAP avec :
 - Release
 - SP Level (niveau Support Package)
 - Description
-
-> Utiliser la **barre de recherche** au-dessus du tableau pour filtrer.
 
 ### Support Packages appliqués
 Liste des patches appliqués avec :
