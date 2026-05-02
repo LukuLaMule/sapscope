@@ -17,6 +17,7 @@ import OnboardingPage from "@/pages/OnboardingPage";
 import InventoryPage from "@/pages/InventoryPage";
 import ReportPage from "@/pages/ReportPage";
 import SettingsPage from "@/pages/SettingsPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -26,7 +27,12 @@ const queryClient = new QueryClient({
 function AppRoutes() {
   const { token } = useAuth();
 
-  if (!token) return <LoginPage />;
+  if (!token) return (
+    <Routes>
+      <Route path="/app" element={<ResetPasswordPage />} />
+      <Route path="*"    element={<LoginPage />} />
+    </Routes>
+  );
 
   return (
     <Routes>
