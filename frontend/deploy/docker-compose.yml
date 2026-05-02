@@ -18,7 +18,7 @@ services:
       - internal
 
   backend:
-    image: ghcr.io/lukulamule/sapscope/backend:latest
+    image: ghcr.io/lukulamule/sapscope-backend:latest
     restart: unless-stopped
     depends_on:
       db:
@@ -31,6 +31,8 @@ services:
       DEBUG:               ${DEBUG:-false}
       REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-false}
       LICENSE_KEY:         ${LICENSE_KEY}
+      ADMIN_EMAIL:         ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD:      ${ADMIN_PASSWORD:-}
       # SMTP (reset de mot de passe)
       SMTP_HOST:     ${SMTP_HOST:-}
       SMTP_PORT:     ${SMTP_PORT:-587}
@@ -51,7 +53,7 @@ services:
       - internal
 
   frontend:
-    image: ghcr.io/lukulamule/sapscope/frontend:latest
+    image: ghcr.io/lukulamule/sapscope-frontend:latest
     restart: unless-stopped
     depends_on:
       - backend

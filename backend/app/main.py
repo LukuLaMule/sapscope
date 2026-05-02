@@ -16,7 +16,7 @@ from sqlalchemy import delete
 from .database import engine
 from .license import validate as validate_license
 from .limiter import limiter
-from .models import Base, OnboardingToken, PasswordResetToken
+from .models import Base, OnboardingToken, PasswordResetToken, User
 from .reporter import send_daily_reports
 from .routers import admin, analysis, auth, billing, diff, history, license_server, license_status, notes, snapshots
 from .routers.reports import router as reports_router
@@ -29,6 +29,24 @@ logger = logging.getLogger(__name__)
 
 # Validate license at import time so it appears in startup logs
 license_info = validate_license(settings.license_key)
+
+
+async def _create_admin_if_needed() -> None:
+    """Au premier démarrage, crée le compte admin si ADMIN_EMAIL est défini et qu'aucun user n'existe."""
+    if not settings.admin_email or not settings.admin_password:
+        return
+    import bcrypt
+    from sqlalchemy import select
+    from .database import SessionLocal
+    async with SessionLocal() as db:
+        count = (await db.execute(select(User))).scalars().first()
+        if count is not None:
+            return
+        hashed = bcrypt.hashpw(settings.admin_password.encode(), bcrypt.gensalt()).decode()
+        admin = User(email=settings.admin_email, password_hash=hashed, is_admin=True)
+        db.add(admin)
+        await db.commit()
+        logger.info("Compte admin créé automatiquement : %s", settings.admin_email)
 
 
 async def _purge_expired_tokens() -> None:
@@ -56,6 +74,7 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     await _purge_expired_tokens()
+    await _create_admin_if_needed()
     if license_info.mode == "self-hosted":
         if not license_info.is_valid:
             logger.error("INVALID LICENSE: %s", license_info.warning)
