@@ -10,7 +10,9 @@
 
 1. Open SAPscope in your browser
 2. Enter your **email** and **password**
-3. Click **Login →**
+3. Click **Se connecter**
+
+> The password field has a **show/hide** toggle (eye icon on the right).
 
 ---
 
@@ -25,15 +27,24 @@
 
 ---
 
-## Demo account
+## Forgot your password?
 
-Click **Auto login** on the login screen.
+1. Click **Mot de passe oublié ?** below the login button
+2. Enter your email address and click **Envoyer le lien**
+3. Check your inbox — you will receive a reset link valid for **1 hour**
+4. Click the link → enter and confirm your new password → **Mettre à jour**
+
+> For security, the page always confirms the email was sent regardless of whether the address is registered.
+
+---
+
+## Demo account
 
 | Email | Password |
 |---|---|
-| `demo@sapscope.fr` | `demo-sapscope-2026` |
+| `demo@sapscope.com` | `SAPscope2026!` |
 
-Gives read-only access to 3 demo clients (Demo, ACME Industries, MLC).
+Gives read-only access to demo clients (Demo, ACME Industries).
 
 ---
 
@@ -44,3 +55,4 @@ Gives read-only access to 3 demo clients (Demo, ACME Industries, MLC).
 | "Invalid credentials" | Wrong password | Check case sensitivity |
 | Login succeeds but no systems visible | No client assigned | Ask admin to assign a client |
 | Session expired | JWT token expired | Log in again |
+| Reset link not received | Email in spam, or address not registered | Check spam folder |
