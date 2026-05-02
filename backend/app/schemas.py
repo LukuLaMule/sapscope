@@ -33,6 +33,7 @@ class SnapshotIn(BaseModel):
     update_info:     dict[str, Any] | None = None         # erreurs SM13
     spool:           dict[str, Any] | None = None         # requests en attente
     system_messages: list[dict[str, Any]] | None = None   # SM02
+    certificates:    dict[str, Any] | None = None         # expiry SSL/TLS PSEs + HANA
 
 
 # ── Outbound responses ────────────────────────────────────────────────────────

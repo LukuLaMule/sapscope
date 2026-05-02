@@ -199,3 +199,65 @@ def test_hsr_none_db_stats_no_effect():
     )
     assert "hsr" not in result["indicators"]
     assert result["score"] == 100
+
+
+# ── Certificates ────────────────────────────────────────────────────────────────
+
+def _cert_data(expired=0, critical=0, warning=0, ok=0):
+    total = expired + critical + warning + ok
+    return {
+        "abap": [],
+        "hana": [],
+        "summary": {
+            "total": total,
+            "expired": expired,
+            "critical": critical,
+            "warning": warning,
+            "ok": ok,
+        },
+    }
+
+
+def test_certificates_all_ok():
+    result = health_scorer.compute({"dumps_7d": 0}, cert_data=_cert_data(ok=3))
+    ind = result["indicators"]["certificates"]
+    assert ind["score"] == 100
+    assert ind["status"] == "OK"
+    assert ind["total"] == 3
+
+
+def test_certificates_warning():
+    result = health_scorer.compute({"dumps_7d": 0}, cert_data=_cert_data(ok=2, warning=1))
+    ind = result["indicators"]["certificates"]
+    assert ind["score"] == 70
+    assert ind["status"] == "WARNING"
+    assert ind["warning"] == 1
+
+
+def test_certificates_critical():
+    result = health_scorer.compute({"dumps_7d": 0}, cert_data=_cert_data(ok=1, critical=1))
+    ind = result["indicators"]["certificates"]
+    assert ind["score"] == 30
+    assert ind["status"] == "CRITICAL"
+    assert ind["critical"] == 1
+
+
+def test_certificates_expired():
+    result = health_scorer.compute({"dumps_7d": 0}, cert_data=_cert_data(expired=1, ok=2))
+    ind = result["indicators"]["certificates"]
+    assert ind["score"] == 10
+    assert ind["status"] == "CRITICAL"
+    assert ind["expired"] == 1
+
+
+def test_certificates_empty_total_domain_absent():
+    """total=0 → domaine absent (pas de PSEs lisibles)."""
+    result = health_scorer.compute({"dumps_7d": 0}, cert_data=_cert_data())
+    assert "certificates" not in result["indicators"]
+
+
+def test_certificates_none_domain_absent():
+    """cert_data=None → domaine absent."""
+    result = health_scorer.compute({"dumps_7d": 0}, cert_data=None)
+    assert "certificates" not in result["indicators"]
+    assert result["score"] == 100

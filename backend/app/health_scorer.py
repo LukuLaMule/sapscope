@@ -27,13 +27,15 @@ _WEIGHTS: dict[str, float] = {
     "security":       0.05,   # locked users (informative)
     "transports":     0.05,   # import queue
     "hsr":            0.15,   # HANA System Replication — only scored when configured
+    "certificates":   0.10,   # SSL/TLS expiry — only scored when PSEs readable
 }
 
 
 def compute(health_data: dict[str, Any] | None,
             security_data: dict[str, Any] | None = None,
             transport_data: dict[str, Any] | None = None,
-            db_stats_data: dict[str, Any] | None = None) -> dict[str, Any]:
+            db_stats_data: dict[str, Any] | None = None,
+            cert_data: dict[str, Any] | None = None) -> dict[str, Any]:
     """
     Compute global score + per-domain indicators from the 'health' key of a snapshot payload.
     Returns a dict ready to be stored in health_checks.indicators.
@@ -213,6 +215,33 @@ def compute(health_data: dict[str, Any] | None,
                 "replication_status":   hsr_status,
                 "replication_mode":     hsr.get("mode", ""),
                 "secondary_host":       secondary_host,
+            }
+
+    # ── Certificates: SSL/TLS expiry ────────────────────────────────────────
+    if cert_data:
+        summary = cert_data.get("summary", {})
+        total    = summary.get("total", 0)
+        expired  = summary.get("expired", 0)
+        critical = summary.get("critical", 0)
+        warning  = summary.get("warning", 0)
+        if total > 0:
+            if expired > 0:
+                s = 10
+            elif critical > 0:
+                s = 30
+            elif warning > 0:
+                s = 70
+            else:
+                s = 100
+            domain_scores["certificates"] = s
+            indicators["certificates"] = {
+                "status":   _label(s),
+                "score":    s,
+                "total":    total,
+                "expired":  expired,
+                "critical": critical,
+                "warning":  warning,
+                "ok":       summary.get("ok", 0),
             }
 
     if not domain_scores:

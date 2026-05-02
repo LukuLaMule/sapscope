@@ -14,7 +14,7 @@ import {
 import {
   ArrowLeft, Shield, Truck, Clock, Server, Cpu, FileText,
   Activity, Database, Layers, Box, Sparkles, Copy, AlertTriangle, Printer, StickyNote, Pencil, Trash2, Gauge,
-  GitFork,
+  GitFork, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +49,7 @@ function indicatorValueColor(key: string, value: unknown): string {
 
   const errorKeys = ["dumps_7d","jobs_aborted_7d","wp_priv","wp_stopped",
     "trfc_errors","sap_all_count","rfc_no_logon_count","import_queue_count",
-    "update_errors","bg_jobs_delayed"];
+    "update_errors","bg_jobs_delayed","expired","critical"];
   if (errorKeys.includes(key)) {
     if (num === 0) return "text-[hsl(var(--status-ok))]";
     if (num <= 2)  return "text-[hsl(var(--status-warning))]";
@@ -74,6 +74,7 @@ const DOMAINS: { key: string; label: string; icon: React.ReactNode }[] = [
   { key: "security_ops",   label: "Security Ops",   icon: <Shield className="w-4 h-4" /> },
   { key: "transports",     label: "Transports",     icon: <Truck className="w-4 h-4" /> },
   { key: "hsr",            label: "HANA Replication", icon: <GitFork className="w-4 h-4" /> },
+  { key: "certificates",  label: "Certificates",     icon: <ShieldCheck className="w-4 h-4" /> },
 ];
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -559,6 +560,9 @@ export default function SystemDetailPage() {
             </div>
           )}
 
+          {/* Certificates */}
+          <CertificatesSection payload={snap.payload} />
+
           {/* Notes */}
           <div className="section-card">
             <div className="section-header">
@@ -817,6 +821,105 @@ function QuickKPI({ label, value, warn }: { label: string; value: string; warn?:
     <div className="kpi-card text-center min-w-[80px]">
       <div className={`font-mono text-sm font-bold ${warn ? "text-[hsl(var(--status-warning))]" : "text-foreground"}`}>{value}</div>
       <div className="text-[10px] text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function CertificatesSection({ payload }: { payload: Record<string, any> | null | undefined }) {
+  const certs = payload?.certificates;
+  if (!certs || (certs.summary?.total ?? 0) === 0) return null;
+
+  const summary = certs.summary as { total: number; expired: number; critical: number; warning: number; ok: number };
+  const allCerts: any[] = [...(certs.abap ?? []), ...(certs.hana ?? [])]
+    .sort((a, b) => (a.days_remaining ?? 9999) - (b.days_remaining ?? 9999));
+
+  const statusColor = (s: string) =>
+    s === "EXPIRED"  ? "hsl(var(--status-critical))" :
+    s === "CRITICAL" ? "hsl(var(--status-critical))" :
+    s === "WARNING"  ? "hsl(var(--status-warning))"  :
+                       "hsl(var(--status-ok))";
+
+  const worstStatus = summary.expired > 0 ? "EXPIRED"
+    : summary.critical > 0 ? "CRITICAL"
+    : summary.warning  > 0 ? "WARNING"
+    : "OK";
+
+  const headerColor = statusColor(worstStatus);
+  const headerBg = worstStatus === "OK"
+    ? "bg-[hsl(var(--status-ok))]/10 border-[hsl(var(--status-ok))]/20"
+    : worstStatus === "WARNING"
+    ? "bg-[hsl(var(--status-warning))]/10 border-[hsl(var(--status-warning))]/20"
+    : "bg-[hsl(var(--status-critical))]/10 border-[hsl(var(--status-critical))]/20";
+
+  return (
+    <div className="section-card">
+      <div className="section-header">
+        <div className="section-icon"><ShieldCheck className="w-4 h-4" /></div>
+        <h3 className="text-sm font-semibold text-foreground">Certificates</h3>
+        <span
+          className={`ml-auto text-xs font-mono font-bold px-2.5 py-1 rounded border ${headerBg}`}
+          style={{ color: headerColor }}
+        >
+          {summary.total} cert{summary.total !== 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {/* Compteurs statut */}
+      <div className="flex gap-2 flex-wrap mb-3">
+        {summary.expired > 0 && (
+          <span className="text-xs font-mono px-2 py-0.5 rounded bg-[hsl(var(--status-critical))]/10 border border-[hsl(var(--status-critical))]/30 text-[hsl(var(--status-critical))]">
+            {summary.expired} expired
+          </span>
+        )}
+        {summary.critical > 0 && (
+          <span className="text-xs font-mono px-2 py-0.5 rounded bg-[hsl(var(--status-critical))]/10 border border-[hsl(var(--status-critical))]/30 text-[hsl(var(--status-critical))]">
+            {summary.critical} &lt;7d
+          </span>
+        )}
+        {summary.warning > 0 && (
+          <span className="text-xs font-mono px-2 py-0.5 rounded bg-[hsl(var(--status-warning))]/10 border border-[hsl(var(--status-warning))]/30 text-[hsl(var(--status-warning))]">
+            {summary.warning} &lt;30d
+          </span>
+        )}
+        {summary.ok > 0 && (
+          <span className="text-xs font-mono px-2 py-0.5 rounded bg-[hsl(var(--status-ok))]/10 border border-[hsl(var(--status-ok))]/30 text-[hsl(var(--status-ok))]">
+            {summary.ok} ok
+          </span>
+        )}
+      </div>
+
+      {/* Tableau des certificats (triés par expiration) */}
+      <div className="space-y-1.5">
+        {allCerts.slice(0, 10).map((c: any, i: number) => {
+          const color = statusColor(c.status);
+          const label = c.pse_context
+            ? `${c.pse_context}${c.pse_applic ? "/" + c.pse_applic : ""}`
+            : c.pse_name ?? "—";
+          const daysLabel = c.days_remaining <= 0
+            ? "Expired"
+            : `${c.days_remaining}d`;
+          const subj = (c.subject || "—").replace(/^CN=/, "").split(",")[0].trim();
+          return (
+            <div key={i} className="kpi-card !py-2">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-mono text-foreground truncate">{subj}</div>
+                  <div className="text-[10px] text-muted-foreground truncate">{label}</div>
+                </div>
+                <span className="text-xs font-mono font-bold flex-shrink-0" style={{ color }}>
+                  {daysLabel}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+        {allCerts.length > 10 && (
+          <div className="text-[10px] text-muted-foreground text-center pt-1">
+            +{allCerts.length - 10} more
+          </div>
+        )}
+      </div>
     </div>
   );
 }
