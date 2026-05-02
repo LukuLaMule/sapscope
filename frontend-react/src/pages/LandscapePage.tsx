@@ -64,7 +64,7 @@ export default function LandscapePage() {
     <Tabs defaultValue="schema" className="flex flex-col h-[calc(100vh-48px)]">
 
       {/* ── Barre top : header + résumé ───────────────────────── */}
-      <div className="flex-shrink-0 px-6 pt-5 pb-4 border-b border-border/50 space-y-3">
+      <div className="relative z-10 flex-shrink-0 px-6 pt-5 pb-4 border-b border-border/50 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => navigate("/")}>

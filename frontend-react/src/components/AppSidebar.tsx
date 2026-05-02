@@ -1,4 +1,4 @@
-import { Home, GitCompare, Settings, Columns2, Table2, SlidersHorizontal, BadgeCheck } from "lucide-react";
+import { Home, GitCompare, Settings, Columns2, Table2, SlidersHorizontal, BadgeCheck, ShieldCheck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -11,16 +11,18 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 import type { LicenseStatus } from "@/lib/api";
 
-const items = [
+const baseItems = [
   { title: "Overview",  url: "/",          icon: Home             },
   { title: "Inventory", url: "/inventory", icon: Table2           },
   { title: "Compare",   url: "/compare",   icon: Columns2         },
   { title: "Diff",      url: "/diff",      icon: GitCompare       },
   { title: "Settings",  url: "/settings",  icon: SlidersHorizontal },
-  { title: "Admin",     url: "/admin",     icon: Settings         },
 ];
+
+const adminItem = { title: "Admin", url: "/admin", icon: ShieldCheck };
 
 const TIER_LABEL: Record<string, string> = {
   solo:       "Solo",
@@ -35,7 +37,9 @@ interface Props {
 
 export function AppSidebar({ license }: Props) {
   const { state } = useSidebar();
+  const { isAdmin } = useAuth();
   const collapsed = state === "collapsed";
+  const items = isAdmin ? [...baseItems, adminItem] : baseItems;
 
   const showBadge = license?.configured && license.valid && license.plan;
   const tierLabel = license?.plan ? (TIER_LABEL[license.plan] ?? license.plan) : null;
