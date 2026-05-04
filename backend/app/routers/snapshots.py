@@ -17,7 +17,7 @@ from ..auth import get_client_for_agent, get_client_for_user, get_current_user
 from ..database import get_db
 from .. import health_scorer
 from ..limiter import limiter
-from ..models import Client, HealthCheck, Snapshot, User, UserClient
+from ..models import Client, HealthCheck, Notification, Snapshot, User, UserClient
 from ..schemas import ClientOut, HealthOut, SnapshotCreated, SnapshotDetail, SnapshotIn, SnapshotSummary
 
 router = APIRouter(tags=["snapshots"])
@@ -144,6 +144,52 @@ async def ingest_snapshot(
     db.add(hc)
     await db.commit()
     await db.refresh(snap)
+
+    try:
+        prev_rows = await db.execute(
+            select(Snapshot)
+            .where(
+                Snapshot.client_id == client.id,
+                Snapshot.system_sid == sid[:10],
+            )
+            .order_by(Snapshot.collected_at.desc())
+            .limit(2)
+        )
+        all_snaps = list(prev_rows.scalars())
+        prev_snap = all_snaps[1] if len(all_snaps) >= 2 else None
+
+        prev_hc = None
+        if prev_snap is not None:
+            prev_hc_row = await db.execute(
+                select(HealthCheck).where(HealthCheck.snapshot_id == prev_snap.id)
+            )
+            prev_hc = prev_hc_row.scalar_one_or_none()
+
+        score = result["score"]
+        prev_score = prev_hc.score if prev_hc is not None else None
+        notif = None
+
+        if score < 40 and (prev_score is None or prev_score >= 40):
+            notif = Notification(
+                client_id=client.id,
+                system_sid=sid[:10],
+                severity="critical",
+                message=f"{sid} — Health dropped to critical (score: {score})",
+            )
+        elif 40 <= score < 60 and (prev_score is None or prev_score >= 60):
+            notif = Notification(
+                client_id=client.id,
+                system_sid=sid[:10],
+                severity="warning",
+                message=f"{sid} — Health dropped to warning (score: {score})",
+            )
+
+        if notif is not None:
+            db.add(notif)
+            await db.commit()
+    except Exception:
+        pass
+
     return SnapshotCreated(id=snap.id, received_at=snap.received_at)
 
 
