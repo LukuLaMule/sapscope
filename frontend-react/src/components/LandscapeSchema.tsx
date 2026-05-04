@@ -114,13 +114,13 @@ function SystemNode({ data }: NodeProps) {
       <Handle type="target" position={Position.Left}  style={{ opacity: 0, pointerEvents: "none" }} />
       <Handle type="source" position={Position.Right} style={{ opacity: 0, pointerEvents: "none" }} />
       <div style={{ width: NODE_W }}
-        className="relative rounded-xl border border-border bg-card px-3 pt-3 pb-2.5 cursor-pointer
-                   group transition-all duration-200 hover:border-primary/50 hover:shadow-xl hover:shadow-black/40">
+        className="relative rounded-xl bg-card px-3 pt-3 pb-2.5 cursor-pointer shadow-md
+                   group transition-all duration-200 hover:shadow-xl hover:shadow-black/40">
 
         <div className="flex items-center gap-2.5 mb-2">
-          <div className={`w-9 h-9 rounded-lg border-2 flex items-center justify-center
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center
             font-mono text-xs font-bold flex-shrink-0 group-hover:scale-105 transition-transform
-            ${getScoreBorderColor(s.healthScore)} ${getScoreBgColor(s.healthScore)} ${getScoreColor(s.healthScore)}`}>
+            ${getScoreBgColor(s.healthScore)} ${getScoreColor(s.healthScore)}`}>
             {s.healthScore}
           </div>
           <div className="min-w-0">
@@ -138,12 +138,12 @@ function SystemNode({ data }: NodeProps) {
             {s.healthStatus}
           </span>
           {s.systemType && s.systemType !== "ABAP" && (
-            <span className={`text-[10px] px-1.5 py-0.5 rounded border font-semibold ${systemTypeClass(s.systemType)}`}>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${systemTypeClass(s.systemType)}`}>
               {s.systemType}
             </span>
           )}
           {s.stmsDomainController && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-primary/15 border border-primary/30 text-primary">DC</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-primary/15 text-primary">DC</span>
           )}
           {s.alerts.length > 0 && (
             <span className="flex items-center gap-0.5 text-[10px] text-status-warning font-medium">
