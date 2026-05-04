@@ -185,12 +185,15 @@
       font-size: clamp(52px, 8vw, 96px);
       font-weight: 800; line-height: 1.04;
       letter-spacing: -3px; margin-bottom: 28px;
+      color: #fff;
+    }
+    :root:not(.light) .hero h1 {
       background: linear-gradient(180deg, #fff 60%, rgba(255,255,255,.5) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     :root.light .hero h1 {
-      background: linear-gradient(180deg, #0d1f38 60%, rgba(13,31,56,.6) 100%);
+      color: #0d1f38;
     }
     .hero p {
       font-size: clamp(17px, 2.2vw, 21px); font-weight: 400;
@@ -217,6 +220,29 @@
     }
     .btn-hero-ghost:hover { color: var(--fg); border-color: rgba(255,255,255,.3); }
     :root.light .btn-hero-ghost:hover { border-color: rgba(13,31,56,.3); }
+
+    /* Feat-visual panels are app mockups — always dark regardless of page theme */
+    :root.light .feat-visual {
+      --bg-2:   #0d1f38;
+      --fg:     #dce6f0;
+      --fg-2:   #8da9c4;
+      --fg-3:   #4a7090;
+      --accent: #4a9eff;
+      --green:  #2dd4a0;
+      --orange: #f59e0b;
+      --red:    #f87171;
+      --border: rgba(74,158,255,0.15);
+      --border-2: rgba(74,158,255,0.07);
+      --card:   rgba(255,255,255,0.03);
+      background: #0d1f38;
+      border-color: rgba(74,158,255,0.15);
+      color: #8da9c4;
+    }
+
+    /* Trial inputs nearly invisible in light mode */
+    :root.light .trial-input {
+      background: rgba(255,255,255,0.85);
+    }
 
     /* ── MOCKUP ──────────────────────────────────────────────────────────── */
     .mockup-wrap {
@@ -622,11 +648,14 @@
     .cta-section h2 {
       font-size: clamp(36px, 5vw, 64px); font-weight: 800;
       letter-spacing: -2px; margin-bottom: 20px;
+      color: #fff;
+    }
+    :root:not(.light) .cta-section h2 {
       background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,.6) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     :root.light .cta-section h2 {
-      background: linear-gradient(135deg, #0d1f38 0%, rgba(13,31,56,.7) 100%);
+      color: #0d1f38;
     }
     .cta-section p { font-size: 18px; color: var(--fg-2); margin-bottom: 44px; }
     .cta-section small { display: block; margin-top: 20px; font-size: 13px; color: var(--fg-3); }
