@@ -2,7 +2,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, AlertTriangle, XCircle } from "lucide-react";
+import { LogOut, Shield, AlertTriangle, XCircle, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLicenseStatus } from "@/lib/api";
@@ -11,6 +12,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { logout, isAdmin } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const { data: license } = useQuery({
@@ -36,6 +38,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex-1" />
             <NotificationBell />
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground" onClick={toggleTheme}>
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             {isAdmin && (
               <Button variant="ghost" size="sm" className="text-xs gap-1.5 text-muted-foreground h-8"
                 onClick={() => navigate("/admin")}>
