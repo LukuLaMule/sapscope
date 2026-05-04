@@ -51,18 +51,21 @@ function resolveTransportLine(
   sid: string,
   release: string | null,
   stmsDomain: { routes?: StmsRoute[]; domain_systems?: StmsSystem[] } | null,
+  systemType: string,
 ): string {
   const routes: StmsRoute[] = stmsDomain?.routes ?? [];
   if (routes.length > 0) {
-    // Find the first route involving this system
     const mine = routes.find(r => r.from === sid || r.to === sid);
     if (mine?.route_name) return mine.route_name;
   }
-  // SID/release heuristic fallback
+  // SID/release heuristic
   const s = sid.toUpperCase();
   const r = (release || "").toUpperCase();
   if (/BW/.test(s) || r.includes("BW"))             return "BW";
   if (/S4|S\/4|HANA/.test(s) || r.includes("S/4")) return "S4";
+  // Fallback sur le type détecté par composants — un S/4HANA ne doit jamais tomber en ECC
+  if (systemType === "S/4HANA" || systemType === "BW/4HANA") return "S4";
+  if (systemType === "BW")                                    return "BW";
   return "ECC";
 }
 
@@ -126,7 +129,16 @@ export function snapshotToSystem(snap: ApiSnapshot, clientId = ""): SAPSystem {
                             Array.isArray(snap.payload?.components) ? snap.payload.components : [],
                             snap.system_sid,
                           ),
-    transportLine:        resolveTransportLine(snap.system_sid, snap.system_release, snap.payload?.stms_domain ?? null),
+    transportLine:        resolveTransportLine(
+                            snap.system_sid,
+                            snap.system_release,
+                            snap.payload?.stms_domain ?? null,
+                            detectSystemType(
+                              snap.payload?.system_type,
+                              Array.isArray(snap.payload?.components) ? snap.payload.components : [],
+                              snap.system_sid,
+                            ),
+                          ),
     stmsDomainController: isDomainController(snap.system_sid, snap.payload?.stms_domain ?? null),
     stmsRoutes:           (snap.payload?.stms_domain?.routes ?? []).map((r: StmsRoute) => ({
                             from:      r.from,
