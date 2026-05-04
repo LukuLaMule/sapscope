@@ -19,6 +19,7 @@ from .limiter import limiter
 from .models import Base, OnboardingToken, PasswordResetToken, User
 from .reporter import send_daily_reports
 from .routers import admin, analysis, auth, billing, diff, history, license_server, license_status, notes, snapshots
+from .routers.notifications import router as notifications_router
 from .routers.reports import router as reports_router
 from .routers.trial import router as trial_router
 from .scheduled_reports import send_scheduled_reports
@@ -160,6 +161,7 @@ app.include_router(admin.router)
 app.include_router(billing.router)
 app.include_router(license_status.router)
 app.include_router(trial_router)
+app.include_router(notifications_router)
 app.include_router(reports_router)
 if settings.is_license_server:
     app.include_router(license_server.router)

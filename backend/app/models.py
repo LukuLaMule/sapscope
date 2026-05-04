@@ -283,6 +283,28 @@ class TrialRequest(Base):
     reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    client_id: Mapped[str] = mapped_column(
+        ForeignKey("clients.id", ondelete="CASCADE"), nullable=False
+    )
+    system_sid: Mapped[str] = mapped_column(String(10), nullable=False)
+    severity: Mapped[str] = mapped_column(String(10), nullable=False)   # warning | critical
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        Index("ix_notifications_client_created", "client_id", "created_at"),
+    )
+
+
 class License(Base):
     """Licence self-hosted émise par le serveur de licences central."""
     __tablename__ = "licenses"

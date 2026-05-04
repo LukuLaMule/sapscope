@@ -310,6 +310,28 @@ export async function downloadReportPdf(clientId: string, clientName: string): P
   URL.revokeObjectURL(url);
 }
 
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+export interface NotificationItem {
+  id: string;
+  client_id: string;
+  client_name: string;
+  system_sid: string;
+  severity: "warning" | "critical";
+  message: string;
+  created_at: string;
+  read_at: string | null;
+}
+
+export const fetchNotifications = (unreadOnly = true): Promise<NotificationItem[]> =>
+  apiFetch(`/api/v1/notifications?unread_only=${unreadOnly}`);
+
+export const markNotificationRead = (id: string): Promise<void> =>
+  apiFetch(`/api/v1/notifications/${id}/read`, { method: "PATCH" });
+
+export const markAllNotificationsRead = (): Promise<void> =>
+  apiFetch("/api/v1/notifications/read-all", { method: "POST" });
+
 // ── License ───────────────────────────────────────────────────────────────────
 
 export interface LicenseStatus {

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLicenseStatus } from "@/lib/api";
 import { TrialBanner } from "@/components/TrialBanner";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { logout, isAdmin } = useAuth();
@@ -34,6 +35,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <span className="text-sm font-semibold text-foreground">scope</span>
             </div>
             <div className="flex-1" />
+            <NotificationBell />
             {isAdmin && (
               <Button variant="ghost" size="sm" className="text-xs gap-1.5 text-muted-foreground h-8"
                 onClick={() => navigate("/admin")}>
