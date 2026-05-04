@@ -4,15 +4,17 @@ All endpoints require an authenticated admin user (is_admin=True).
 """
 
 import secrets
+from datetime import datetime, timedelta, timezone
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import get_current_user, hash_password
 from ..database import get_db
-from ..models import AgentToken, Client, User, UserClient
+from ..models import AgentHeartbeat, AgentToken, Client, Snapshot, SystemDecommission, User, UserClient
 from ..schemas import AdminToggle, ClientOut, LogoUpdateRequest, PasswordReset, TokenCreated, TokenOut, UserCreate, UserOut
 from ..settings import settings
 
@@ -302,3 +304,89 @@ async def unassign_client(
     if link:
         await db.delete(link)
         await db.commit()
+
+
+# ── Agent health & décommission ──────────────────────────────────────────────
+
+@router.get("/agent-health")
+async def agent_health(
+    _: User = Depends(_require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    heartbeats = (await db.execute(select(AgentHeartbeat))).scalars().all()
+    now = datetime.now(timezone.utc)
+    result = []
+    for hb in heartbeats:
+        interval = timedelta(minutes=hb.collection_interval_minutes)
+        age = now - hb.last_seen_at
+        if age <= interval * 2:
+            hb_status = "ok"
+        elif age <= interval * 4:
+            hb_status = "warning"
+        else:
+            hb_status = "down"
+        result.append({
+            "client_id": hb.client_id,
+            "last_seen_at": hb.last_seen_at.isoformat(),
+            "agent_version": hb.agent_version,
+            "monitored_sids": hb.monitored_sids,
+            "collection_interval_minutes": hb.collection_interval_minutes,
+            "status": hb_status,
+            "age_minutes": int(age.total_seconds() / 60),
+        })
+    return result
+
+
+@router.get("/decommission-candidates")
+async def decommission_candidates(
+    _: User = Depends(_require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    rows = (await db.execute(
+        select(SystemDecommission)
+        .where(SystemDecommission.status == "candidate")
+        .order_by(SystemDecommission.detected_at.desc())
+    )).scalars().all()
+    return [
+        {
+            "id": r.id,
+            "client_id": r.client_id,
+            "system_sid": r.system_sid,
+            "reason": r.reason,
+            "detected_at": r.detected_at.isoformat(),
+        }
+        for r in rows
+    ]
+
+
+@router.post("/systems/{client_id}/{sid}/decommission", status_code=status.HTTP_204_NO_CONTENT)
+async def confirm_decommission(
+    client_id: str,
+    sid: str,
+    _: User = Depends(_require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    await db.execute(
+        update(SystemDecommission)
+        .where(SystemDecommission.client_id == client_id, SystemDecommission.system_sid == sid)
+        .values(status="confirmed", confirmed_at=datetime.now(timezone.utc))
+    )
+    await db.execute(
+        delete(Snapshot).where(Snapshot.client_id == client_id, Snapshot.system_sid == sid)
+    )
+    await db.commit()
+
+
+@router.post("/systems/{client_id}/{sid}/restore", status_code=status.HTTP_204_NO_CONTENT)
+async def restore_system(
+    client_id: str,
+    sid: str,
+    _: User = Depends(_require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    await db.execute(
+        update(SystemDecommission)
+        .where(SystemDecommission.client_id == client_id, SystemDecommission.system_sid == sid)
+        .values(status="restored", restored_at=datetime.now(timezone.utc))
+    )
+    await db.commit()

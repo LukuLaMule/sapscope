@@ -124,3 +124,21 @@ export interface Snapshot {
   sapAllUsers: number;
   transportQueueSize: number;
 }
+
+export interface AgentHealth {
+  client_id: string;
+  last_seen_at: string | null;
+  agent_version: string | null;
+  monitored_sids: string[];
+  collection_interval_minutes: number | null;
+  status: "ok" | "warning" | "down";
+  age_minutes: number | null;
+}
+
+export interface DecommissionCandidate {
+  id: string;
+  client_id: string;
+  system_sid: string;
+  reason: string;
+  detected_at: string;
+}

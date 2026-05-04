@@ -1,0 +1,14 @@
+{
+  "name": "SAPscope",
+  "short_name": "SAPscope",
+  "description": "Monitoring SAP Basis",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1f38",
+  "theme_color": "#31c4d5",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/sapscope-icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/favicon.ico", "sizes": "any", "type": "image/x-icon" }
+  ]
+}

@@ -77,6 +77,42 @@ SAPscope est un outil pour le Basis admin, pas un remplacement. Les nouvelles fo
   - Données indicateurs connues : `stability.{dumps_7d, jobs_aborted_7d}`, `performance.{wp_priv, wp_stopped}`, `connectivity.{trfc_errors}`, `infrastructure.{max_used_pct, warning:[], critical:[]}`, `security.{users_locked}`, `security_ops.{sap_all_count}`, `transports.{import_queue_count}`
   - Frontend attendu : `src/hooks/useReportConfig.ts`, `src/components/ReportConfigPanel.tsx`, bouton "Télécharger PDF" dans `ReportPage.tsx`, panneau Rapports dans `AdminPage.tsx`, fonctions API dans `lib/api.ts`
 
+- Détection décommissionnement automatique — agent heartbeat + détection backend
+  - Table `agent_heartbeats` (client_id, monitored_sids JSONB, agent_version, last_seen_at) + table `system_decommissions` (client_id, system_sid, status, detected_at)
+  - Migration : `backend/migrations/20260504_agent_heartbeat_decommission.sql`
+  - Agent envoie `POST /api/v1/agent/heartbeat` avec `monitored_sids` ; backend détecte SID absent comme candidat au décommissionnement
+  - Router : `backend/app/routers/heartbeat.py` ; détecteur : `backend/app/decommission_detector.py` (job APScheduler CronTrigger(minute=30))
+  - Admin endpoints : `GET /agent-health`, `GET /decommission-candidates`, `POST /systems/{client_id}/{sid}/decommission`, `POST /systems/{client_id}/{sid}/restore`
+  - Frontend : `AgentHealthPanel.tsx` + `DecommissionPanel.tsx` dans onglet "Infrastructure" de AdminPage
+  - API : `fetchAgentHealth()`, `fetchDecommissionCandidates()`, `confirmDecommission()`, `restoreSystem()` dans `lib/api.ts`
+- Benchmarks cross-tier — compare les métriques d'un système contre la moyenne des systèmes du même tier dans l'instance
+  - Router : `backend/app/routers/benchmarks.py` — `GET /api/v1/clients/{id}/systems/{sid}/benchmarks`
+  - Métriques : `stability.dumps_7d`, `stability.jobs_aborted_7d`, `performance.wp_priv`, `connectivity.trfc_errors`, `transports.import_queue_count`, `security_ops.sap_all_count`
+  - Régression DISTINCT ON (client_id, system_sid) sur les derniers snapshots par tier ; retourne ratio, avg, médiane, status (good/warning/critical/unknown)
+  - Frontend : `BenchmarkSection.tsx` — barre comparative, ratio coloré, badge status
+- Sécurité étendue — 3 nouvelles métriques collectées par l'agent dans `get_security_info()` :
+  - `inactive_users_count` / `inactive_users` : USR02 WHERE TRDAT < 90j AND UFLAG = 0
+  - `never_logged_in_count` / `never_logged_in` : USR02 WHERE TRDAT = '00000000' AND UFLAG = 0
+  - `sap_new_count` / `sap_new_users` : AGR_USERS WHERE AGR_NAME = 'SAP_NEW'
+  - Health scorer `security_ops` : pénalités -5 si inactive>20, -10 si inactive>50, -3 si never_logged_in>10, -5 si sap_new>0
+  - Frontend : affichage conditionnel dans section sécurité de SystemDetailPage (masqué si valeur = 0)
+- Tendances prédictives — régression linéaire sur les 30 derniers snapshots
+  - Router : `backend/app/routers/trends.py` — `GET /api/v1/clients/{id}/systems/{sid}/trends`
+  - Métriques : `infrastructure.max_used_pct` (seuil 90%), `stability.dumps_7d` (5), `stability.jobs_aborted_7d` (3), `performance.wp_priv` (80)
+  - Régression linéaire stdlib pure (pas numpy) ; retourne slope_per_day, days_to_threshold, trend (up/down/stable), status (ok/warning/critical)
+  - Frontend : `TrendSection.tsx` — sparklines SVG inline, flèche tendance, badge "CRITIQUE dans Xj"
+- Rapport conformité PDF par système — 10 checks SAP Security Guide
+  - Générateur : `backend/app/compliance_report.py` — `generate_compliance_pdf(payload, indicators, system_info)` → bytes PDF WeasyPrint
+  - Router : `backend/app/routers/compliance.py` — `GET /api/v1/clients/{id}/systems/{sid}/compliance-report` → PDF téléchargeable `compliance-{SID}-{date}.pdf`
+  - Checks : SEC-001 à SEC-010 (comptes défaut, SAP_ALL, SAP_NEW, RFC, inactifs, jamais connectés, verrouillés)
+  - Frontend : bouton "Rapport conformité" avec icône ShieldCheck dans header SystemDetailPage ; `downloadComplianceReport()` dans `lib/api.ts`
+- PWA (Progressive Web App) — SAPscope installable sur mobile
+  - `frontend-react/public/manifest.json` — name, icons (sapscope-icon.svg), theme_color #31c4d5, background #0d1f38, display standalone
+  - `frontend-react/public/sw.js` — service worker cache-first (ne pas intercepter /api/)
+  - `frontend-react/public/sapscope-icon.svg` — carré arrondi fond #0d1f38, "SS" en #31c4d5
+  - `index.html` — balises PWA (manifest, theme-color, Apple mobile meta)
+  - `main.tsx` — enregistrement service worker sur window.load
+
 **En attente d'un système SAP de test :**
 - Surveillance certificats SSL/TLS — ABAP PSE (SSFR_PSE_LIST/GET) + HANA (M_PSE_CERTIFICATES). Non testable sans accès RFC réel. Lib `cryptography` déjà présente dans le container.
 - BW process chains (RSPCCHAIN/RSPCPROCESSLOG) — pour clients BW/4HANA

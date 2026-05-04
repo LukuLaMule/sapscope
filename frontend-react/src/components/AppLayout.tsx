@@ -39,7 +39,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex-1" />
             <NotificationBell />
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground" onClick={toggleTheme}>
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </Button>
             {isAdmin && (
               <Button variant="ghost" size="sm" className="text-xs gap-1.5 text-muted-foreground h-8"

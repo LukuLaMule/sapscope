@@ -108,17 +108,17 @@ export default function OverviewPage() {
   }
 
   return (
-    <div className="p-6 max-w-[1440px] mx-auto space-y-8">
-      <div className="flex items-end justify-between gap-6">
+    <div className="p-4 sm:p-6 max-w-[1440px] mx-auto space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             {greeting}{displayName && <span className="text-primary">, {displayName}</span>}
           </h1>
           <p className="text-sm text-muted-foreground mt-1.5">
             {clientOverviews.length} client{clientOverviews.length !== 1 ? "s" : ""} · {totalSystems} SAP systems monitored
           </p>
         </div>
-        <div className="relative w-72">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search client, SID…"

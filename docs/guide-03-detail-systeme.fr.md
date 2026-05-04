@@ -79,6 +79,62 @@ Liste des patches appliqués avec :
 - Type
 - Date d'application
 
+### Sécurité étendue
+En plus des indicateurs classiques (SAP_ALL, RFC sans logon, comptes par défaut), trois métriques supplémentaires sont affichées si leur valeur est non nulle :
+
+| Indicateur | Signification | Seuil warning |
+|---|---|---|
+| Utilisateurs inactifs (>90j) | Comptes actifs sans connexion depuis plus de 90 jours | > 20 |
+| Jamais connectés | Comptes actifs qui ne se sont jamais connectés | > 10 |
+| Profil SAP_NEW | Utilisateurs avec SAP_NEW (quasi-équivalent SAP_ALL) | tout nombre > 0 |
+
+Ces métriques impactent le score du domaine **Security Ops**.
+
+### Positionnement vs portefeuille (Benchmarks)
+Compare les métriques clés du système contre la moyenne de tous les systèmes du **même tier** dans l'instance SAPscope.
+
+Pour chaque métrique (dumps, jobs abortés, WP privés, erreurs RFC, queue transport, SAP_ALL) :
+- **Barre comparative** : la position de la valeur du système par rapport à la moyenne du tier
+- **Ratio coloré** : vert si ≤ 1.2×, orange si 1.2–2.5×, rouge si > 2.5× la moyenne
+- **Badge** : "Dans la norme" / "Au-dessus" / "Critique"
+
+> Nécessite au moins 2 systèmes du même tier dans l'instance pour afficher un benchmark.
+
+### Tendances & prédictions
+Analyse l'évolution des métriques sur les **30 derniers snapshots** collectés. Pour chaque métrique surveillée :
+
+| Icône | Signification |
+|---|---|
+| ↑ (rouge) | Tendance à la hausse, seuil en approche |
+| ↓ (vert) | Tendance à la baisse, situation s'améliore |
+| → (gris) | Stable, pas d'évolution significative |
+
+Si la tendance est à la hausse et qu'un seuil critique est défini, un badge indique l'échéance estimée :
+- **"CRITIQUE dans X jours"** (rouge) — seuil atteint en moins de 7 jours
+- **"ATTENTION dans X jours"** (orange) — seuil atteint en moins de 30 jours
+
+> Nécessite un minimum de 3 snapshots pour calculer une tendance.
+
+### Rapport de conformité PDF
+Bouton **"Rapport conformité"** (icône bouclier) dans le header de la page.
+
+Génère un PDF téléchargeable (`compliance-{SID}-{date}.pdf`) avec 10 contrôles basés sur le **SAP Security Guide** :
+
+| Contrôle | Catégorie | Sévérité si non-conforme |
+|---|---|---|
+| SEC-001 | Comptes par défaut | SAP* désactivé | CRITIQUE |
+| SEC-002 | Comptes par défaut | DDIC désactivé | CRITIQUE |
+| SEC-003 | Comptes par défaut | EARLYWATCH désactivé | ÉLEVÉ |
+| SEC-004 | Autorisations | Aucun SAP_ALL | CRITIQUE |
+| SEC-005 | Autorisations | Aucun SAP_NEW | ÉLEVÉ |
+| SEC-006 | Connexions RFC | RFC type-3 avec utilisateur défini | ÉLEVÉ |
+| SEC-007 | Connexions RFC | Connexions de confiance < 5 | MOYEN |
+| SEC-008 | Gestion comptes | Inactifs >90j < 20 | MOYEN |
+| SEC-009 | Gestion comptes | Jamais connectés < 10 | MOYEN |
+| SEC-010 | Gestion comptes | Comptes verrouillés < 50% | BAS |
+
+Le rapport affiche un résumé CRITIQUE / ÉLEVÉ / MOYEN / BAS / CONFORME et le détail de chaque contrôle.
+
 ### Objets custom ABAP
 Graphique donut + tableau des développements Z/Y :
 - Répartition par type (programme, fonction, classe, table, etc.)

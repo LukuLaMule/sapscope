@@ -19,8 +19,13 @@ from .limiter import limiter
 from .models import Base, OnboardingToken, PasswordResetToken, User
 from .reporter import send_daily_reports
 from .routers import admin, analysis, auth, billing, diff, history, license_server, license_status, notes, snapshots
+from .routers.benchmarks import router as benchmarks_router
+from .routers.compliance import router as compliance_router
+from .routers.agent_logs import router as agent_logs_router
+from .routers.heartbeat import router as heartbeat_router
 from .routers.notifications import router as notifications_router
 from .routers.reports import router as reports_router
+from .routers.trends import router as trends_router
 from .routers.trial import router as trial_router
 from .scheduled_reports import send_scheduled_reports
 from .trial_reminder import send_trial_reminders
@@ -112,6 +117,14 @@ async def lifespan(app: FastAPI):
         replace_existing=True,
     )
     logger.info("Job 'scheduled_reports' enregistré (toutes les heures)")
+    from .decommission_detector import run_decommission_detection
+    scheduler.add_job(
+        run_decommission_detection,
+        CronTrigger(minute=30),  # toutes les heures à H:30
+        id="decommission_detection",
+        replace_existing=True,
+    )
+    logger.info("Job 'decommission_detection' enregistré (toutes les heures à H:30)")
     scheduler.start()
 
     yield
@@ -154,6 +167,9 @@ async def https_redirect(request: Request, call_next):
 app.include_router(auth.router)
 app.include_router(snapshots.router)
 app.include_router(analysis.router)
+app.include_router(benchmarks_router)
+app.include_router(trends_router)
+app.include_router(compliance_router)
 app.include_router(diff.router)
 app.include_router(history.router)
 app.include_router(notes.router)
@@ -163,6 +179,8 @@ app.include_router(license_status.router)
 app.include_router(trial_router)
 app.include_router(notifications_router)
 app.include_router(reports_router)
+app.include_router(agent_logs_router)
+app.include_router(heartbeat_router)
 if settings.is_license_server:
     app.include_router(license_server.router)
 
