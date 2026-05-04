@@ -88,7 +88,17 @@
       "Bash(docker-compose build:*)",
       "Bash(python -m py_compile backend/app/schemas.py)",
       "Bash(python -m py_compile backend/app/routers/snapshots.py)",
-      "Bash(python -m py_compile agent/collector.py)"
+      "Bash(python -m py_compile agent/collector.py)",
+      "Bash(cp docs/guide-00-installation.md frontend/docs/guide-00-installation.md)",
+      "Bash(cp docs/guide-00-installation.fr.md frontend/docs/guide-00-installation.fr.md)",
+      "Bash(cp -f docs/guide-00-installation.md frontend/docs/guide-00-installation.md)",
+      "Bash(cp -f docs/guide-00-installation.fr.md frontend/docs/guide-00-installation.fr.md)",
+      "Bash(yes)",
+      "Bash(./run-tests.sh)",
+      "Bash(python -m pytest tests/test_health_scorer.py -v)",
+      "Bash(awk '{print $2}')",
+      "Bash(xargs '-I{}' sh -c ' *)",
+      "Bash(./run-tests.sh *)"
     ]
   }
 }

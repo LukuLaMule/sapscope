@@ -1,9 +1,19 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(crontab -l)"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": "if echo $CC_TOOL_INPUT | grep -q '\\.py'; then cd /home/opc/Docker/sites/sapscope && python -m py_compile $(echo $CC_TOOL_INPUT | jq -r '.file_path') 2>&1 || true; fi"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo $CC_TOOL_INPUT | grep -q '\\.py'; then cd /home/opc/Docker/sites/sapscope && python -m py_compile $(echo $CC_TOOL_INPUT | jq -r '.file_path') 2>&1 || true; fi"
+          }
+        ]
       }
     ]
   }
