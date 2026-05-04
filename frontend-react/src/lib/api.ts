@@ -268,6 +268,10 @@ export interface ApiReportConfig {
   schedule_day: number;
   language: "fr" | "en";
   last_sent_at: string | null;
+  report_title: string | null;
+  include_health_domains: boolean;
+  include_key_metrics: boolean;
+  include_ai_analysis: boolean;
 }
 
 export const fetchReportConfig = (clientId: string): Promise<ApiReportConfig> =>

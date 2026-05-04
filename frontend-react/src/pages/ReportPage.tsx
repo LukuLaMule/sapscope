@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchClients, fetchSnapshots } from "@/lib/api";
 import { snapshotToSystem } from "@/lib/data-adapter";
 import { getScoreColor, getStatusBadgeClass, getTierBadgeClass } from "@/lib/sap-utils";
-import { getKernelStatus, getKernelStatusLabel, VERSION_STATUS_CLASS } from "@/lib/sap-versions";
-import { Printer, ArrowLeft, FileText, Download } from "lucide-react";
+import { getKernelStatus, getKernelStatusLabel } from "@/lib/sap-versions";
+import { ArrowLeft, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { downloadReportPdf } from "@/lib/api";
@@ -176,17 +176,12 @@ export default function ReportPage() {
         </span>
         <Button
           size="sm"
-          variant="outline"
           onClick={handleDownloadPdf}
           disabled={downloading}
           className="gap-1.5"
         >
           <Download className="w-3.5 h-3.5" />
           {downloading ? "Génération…" : "Télécharger PDF"}
-        </Button>
-        <Button size="sm" onClick={() => window.print()} className="gap-1.5">
-          <Printer className="w-3.5 h-3.5" />
-          Imprimer
         </Button>
       </div>
 
@@ -401,12 +396,12 @@ export default function ReportPage() {
                     </td>
                     <td style={{ padding: "8px 12px" }}>
                       <span style={{ fontFamily: "monospace", color: "#374151" }}>{kernelStr}</span>
-                      {kStatus !== "unknown" && (
+                      {(kStatus === "warning" || kStatus === "critical") && (
                         <span style={{
                           marginLeft: 4, fontSize: 9, padding: "1px 5px",
                           borderRadius: 3, border: "1px solid currentColor",
-                          color: kStatus === "eol" ? "#b91c1c" : kStatus === "maintenance" ? "#b45309" : "#15803d",
-                          background: kStatus === "eol" ? "#fee2e2" : kStatus === "maintenance" ? "#fef3c7" : "#dcfce7",
+                          color: kStatus === "critical" ? "#b91c1c" : "#b45309",
+                          background: kStatus === "critical" ? "#fee2e2" : "#fef3c7",
                         }}>
                           {kLabel}
                         </span>

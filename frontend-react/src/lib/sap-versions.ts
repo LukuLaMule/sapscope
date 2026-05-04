@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 /**
  * SAP kernel and SP version staleness helpers.
  * Basis consultants need to know at a glance if components are on maintenance.
@@ -33,9 +35,35 @@ export function getKernelStatusLabel(kernelRelease: string | null | undefined): 
   return "";
 }
 
+/** @deprecated use getVersionStatusStyle() for inline styles */
 export const VERSION_STATUS_CLASS: Record<VersionStatus, string> = {
-  ok:      "text-[hsl(var(--status-ok))] border-[hsl(var(--status-ok)/0.3)] bg-[hsl(var(--status-ok)/0.08)]",
-  warning: "text-[hsl(var(--status-warning))] border-[hsl(var(--status-warning)/0.3)] bg-[hsl(var(--status-warning)/0.08)]",
-  critical:"text-[hsl(var(--status-critical))] border-[hsl(var(--status-critical)/0.3)] bg-[hsl(var(--status-critical)/0.08)]",
-  unknown: "text-muted-foreground border-border bg-transparent",
+  ok:      "",
+  warning: "",
+  critical:"",
+  unknown: "",
 };
+
+export function getVersionStatusStyle(status: VersionStatus): CSSProperties {
+  switch (status) {
+    case "ok":
+      return {
+        color: "hsl(var(--status-ok))",
+        borderColor: "hsl(var(--status-ok) / 0.4)",
+        backgroundColor: "hsl(var(--status-ok) / 0.1)",
+      };
+    case "warning":
+      return {
+        color: "hsl(var(--status-warning))",
+        borderColor: "hsl(var(--status-warning) / 0.4)",
+        backgroundColor: "hsl(var(--status-warning) / 0.1)",
+      };
+    case "critical":
+      return {
+        color: "hsl(var(--status-critical))",
+        borderColor: "hsl(var(--status-critical) / 0.4)",
+        backgroundColor: "hsl(var(--status-critical) / 0.1)",
+      };
+    default:
+      return {};
+  }
+}

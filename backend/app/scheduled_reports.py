@@ -177,6 +177,12 @@ async def send_scheduled_reports() -> None:
                     snapshots_data=snapshots_data,
                     language=cfg.language,
                     report_date=report_date,
+                    report_title=cfg.report_title,
+                    sections={
+                        "health_domains": cfg.include_health_domains,
+                        "key_metrics":    cfg.include_key_metrics,
+                        "ai_analysis":    cfg.include_ai_analysis,
+                    },
                 )
             except Exception:
                 logger.exception(
