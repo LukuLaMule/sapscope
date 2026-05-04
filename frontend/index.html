@@ -774,6 +774,34 @@
     }
     .lang-dropdown-item:hover { background: rgba(74,158,255,.08); color: var(--fg); }
     .lang-dropdown-item.active { color: var(--accent); }
+
+    /* ── PRICING TOGGLE ──────────────────────────────────────────────────────── */
+    .pricing-toggle {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 48px;
+    }
+    .pricing-toggle-track {
+      position: relative; width: 48px; height: 26px;
+      background: var(--border-2); border-radius: 13px;
+      cursor: pointer; transition: background .25s;
+      border: 1px solid var(--border);
+    }
+    .pricing-toggle-track.annual { background: var(--accent); }
+    .pricing-toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; transition: transform .25s;
+    }
+    .pricing-toggle-track.annual .pricing-toggle-thumb { transform: translateX(22px); }
+    .pricing-toggle-label {
+      font-size: 14px; font-weight: 500; color: var(--fg-2); transition: color .2s;
+    }
+    .pricing-toggle-label.active { color: var(--fg); font-weight: 600; }
+    .pricing-save-badge {
+      font-size: 11px; font-weight: 700; color: var(--green);
+      background: rgba(45,212,160,.1); border: 1px solid rgba(45,212,160,.25);
+      padding: 2px 8px; border-radius: 6px; margin-left: 4px;
+    }
   </style>
 </head>
 <body>
@@ -1256,6 +1284,36 @@
         </div></div>
       </div>
 
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>How often does the agent collect data?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          By default, the agent runs <strong>once every 24 hours</strong> via a systemd timer. You can adjust this interval — hourly collection is supported for critical systems. Each run takes under 30 seconds and has negligible impact on system performance.
+        </div></div>
+      </div>
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Does SAPscope work behind a SAProuter or Message Server?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Yes. The agent connects <strong>locally from within the SAP server</strong> via RFC — no inbound connection from the internet is needed. SAProuter and Message Server (logon groups) are supported through the <code>systems.yaml</code> configuration file.
+        </div></div>
+      </div>
+
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Can I monitor S/4HANA and ECC systems in the same dashboard?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Yes. SAPscope automatically detects the system type (S/4HANA, ECC, BW, SolMan, PI/PO…) from installed components. All system types are displayed in a <strong>unified landscape view</strong>, with transport routes visualized across the whole STMS domain.
+        </div></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1313,13 +1371,21 @@
     <h2 class="section-title fade-up" data-i18n="pricing_title">Self-hosted. Your data stays on your servers.</h2>
     <p class="section-sub fade-up" data-i18n="pricing_sub">Annual license. Deploy in 5 minutes with Docker. No cloud dependency.</p>
 
+    <div class="pricing-toggle fade-up">
+      <span class="pricing-toggle-label" id="toggle-label-monthly">Monthly</span>
+      <div class="pricing-toggle-track annual" id="pricing-toggle-track" onclick="togglePricing()">
+        <div class="pricing-toggle-thumb"></div>
+      </div>
+      <span class="pricing-toggle-label active" id="toggle-label-annual">Annual <span class="pricing-save-badge">Save 17%</span></span>
+    </div>
+
     <div class="pricing-grid">
       <!-- Solo -->
       <div class="pricing-card fade-up">
         <div class="pricing-tier">Solo</div>
         <div class="pricing-price">
-          <div class="pricing-amount"><span>€</span>490</div>
-          <div class="pricing-period" data-i18n="pricing_per_month">per year</div>
+          <div class="pricing-amount"><span>€</span><span data-annual="490" data-monthly="59" class="price-val">490</span></div>
+          <div class="pricing-period price-period" data-i18n="pricing_per_month">per year</div>
         </div>
         <p class="pricing-desc" data-i18n="solo_desc">For independent SAP Basis consultants monitoring their own clients.</p>
         <a href="mailto:contact@sapscope.fr?subject=Solo%20License" class="pricing-cta pricing-cta-secondary" data-i18n="solo_cta">Get a license →</a>
@@ -1339,8 +1405,8 @@
         <div class="pricing-popular" data-i18n="pricing_popular">⭐ Most popular</div>
         <div class="pricing-tier pricing-tier-featured">Team</div>
         <div class="pricing-price">
-          <div class="pricing-amount"><span>€</span>1 490</div>
-          <div class="pricing-period" data-i18n="pricing_per_month">per year</div>
+          <div class="pricing-amount"><span>€</span><span data-annual="1490" data-monthly="149" class="price-val">1 490</span></div>
+          <div class="pricing-period price-period" data-i18n="pricing_per_month">per year</div>
         </div>
         <p class="pricing-desc" data-i18n="team_desc">For SAP consulting firms managing multiple client landscapes.</p>
         <a href="mailto:contact@sapscope.fr?subject=Team%20License" class="pricing-cta pricing-cta-primary" data-i18n="team_cta">Get a license →</a>
@@ -2111,6 +2177,25 @@
     activate(0);
     startTimer();
   })();
+
+  // ── Pricing toggle ────────────────────────────────────────────────────────
+  var pricingAnnual = true;
+  function togglePricing() {
+    pricingAnnual = !pricingAnnual;
+    var track = document.getElementById('pricing-toggle-track');
+    var labelM = document.getElementById('toggle-label-monthly');
+    var labelA = document.getElementById('toggle-label-annual');
+    track.classList.toggle('annual', pricingAnnual);
+    labelM.classList.toggle('active', !pricingAnnual);
+    labelA.classList.toggle('active', pricingAnnual);
+    document.querySelectorAll('.price-val').forEach(function(el) {
+      var val = pricingAnnual ? el.dataset.annual : el.dataset.monthly;
+      el.textContent = Number(val).toLocaleString('fr-FR');
+    });
+    document.querySelectorAll('.price-period').forEach(function(el) {
+      el.textContent = pricingAnnual ? 'per year' : 'per month';
+    });
+  }
 
   const dropdown = document.getElementById('lang-dropdown');
   const dropdownBtn = document.getElementById('lang-dropdown-btn');

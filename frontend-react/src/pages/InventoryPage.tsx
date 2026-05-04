@@ -19,6 +19,7 @@ interface InventoryRow {
   clientName:    string;
   sid:           string;
   tier:          string;
+  systemType:    string;
   sapRelease:    string;
   kernelRelease: string | null;
   kernelPatch:   string | null;
@@ -32,11 +33,13 @@ interface InventoryRow {
 
 export default function InventoryPage() {
   const navigate = useNavigate();
-  const [search, setSearch]           = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterClient, setFilterClient] = useState("all");
-  const [sortKey, setSortKey]         = useState<SortKey>("score");
-  const [sortDir, setSortDir]         = useState<SortDir>("asc");
+  const [search, setSearch]               = useState("");
+  const [filterStatus, setFilterStatus]   = useState("all");
+  const [filterClient, setFilterClient]   = useState("all");
+  const [filterType, setFilterType]       = useState("all");
+  const [filterTier, setFilterTier]       = useState("all");
+  const [sortKey, setSortKey]             = useState<SortKey>("score");
+  const [sortDir, setSortDir]             = useState<SortDir>("asc");
 
   const { data: clients = [], isLoading: loadingClients } = useQuery({
     queryKey: ["clients"],
@@ -55,7 +58,6 @@ export default function InventoryPage() {
   const rows: InventoryRow[] = useMemo(() => {
     return clients.flatMap((c, i) => {
       const snaps = snapQueries[i]?.data ?? [];
-      // Group by SID, take latest snapshot per SID
       const bySid = new Map<string, typeof snaps[0]>();
       for (const s of snaps) {
         const existing = bySid.get(s.system_sid);
@@ -70,6 +72,7 @@ export default function InventoryPage() {
           clientName:    c.name,
           sid:           s.system_sid,
           tier:          sys.tier,
+          systemType:    sys.systemType ?? "ABAP",
           sapRelease:    s.system_release || "—",
           kernelRelease: s.kernel_release,
           kernelPatch:   s.kernel_patch,
@@ -89,6 +92,8 @@ export default function InventoryPage() {
     let out = rows;
     if (filterStatus !== "all") out = out.filter(r => r.status === filterStatus);
     if (filterClient !== "all") out = out.filter(r => r.clientId === filterClient);
+    if (filterType !== "all")   out = out.filter(r => r.systemType === filterType);
+    if (filterTier !== "all")   out = out.filter(r => r.tier === filterTier);
     if (search.trim()) {
       const q = search.toLowerCase();
       out = out.filter(r =>
@@ -111,7 +116,14 @@ export default function InventoryPage() {
       const cmp = typeof va === "number" ? va - (vb as number) : String(va).localeCompare(String(vb));
       return sortDir === "asc" ? cmp : -cmp;
     });
-  }, [rows, search, filterStatus, filterClient, sortKey, sortDir]);
+  }, [rows, search, filterStatus, filterClient, filterType, filterTier, sortKey, sortDir]);
+
+  const kpiCritical      = rows.filter(r => r.status === "CRITICAL").length;
+  const kpiWarning       = rows.filter(r => r.status === "WARNING").length;
+  const kpiOutdatedKernel = rows.filter(r => {
+    const s = getKernelStatus(r.kernelRelease);
+    return s === "warning" || s === "critical";
+  }).length;
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -119,9 +131,9 @@ export default function InventoryPage() {
   }
 
   function exportCSV() {
-    const header = ["Client","SID","Tier","SAP Release","Kernel","Kernel Status","BASIS SP","Database","Health Score","Status","Last Snapshot"];
+    const header = ["Client","SID","Type","Tier","SAP Release","Kernel","Kernel Status","BASIS SP","Database","Health Score","Status","Last Snapshot"];
     const data = filtered.map(r => [
-      r.clientName, r.sid, r.tier, r.sapRelease,
+      r.clientName, r.sid, r.systemType, r.tier, r.sapRelease,
       r.kernelRelease || "—",
       getKernelStatusLabel(r.kernelRelease) || "—",
       r.basisSP ? `SP ${r.basisSP.padStart(4,"0")}` : "—",
@@ -157,7 +169,6 @@ export default function InventoryPage() {
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-5">
-      {/* Header */}
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Global Inventory</h1>
@@ -170,7 +181,25 @@ export default function InventoryPage() {
         </Button>
       </div>
 
-      {/* Filters */}
+      <div className="flex gap-3 flex-wrap">
+        <div className="bg-[hsl(var(--surface-1))] rounded-lg px-4 py-3 flex flex-col gap-0.5">
+          <span className="text-xs text-muted-foreground">Total Systems</span>
+          <span className="text-2xl font-bold font-mono">{filtered.length}</span>
+        </div>
+        <div className="bg-[hsl(var(--surface-1))] rounded-lg px-4 py-3 flex flex-col gap-0.5">
+          <span className="text-xs text-muted-foreground">Critical</span>
+          <span className="text-2xl font-bold font-mono text-status-critical">{kpiCritical}</span>
+        </div>
+        <div className="bg-[hsl(var(--surface-1))] rounded-lg px-4 py-3 flex flex-col gap-0.5">
+          <span className="text-xs text-muted-foreground">Warning</span>
+          <span className="text-2xl font-bold font-mono text-status-warning">{kpiWarning}</span>
+        </div>
+        <div className="bg-[hsl(var(--surface-1))] rounded-lg px-4 py-3 flex flex-col gap-0.5">
+          <span className="text-xs text-muted-foreground">Outdated Kernels</span>
+          <span className="text-2xl font-bold font-mono text-status-warning">{kpiOutdatedKernel}</span>
+        </div>
+      </div>
+
       <div className="flex gap-3 flex-wrap">
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -198,9 +227,36 @@ export default function InventoryPage() {
             <SelectItem value="CRITICAL">Critical</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="w-40 bg-[hsl(var(--surface-1))] border-border h-9 text-sm">
+            <SelectValue placeholder="All types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value="S/4HANA">S/4HANA</SelectItem>
+            <SelectItem value="ECC">ECC</SelectItem>
+            <SelectItem value="BW">BW</SelectItem>
+            <SelectItem value="BW/4HANA">BW/4HANA</SelectItem>
+            <SelectItem value="SolMan">SolMan</SelectItem>
+            <SelectItem value="PI/PO">PI/PO</SelectItem>
+            <SelectItem value="ABAP">ABAP</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterTier} onValueChange={setFilterTier}>
+          <SelectTrigger className="w-44 bg-[hsl(var(--surface-1))] border-border h-9 text-sm">
+            <SelectValue placeholder="All tiers" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All tiers</SelectItem>
+            <SelectItem value="Production">Production</SelectItem>
+            <SelectItem value="Pre-Production">Pre-Production</SelectItem>
+            <SelectItem value="Quality">Quality</SelectItem>
+            <SelectItem value="Development">Development</SelectItem>
+            <SelectItem value="Sandbox">Sandbox</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Table */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">Loading inventory…</div>
       ) : filtered.length === 0 ? (
@@ -215,6 +271,7 @@ export default function InventoryPage() {
                 <tr className="border-b border-border">
                   <Th label="Client"    k="client" />
                   <Th label="SID"       k="sid" />
+                  <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
                   <Th label="Tier"      k="tier" />
                   <Th label="Release"   k="release" />
                   <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -241,6 +298,9 @@ export default function InventoryPage() {
                       onClick={() => navigate(`/system/${r.snapId}`)}>
                       <td className="px-3 py-2.5 text-sm text-muted-foreground">{r.clientName}</td>
                       <td className="px-3 py-2.5 font-mono text-sm font-semibold text-foreground">{r.sid}</td>
+                      <td className="px-3 py-2.5">
+                        <span className="text-xs font-semibold font-mono text-muted-foreground">{r.systemType}</span>
+                      </td>
                       <td className="px-3 py-2.5">
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getTierBadgeClass(r.tier)}`}>
                           {r.tier}
