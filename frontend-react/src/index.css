@@ -6,9 +6,6 @@
 
 @layer base {
   :root {
-    /* Neutralise le fond blanc par défaut des nœuds ReactFlow */
-    --xy-node-background-color: transparent;
-
     --background: 222 47% 6%;
     --foreground: 210 20% 90%;
 

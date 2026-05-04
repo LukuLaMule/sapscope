@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr" id="html-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Politique de confidentialité — SAPscope</title>
+  <meta name="robots" content="noindex, follow">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a1628; --bg-2: #0d1f38; --fg: #dce6f0; --fg-2: #8da9c4; --fg-3: #4a7090;
+      --accent: #4a9eff; --border: rgba(74,158,255,0.15); --border-2: rgba(74,158,255,0.07);
+    }
+    body { background: var(--bg); color: var(--fg); font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: blur(20px); background: rgba(10,22,40,0.9);
+      border-bottom: 1px solid var(--border-2);
+    }
+    .nav-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 52px; }
+    .nav-logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--fg); text-decoration: none; }
+    .nav-logo span { color: var(--accent); }
+    .nav-back { font-size: 13px; color: var(--fg-2); }
+    .nav-back:hover { color: var(--fg); text-decoration: none; }
+    main { max-width: 860px; margin: 0 auto; padding: 100px 24px 80px; }
+    h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .meta { font-size: 13px; color: var(--fg-3); margin-bottom: 48px; }
+    h2 { font-size: 16px; font-weight: 600; color: var(--fg); margin: 36px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-2); }
+    p { font-size: 14px; line-height: 1.75; color: var(--fg-2); margin-bottom: 12px; }
+    ul { margin: 0 0 12px 20px; }
+    ul li { font-size: 14px; line-height: 1.75; color: var(--fg-2); margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    th { text-align: left; font-size: 12px; font-weight: 600; color: var(--fg-3); padding: 8px 12px; background: rgba(74,158,255,0.05); border: 1px solid var(--border-2); }
+    td { font-size: 13px; color: var(--fg-2); padding: 8px 12px; border: 1px solid var(--border-2); vertical-align: top; }
+    footer { border-top: 1px solid var(--border-2); margin-top: 64px; padding: 24px; text-align: center; font-size: 13px; color: var(--fg-3); }
+    footer a { color: var(--fg-3); margin: 0 12px; }
+    footer a:hover { color: var(--fg); text-decoration: none; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/">SAP<span>scope</span></a>
+    <a class="nav-back" href="/">← Retour</a>
+  </div>
+</nav>
+
+<main>
+  <h1>Politique de confidentialité</h1>
+  <p class="meta">En vigueur au 4 mai 2026 — conforme au Règlement (UE) 2016/679 (RGPD)</p>
+
+  <h2>1. Responsable du traitement</h2>
+  <p>L. Lautrec, entrepreneur individuel (SAPscope) — France<br>
+  Email : <a href="mailto:pro@luku.fr">pro@luku.fr</a></p>
+
+  <h2>2. Données collectées et finalités</h2>
+  <table>
+    <thead>
+      <tr><th>Données</th><th>Finalité</th><th>Base légale</th><th>Durée</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Nom, prénom, email professionnel, entreprise</td><td>Création et gestion du compte</td><td>Exécution du contrat (art. 6.1.b RGPD)</td><td>Durée du compte + 3 ans</td></tr>
+      <tr><td>Données de facturation (gérées par Stripe)</td><td>Facturation et paiement</td><td>Obligation légale (art. 6.1.c RGPD)</td><td>10 ans (obligation comptable)</td></tr>
+      <tr><td>Logs de connexion (IP, horodatage)</td><td>Sécurité et débogage</td><td>Intérêt légitime (art. 6.1.f RGPD)</td><td>90 jours</td></tr>
+      <tr><td>Métadonnées techniques SAP (versions, métriques système)</td><td>Fourniture du service de supervision</td><td>Exécution du contrat (art. 6.1.b RGPD)</td><td>Durée du contrat</td></tr>
+      <tr><td>Logs de l'agent de collecte</td><td>Support et diagnostic</td><td>Intérêt légitime (art. 6.1.f RGPD)</td><td>7 jours glissants</td></tr>
+      <tr><td>Email (demande d'essai)</td><td>Envoi du kit d'essai et rappel d'expiration</td><td>Consentement (art. 6.1.a RGPD)</td><td>3 mois + 1 an si conversion</td></tr>
+    </tbody>
+  </table>
+  <p><strong>SAPscope ne collecte pas de données personnelles SAP</strong> (noms d'utilisateurs finaux, données métier, contenus transactionnels). Les métadonnées collectées sont exclusivement techniques : versions logicielles, états de processus, métriques de performance.</p>
+
+  <h2>3. Cookies et traceurs</h2>
+  <p>SAPscope n'utilise <strong>aucun cookie tiers, aucun outil d'analytics tiers, aucun pixel publicitaire</strong>. Un cookie de session est utilisé exclusivement pour maintenir la connexion à l'application. Il est supprimé à la fermeture de session.</p>
+
+  <h2>4. Hébergement et transferts de données</h2>
+  <p>Toutes les données sont hébergées sur des serveurs OVH situés en France (Union européenne). Aucun transfert de données vers des pays tiers n'est effectué.</p>
+  <p>Les paiements sont traités par <strong>Stripe Payments Europe, Ltd.</strong> (Irlande, UE). SAPscope ne stocke aucune donnée bancaire. Consultez la politique de confidentialité de Stripe sur <a href="https://stripe.com/fr/privacy" target="_blank" rel="noopener">stripe.com/fr/privacy</a>.</p>
+
+  <h2>5. Sous-traitants</h2>
+  <ul>
+    <li><strong>OVH SAS</strong> (Roubaix, France) — hébergement infrastructure</li>
+    <li><strong>Stripe Payments Europe, Ltd.</strong> (Dublin, Irlande) — traitement des paiements</li>
+    <li><strong>Anthropic, PBC</strong> (San Francisco, USA) — analyse IA des snapshots via API (données techniques uniquement, sans données personnelles) — couvert par les clauses contractuelles types UE</li>
+  </ul>
+
+  <h2>6. Vos droits</h2>
+  <p>Conformément au RGPD, vous disposez des droits suivants :</p>
+  <ul>
+    <li><strong>Accès</strong> — obtenir une copie de vos données</li>
+    <li><strong>Rectification</strong> — corriger des données inexactes</li>
+    <li><strong>Suppression</strong> — demander l'effacement de vos données</li>
+    <li><strong>Portabilité</strong> — recevoir vos données dans un format structuré</li>
+    <li><strong>Opposition</strong> — vous opposer à un traitement fondé sur l'intérêt légitime</li>
+    <li><strong>Limitation</strong> — demander la suspension d'un traitement</li>
+  </ul>
+  <p>Pour exercer ces droits : <a href="mailto:pro@luku.fr">pro@luku.fr</a>. Réponse sous 30 jours. En cas de réponse insatisfaisante, vous pouvez saisir la <strong>CNIL</strong> : <a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>.</p>
+
+  <h2>7. Sécurité</h2>
+  <p>Les données sont protégées par chiffrement TLS en transit et chiffrement au repos. Les tokens d'agent sont à usage unique et révocables. Les mots de passe sont stockés hashés (bcrypt). Des journaux d'accès sont maintenus à des fins de détection d'anomalies.</p>
+
+  <h2>8. Modifications</h2>
+  <p>Cette politique peut être mise à jour. En cas de modification substantielle, les utilisateurs actifs seront notifiés par email au moins 15 jours avant l'entrée en vigueur. La version en vigueur est toujours accessible sur cette page.</p>
+</main>
+
+<footer>
+  <a href="/legal.html">Mentions légales</a>
+  <a href="/privacy.html">Confidentialité</a>
+  <a href="/terms.html">CGU</a>
+  <a href="/sales.html">CGV</a>
+  <div style="margin-top: 16px;">© 2026 SAPscope — Lucas Lautrec</div>
+</footer>
+</body>
+</html>

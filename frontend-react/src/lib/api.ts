@@ -310,6 +310,82 @@ export async function downloadReportPdf(clientId: string, clientName: string): P
   URL.revokeObjectURL(url);
 }
 
+// ── Trends ───────────────────────────────────────────────────────────────────
+
+export interface TrendItem {
+  metric: string;
+  label: string;
+  current_value: number | null;
+  values: number[];
+  dates: string[];
+  slope_per_day: number | null;
+  trend: "stable" | "up" | "down";
+  days_to_threshold: number | null;
+  threshold: number | null;
+  status: "ok" | "warning" | "critical";
+}
+
+export interface TrendsResponse {
+  sid: string;
+  snapshot_count: number;
+  items: TrendItem[];
+}
+
+export async function fetchTrends(clientId: string, sid: string): Promise<TrendsResponse> {
+  return apiFetch(`/api/v1/clients/${clientId}/systems/${sid}/trends`);
+}
+
+// ── Compliance report ─────────────────────────────────────────────────────────
+
+export async function downloadComplianceReport(clientId: string, sid: string): Promise<void> {
+  const token = sessionStorage.getItem("sapscope_token") || "";
+  const res = await fetch(`${BASE}/api/v1/clients/${clientId}/systems/${sid}/compliance-report`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401) {
+    sessionStorage.removeItem("sapscope_token");
+    window.location.reload();
+    throw new Error("Session expirée");
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as any).detail || `HTTP ${res.status}`);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `compliance-${sid}-${new Date().toISOString().slice(0, 10)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Benchmarks ────────────────────────────────────────────────────────────────
+
+export interface BenchmarkItem {
+  metric: string;
+  label: string;
+  system_value: number | null;
+  tier_avg: number | null;
+  tier_median: number | null;
+  peer_count: number;
+  ratio: number | null;
+  status: "good" | "warning" | "critical" | "unknown";
+}
+
+export interface BenchmarkResponse {
+  sid: string;
+  tier: string;
+  items: BenchmarkItem[];
+}
+
+export async function fetchBenchmarks(clientId: string, sid: string): Promise<BenchmarkResponse> {
+  const res = await apiFetch<BenchmarkResponse>(`/api/v1/clients/${clientId}/systems/${sid}/benchmarks`);
+  return res;
+}
+
 // ── Notifications ─────────────────────────────────────────────────────────────
 
 export interface NotificationItem {
@@ -332,6 +408,38 @@ export const markNotificationRead = (id: string): Promise<void> =>
 export const markAllNotificationsRead = (): Promise<void> =>
   apiFetch("/api/v1/notifications/read-all", { method: "POST" });
 
+// ── Agent health & decommission ───────────────────────────────────────────────
+
+export interface ApiAgentHealth {
+  client_id: string;
+  last_seen_at: string | null;
+  agent_version: string | null;
+  monitored_sids: string[];
+  collection_interval_minutes: number | null;
+  status: "ok" | "warning" | "down";
+  age_minutes: number | null;
+}
+
+export interface ApiDecommissionCandidate {
+  id: string;
+  client_id: string;
+  system_sid: string;
+  reason: string;
+  detected_at: string;
+}
+
+export const fetchAgentHealth = (): Promise<ApiAgentHealth[]> =>
+  apiFetch("/api/v1/admin/agent-health");
+
+export const fetchDecommissionCandidates = (): Promise<ApiDecommissionCandidate[]> =>
+  apiFetch("/api/v1/admin/decommission-candidates");
+
+export const confirmDecommission = (clientId: string, sid: string): Promise<void> =>
+  apiFetch(`/api/v1/admin/systems/${clientId}/${sid}/decommission`, { method: "POST" });
+
+export const restoreSystem = (clientId: string, sid: string): Promise<void> =>
+  apiFetch(`/api/v1/admin/systems/${clientId}/${sid}/restore`, { method: "POST" });
+
 // ── License ───────────────────────────────────────────────────────────────────
 
 export interface LicenseStatus {
@@ -348,4 +456,26 @@ export async function fetchLicenseStatus(): Promise<LicenseStatus> {
   const res = await fetch(`${BASE}/api/license/status`);
   if (!res.ok) return { configured: false, valid: false, plan: null, expires_at: null, days_remaining: null, grace_mode: false, reason: null };
   return res.json();
+}
+
+// ── Agent Logs ────────────────────────────────────────────────────────────────
+
+export interface AgentLog {
+  id:         number;
+  level:      "DEBUG" | "INFO" | "WARNING" | "ERROR";
+  message:    string;
+  system_sid: string | null;
+  created_at: string;
+}
+
+export async function fetchAgentLogs(
+  clientId: string,
+  opts: { level?: string; sid?: string; limit?: number } = {},
+): Promise<AgentLog[]> {
+  const params = new URLSearchParams();
+  if (opts.level) params.set("level", opts.level);
+  if (opts.sid)   params.set("sid",   opts.sid);
+  if (opts.limit) params.set("limit", String(opts.limit));
+  const qs = params.toString() ? `?${params}` : "";
+  return apiFetch(`/api/v1/clients/${clientId}/agent-logs${qs}`);
 }

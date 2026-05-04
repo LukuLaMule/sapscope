@@ -284,6 +284,60 @@ class SAPCollector:
         except Exception:
             logger.debug("Security: RFCDES not readable")
 
+        # Inactive users (no login in 90+ days, not locked)
+        try:
+            cutoff = (datetime.now() - timedelta(days=90)).strftime("%Y%m%d")
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="USR02",
+                FIELDS=[{"FIELDNAME": "BNAME"}],
+                OPTIONS=[
+                    {"TEXT": f"TRDAT < '{cutoff}'"},
+                    {"TEXT": "AND TRDAT <> '00000000'"},
+                    {"TEXT": "AND UFLAG = '0'"},
+                ],
+                ROWCOUNT=500,
+            )
+            parsed = _parse_table(rows)
+            result["inactive_users_count"] = len(parsed)
+            result["inactive_users"]       = [_trim(r, "BNAME") for r in parsed[:20]]
+        except Exception:
+            logger.debug("Security: inactive users not readable")
+
+        # Users who never logged in (dialog, not locked)
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="USR02",
+                FIELDS=[{"FIELDNAME": "BNAME"}],
+                OPTIONS=[
+                    {"TEXT": "TRDAT = '00000000'"},
+                    {"TEXT": "AND UFLAG = '0'"},
+                ],
+                ROWCOUNT=200,
+            )
+            parsed = _parse_table(rows)
+            result["never_logged_in_count"] = len(parsed)
+            result["never_logged_in"]       = [_trim(r, "BNAME") for r in parsed[:20]]
+        except Exception:
+            logger.debug("Security: never-logged-in users not readable")
+
+        # Users with SAP_NEW (nearly as dangerous as SAP_ALL)
+        try:
+            rows = self.conn.call(
+                "RFC_READ_TABLE",
+                QUERY_TABLE="AGR_USERS",
+                FIELDS=[{"FIELDNAME": "UNAME"}],
+                OPTIONS=[{"TEXT": "AGR_NAME = 'SAP_NEW'"}],
+                ROWCOUNT=100,
+            )
+            result["sap_new_users"] = [
+                _trim(r, "UNAME") for r in _parse_table(rows) if _trim(r, "UNAME")
+            ]
+            result["sap_new_count"] = len(result["sap_new_users"])
+        except Exception:
+            logger.debug("Security: SAP_NEW not readable")
+
         return result
 
     def get_transport_info(self) -> dict[str, Any]:

@@ -13,7 +13,7 @@ analyses             — Claude-generated assessment for a snapshot
 import hashlib
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, SmallInteger, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, JSON, SmallInteger, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -321,4 +321,36 @@ class License(Base):
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class AgentHeartbeat(Base):
+    __tablename__ = "agent_heartbeats"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    client_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, unique=True)
+    monitored_sids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    agent_version: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    collection_interval_minutes: Mapped[int] = mapped_column(default=60)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+
+    client: Mapped["Client"] = relationship()
+
+
+class SystemDecommission(Base):
+    __tablename__ = "system_decommissions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    client_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("clients.id", ondelete="CASCADE"), nullable=False)
+    system_sid: Mapped[str] = mapped_column(String(10), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="candidate")  # candidate | confirmed | restored
+    reason: Mapped[str] = mapped_column(String(50), default="removed_from_config")
+    detected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    restored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("client_id", "system_sid", name="uq_system_decommission"),
+        Index("ix_system_decommissions_client", "client_id"),
+        Index("ix_system_decommissions_status", "status"),
     )

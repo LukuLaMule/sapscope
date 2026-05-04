@@ -36,7 +36,7 @@ from pathlib import Path
 
 from .collector import SAPCollector
 from .config import AgentConfig, BackendConfig, SAPConfig
-from .sender import BackendSender
+from .sender import BackendSender, BatchLogHandler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -157,25 +157,40 @@ def run(dry_run: bool = False) -> None:
 
 
 def _collect_one(cfg: AgentConfig, backend_cfg: BackendConfig, dry_run: bool) -> None:
-    with SAPCollector(cfg) as collector:
-        snapshot = collector.collect()
+    # Capture all log records emitted during this collection
+    batch_handler = BatchLogHandler(level=logging.INFO)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(batch_handler)
 
-    sid = snapshot["system"].get("rfcsysid", "?")
-    logger.info(
-        "SID=%-3s  components=%d  SPs=%d  custom=%d",
-        sid,
-        len(snapshot["components"]),
-        len(snapshot["support_packages"]),
-        snapshot["custom_objects"]["total"],
-    )
+    try:
+        with SAPCollector(cfg) as collector:
+            snapshot = collector.collect()
 
-    if dry_run:
-        print(json.dumps(snapshot, indent=2, ensure_ascii=False))
-        return
+        sid = snapshot["system"].get("rfcsysid", "?")
+        logger.info(
+            "SID=%-3s  components=%d  SPs=%d  custom=%d",
+            sid,
+            len(snapshot["components"]),
+            len(snapshot["support_packages"]),
+            snapshot["custom_objects"]["total"],
+        )
 
-    with BackendSender(backend_cfg) as sender:
-        reply = sender.send(snapshot)
-    logger.info("SID=%-3s  accepted by backend: %s", sid, reply)
+        if dry_run:
+            print(json.dumps(snapshot, indent=2, ensure_ascii=False))
+            return
+
+        with BackendSender(backend_cfg) as sender:
+            reply = sender.send(snapshot)
+            sender.send_logs(batch_handler.flush_records(sid=sid))
+        logger.info("SID=%-3s  accepted by backend: %s", sid, reply)
+
+    except Exception:
+        sid = getattr(cfg.sap, "ashost", "?")
+        with BackendSender(backend_cfg) as sender:
+            sender.send_logs(batch_handler.flush_records(sid=None))
+        raise
+    finally:
+        root_logger.removeHandler(batch_handler)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

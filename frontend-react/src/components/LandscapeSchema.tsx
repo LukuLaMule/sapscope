@@ -16,6 +16,7 @@ import "@xyflow/react/dist/style.css";
 import type { SAPSystem, Tier } from "@/types/sap";
 import { getScoreColor, getScoreBorderColor, getScoreBgColor, getStatusBadgeClass } from "@/lib/sap-utils";
 import { AlertTriangle } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // ── Dimensions ────────────────────────────────────────────────────────────────
 
@@ -175,6 +176,7 @@ interface Props { systems: SAPSystem[] }
 
 export function LandscapeSchema({ systems }: Props) {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const onNodeClick: NodeMouseHandler = useCallback((_e, node) => {
     if (node.type === "system") navigate(`/system/${node.id}`);
@@ -325,6 +327,8 @@ export function LandscapeSchema({ systems }: Props) {
         edges={edges}
         nodeTypes={nodeTypes}
         onNodeClick={onNodeClick}
+        colorMode={theme === "dark" ? "dark" : "light"}
+        style={{ "--xy-background-color": "transparent" } as React.CSSProperties}
         fitView
         fitViewOptions={{ padding: 0.08 }}
         nodesDraggable={false}

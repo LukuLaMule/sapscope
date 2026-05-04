@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" id="html-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conditions Générales d'Utilisation — SAPscope</title>
+  <meta name="robots" content="noindex, follow">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a1628; --bg-2: #0d1f38; --fg: #dce6f0; --fg-2: #8da9c4; --fg-3: #4a7090;
+      --accent: #4a9eff; --border: rgba(74,158,255,0.15); --border-2: rgba(74,158,255,0.07);
+    }
+    body { background: var(--bg); color: var(--fg); font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: blur(20px); background: rgba(10,22,40,0.9);
+      border-bottom: 1px solid var(--border-2);
+    }
+    .nav-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 52px; }
+    .nav-logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--fg); text-decoration: none; }
+    .nav-logo span { color: var(--accent); }
+    .nav-back { font-size: 13px; color: var(--fg-2); }
+    .nav-back:hover { color: var(--fg); text-decoration: none; }
+    main { max-width: 860px; margin: 0 auto; padding: 100px 24px 80px; }
+    h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .meta { font-size: 13px; color: var(--fg-3); margin-bottom: 48px; }
+    h2 { font-size: 16px; font-weight: 600; color: var(--fg); margin: 36px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-2); }
+    p { font-size: 14px; line-height: 1.75; color: var(--fg-2); margin-bottom: 12px; }
+    ul { margin: 0 0 12px 20px; }
+    ul li { font-size: 14px; line-height: 1.75; color: var(--fg-2); margin-bottom: 4px; }
+    footer { border-top: 1px solid var(--border-2); margin-top: 64px; padding: 24px; text-align: center; font-size: 13px; color: var(--fg-3); }
+    footer a { color: var(--fg-3); margin: 0 12px; }
+    footer a:hover { color: var(--fg); text-decoration: none; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/">SAP<span>scope</span></a>
+    <a class="nav-back" href="/">← Retour</a>
+  </div>
+</nav>
+
+<main>
+  <h1>Conditions Générales d'Utilisation</h1>
+  <p class="meta">En vigueur au 4 mai 2026</p>
+
+  <h2>1. Objet</h2>
+  <p>Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation du service SAPscope, outil de supervision et d'analyse des paysages SAP, accessible sur <a href="https://app.sapscope.com">app.sapscope.com</a>, édité par un entrepreneur individuel établi en France.</p>
+  <p>L'utilisation du service vaut acceptation sans réserve des présentes CGU.</p>
+
+  <h2>2. Accès au service</h2>
+  <p>L'accès au service requiert la création d'un compte avec une adresse email professionnelle valide. L'utilisateur est responsable de la confidentialité de ses identifiants de connexion et de l'ensemble des actions réalisées depuis son compte.</p>
+  <p>SAPscope est un service destiné exclusivement aux professionnels (consultants SAP Basis, équipes IT, entreprises disposant d'un ou plusieurs systèmes SAP). Il n'est pas destiné à un usage à titre personnel.</p>
+
+  <h2>3. Tokens d'agent et données collectées</h2>
+  <p>L'accès des agents de collecte au backend SAPscope est sécurisé par des tokens d'authentification générés par l'utilisateur. L'utilisateur est seul responsable :</p>
+  <ul>
+    <li>de la sécurisation et de la non-divulgation de ces tokens</li>
+    <li>des données transmises par les agents qu'il configure</li>
+    <li>de la légitimité de son accès aux systèmes SAP supervisés</li>
+  </ul>
+  <p>SAPscope ne collecte que des métadonnées techniques (versions logicielles, métriques de performance, états de processus). Aucune donnée transactionnelle, aucun contenu métier SAP n'est transmis ou stocké.</p>
+
+  <h2>4. Utilisation acceptable</h2>
+  <p>Il est interdit d'utiliser SAPscope pour :</p>
+  <ul>
+    <li>superviser des systèmes SAP sans l'autorisation de leur propriétaire</li>
+    <li>tenter de décompiler, rétro-ingénier ou reproduire tout ou partie du logiciel</li>
+    <li>transmettre des données illicites ou porter atteinte à des droits de tiers</li>
+    <li>perturber le fonctionnement du service ou des infrastructures sous-jacentes</li>
+    <li>revendre ou sous-licencier l'accès au service à des tiers sans accord écrit préalable</li>
+  </ul>
+
+  <h2>5. Disponibilité du service</h2>
+  <p>SAPscope est fourni en l'état (<em>as-is</em>), sans garantie de disponibilité continue. Des interruptions pour maintenance, mises à jour ou incidents techniques peuvent survenir. Lucas Lautrec s'efforce d'assurer la meilleure disponibilité possible mais ne peut garantir un niveau de service (SLA) contractuel dans le cadre des offres standards.</p>
+
+  <h2>6. Propriété intellectuelle</h2>
+  <p>SAPscope, son code source, son interface, ses marques et contenus sont la propriété exclusive de Lucas Lautrec. Toute reproduction ou utilisation sans autorisation écrite est interdite.</p>
+  <p>Les données générées par l'utilisateur (snapshots, configurations) lui appartiennent. SAPscope ne revendique aucun droit sur ces données et les restitue ou supprime sur demande.</p>
+
+  <h2>7. Responsabilité</h2>
+  <p>SAPscope est un outil de <strong>supervision et d'analyse</strong>. Il produit des informations et des recommandations à titre indicatif. Les décisions d'administration, de maintenance ou de modification des systèmes SAP restent sous la responsabilité exclusive de l'utilisateur.</p>
+  <p>Lucas Lautrec ne saurait être tenu responsable de dommages directs ou indirects résultant de l'utilisation ou de l'impossibilité d'utiliser le service, de décisions prises sur la base des analyses fournies, ou d'interruptions de service.</p>
+
+  <h2>8. Résiliation</h2>
+  <p>L'utilisateur peut résilier son compte à tout moment depuis les paramètres de l'application ou en contactant <a href="mailto:pro@luku.fr">pro@luku.fr</a>. Les données du compte sont supprimées dans un délai de 30 jours suivant la résiliation, sauf obligation légale de conservation.</p>
+  <p>Lucas Lautrec se réserve le droit de suspendre ou supprimer un compte en cas de violation des présentes CGU, sans préavis en cas d'urgence.</p>
+
+  <h2>9. Modifications des CGU</h2>
+  <p>Les présentes CGU peuvent être modifiées. Les utilisateurs actifs seront notifiés par email au moins 15 jours avant l'entrée en vigueur des modifications. La poursuite de l'utilisation du service vaut acceptation des nouvelles conditions.</p>
+
+  <h2>10. Droit applicable et juridiction</h2>
+  <p>Les présentes CGU sont soumises au droit français. En cas de litige, les parties s'efforceront de trouver une solution amiable. À défaut, les tribunaux compétents du ressort de Pau seront saisis.</p>
+</main>
+
+<footer>
+  <a href="/legal.html">Mentions légales</a>
+  <a href="/privacy.html">Confidentialité</a>
+  <a href="/terms.html">CGU</a>
+  <a href="/sales.html">CGV</a>
+  <div style="margin-top: 16px;">© 2026 SAPscope — Lucas Lautrec</div>
+</footer>
+</body>
+</html>

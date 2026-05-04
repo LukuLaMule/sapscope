@@ -1,12 +1,14 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { fetchSnapshotDetail, fetchAnalysis, requestAnalysis, fetchSnapshots, fetchHistory, fetchNotes, createNote, updateNote, deleteNote, fetchMe } from "@/lib/api";
+import { fetchSnapshotDetail, fetchAnalysis, requestAnalysis, fetchSnapshots, fetchHistory, fetchNotes, createNote, updateNote, deleteNote, fetchMe, downloadComplianceReport } from "@/lib/api";
 import { analyzeSizing } from "@/lib/sizing-analyzer";
 import type { SizingIndicator, DbContext } from "@/lib/sizing-analyzer";
 import type { ApiSnapshotDetail, ApiAnalysis, ApiNote } from "@/lib/api";
 import { DialogResponseChart } from "@/components/charts/DialogResponseChart";
 import { WorkProcessChart } from "@/components/charts/WorkProcessChart";
+import { BenchmarkSection } from "@/components/BenchmarkSection";
+import { TrendSection } from "@/components/TrendSection";
 import {
   getStatusBadgeClass, getScoreColor, getScoreBorderColor, getScoreBgColor,
   getTierBadgeClass, formatDate, classifyTier, timeAgo,
@@ -17,6 +19,7 @@ import {
   GitFork, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -204,10 +207,10 @@ export default function SystemDetailPage() {
   const stale = staleMs > 86_400_000;
 
   return (
-    <div className="p-6 max-w-[1440px] mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-[1440px] mx-auto space-y-5 sm:space-y-6">
       {/* ─── Header ─── */}
       <div className="section-card !p-0 overflow-hidden">
-        <div className="flex items-center gap-5 p-5">
+        <div className="flex items-center gap-3 sm:gap-5 p-4 sm:p-5 flex-wrap">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="flex-shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -225,10 +228,10 @@ export default function SystemDetailPage() {
               <span className={`text-xs px-2.5 py-1 rounded font-medium ${getStatusBadgeClass(status)}`}>{status}</span>
               {stale && <Badge variant="outline" className="text-[10px] text-[hsl(var(--status-warning))] border-[hsl(var(--status-warning)/0.3)] animate-pulse">STALE</Badge>}
             </div>
-            <div className="flex items-center gap-4 mt-1.5 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1.5 text-xs sm:text-sm text-muted-foreground">
               <span className="font-mono">{snap.system_host}</span>
-              {snap.system_release && <><span className="text-border">|</span><span>{snap.system_release}</span></>}
-              {dbType !== "—" && <><span className="text-border">|</span><span>{dbType}</span></>}
+              {snap.system_release && <span>{snap.system_release}</span>}
+              {dbType !== "—" && <span>{dbType}</span>}
             </div>
           </div>
 
@@ -238,6 +241,25 @@ export default function SystemDetailPage() {
             <QuickKPI label="Components" value={String(snap.components_count)} />
             <QuickKPI label="Snapshot" value={timeAgo(snap.collected_at)} />
           </div>
+
+          {/* Compliance Report button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-shrink-0 gap-1.5"
+            onClick={async () => {
+              const tid = toast.loading("Génération du rapport…");
+              try {
+                await downloadComplianceReport(clientId, snap.system_sid);
+                toast.success("Rapport téléchargé", { id: tid });
+              } catch (err: any) {
+                toast.error(err?.message || "Erreur lors du téléchargement", { id: tid });
+              }
+            }}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span className="hidden sm:inline">Rapport conformité</span>
+          </Button>
         </div>
       </div>
 
@@ -288,6 +310,12 @@ export default function SystemDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Benchmarks vs portfolio */}
+          <BenchmarkSection clientId={clientId} sid={snap.system_sid} />
+
+          {/* Tendances & prédictions */}
+          <TrendSection clientId={clientId} sid={snap.system_sid} />
 
           {/* Performance charts */}
           <div className="section-card">
@@ -465,6 +493,42 @@ export default function SystemDetailPage() {
                 {snap.security_sap_all_count}
               </span>
             </div>
+
+            {/* Extended security_ops metrics */}
+            {(() => {
+              const secOps = hc?.indicators?.security_ops;
+              const inactiveCount   = secOps?.inactive_users_count   as number | undefined;
+              const neverLoggedIn   = secOps?.never_logged_in_count   as number | undefined;
+              const sapNewCount     = secOps?.sap_new_count           as number | undefined;
+              return (
+                <>
+                  {inactiveCount != null && inactiveCount > 0 && (
+                    <div className="info-row">
+                      <span className="text-muted-foreground">Utilisateurs inactifs (&gt;90j)</span>
+                      <span className={`font-mono font-bold text-lg ${inactiveCount > 20 ? "text-[hsl(var(--status-warning))]" : "text-foreground"}`}>
+                        {inactiveCount}
+                      </span>
+                    </div>
+                  )}
+                  {neverLoggedIn != null && neverLoggedIn > 0 && (
+                    <div className="info-row">
+                      <span className="text-muted-foreground">Jamais connectés</span>
+                      <span className={`font-mono font-bold text-lg ${neverLoggedIn > 10 ? "text-[hsl(var(--status-warning))]" : "text-foreground"}`}>
+                        {neverLoggedIn}
+                      </span>
+                    </div>
+                  )}
+                  {sapNewCount != null && sapNewCount > 0 && (
+                    <div className="info-row">
+                      <span className="text-muted-foreground">Profil SAP_NEW</span>
+                      <Badge className="text-xs bg-[hsl(var(--status-warning))]/10 border border-[hsl(var(--status-warning))]/30 text-[hsl(var(--status-warning))]">
+                        {sapNewCount} utilisateur{sapNewCount > 1 ? "s" : ""}
+                      </Badge>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Transports */}

@@ -79,6 +79,60 @@ List of applied patches with:
 - Type
 - Application date
 
+### Extended security
+In addition to classic indicators (SAP_ALL, RFC without logon, default accounts), three extra metrics are shown when non-zero:
+
+| Indicator | Meaning | Warning threshold |
+|---|---|---|
+| Inactive users (>90d) | Active accounts with no login in over 90 days | > 20 |
+| Never logged in | Active accounts that have never logged in | > 10 |
+| SAP_NEW profile | Users with SAP_NEW (nearly equivalent to SAP_ALL) | any value > 0 |
+
+These metrics affect the **Security Ops** domain score.
+
+### Benchmarks — positioning vs portfolio
+Compares key metrics of this system against the average of all systems with the **same tier** in the SAPscope instance.
+
+For each metric (dumps, aborted jobs, private WPs, RFC errors, transport queue, SAP_ALL):
+- **Comparison bar**: system value relative to the tier average
+- **Colored ratio**: green ≤ 1.2×, orange 1.2–2.5×, red > 2.5× the average
+- **Badge**: "Within norm" / "Above average" / "Critical"
+
+> Requires at least 2 systems of the same tier in the instance.
+
+### Trends & predictions
+Analyses metric evolution over the **last 30 collected snapshots**:
+
+| Icon | Meaning |
+|---|---|
+| ↑ (red) | Rising trend, threshold approaching |
+| ↓ (green) | Falling trend, situation improving |
+| → (grey) | Stable, no significant change |
+
+If a threshold is defined and will be reached, a badge shows the estimated deadline:
+- **"CRITICAL in X days"** (red) — threshold in less than 7 days
+- **"WARNING in X days"** (orange) — threshold in less than 30 days
+
+> Requires at least 3 snapshots to compute a trend.
+
+### Compliance PDF report
+**"Compliance report"** button (shield icon) in the page header.
+
+Downloads a PDF (`compliance-{SID}-{date}.pdf`) with 10 checks based on the **SAP Security Guide**:
+
+| Check | Category | Severity if non-compliant |
+|---|---|---|
+| SEC-001 | Default accounts | SAP* disabled | CRITICAL |
+| SEC-002 | Default accounts | DDIC disabled | CRITICAL |
+| SEC-003 | Default accounts | EARLYWATCH disabled | HIGH |
+| SEC-004 | Authorizations | No SAP_ALL user | CRITICAL |
+| SEC-005 | Authorizations | No SAP_NEW user | HIGH |
+| SEC-006 | RFC connections | Type-3 RFC with logon user defined | HIGH |
+| SEC-007 | RFC connections | Trusted connections < 5 | MEDIUM |
+| SEC-008 | Account hygiene | Inactive >90d users < 20 | MEDIUM |
+| SEC-009 | Account hygiene | Never-logged-in users < 10 | MEDIUM |
+| SEC-010 | Account hygiene | Locked accounts < 50% | LOW |
+
 ### Custom ABAP objects
 Donut chart + table of Z/Y developments:
 - Breakdown by type (program, function, class, table, etc.)

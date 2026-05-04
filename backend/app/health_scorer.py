@@ -149,11 +149,13 @@ def compute(health_data: dict[str, Any] | None,
 
     # ── Security ops: default users, SAP_ALL, RFC sans logon (v2) ──────────────
     if security_data:
-        default_users = security_data.get("default_users_active", [])
-        sap_all       = security_data.get("sap_all_users", [])
-        rfc_no_logon  = security_data.get("rfc_no_logon_count", 0)
+        default_users       = security_data.get("default_users_active", [])
+        sap_all             = security_data.get("sap_all_users", [])
+        rfc_no_logon        = security_data.get("rfc_no_logon_count", 0)
+        inactive_users      = security_data.get("inactive_users_count", 0) or 0
+        never_logged_in     = security_data.get("never_logged_in_count", 0) or 0
+        sap_new_count       = security_data.get("sap_new_count", 0) or 0
 
-        issues = len(default_users) + len(sap_all)
         if default_users:          # SAP* ou DDIC actif → critique
             s = 10
         elif sap_all:              # utilisateurs SAP_ALL
@@ -165,13 +167,26 @@ def compute(health_data: dict[str, Any] | None,
         else:
             s = 100
 
+        # Additional penalties — applied after base score calculation
+        if inactive_users > 50:
+            s = max(0, s - 10)
+        elif inactive_users > 20:
+            s = max(0, s - 5)
+        if never_logged_in > 10:
+            s = max(0, s - 3)
+        if sap_new_count > 0:
+            s = max(0, s - 5)
+
         domain_scores["security_ops"] = s
         indicators["security_ops"] = {
-            "status":            _label(s),
-            "score":             s,
+            "status":               _label(s),
+            "score":                s,
             "default_users_active": default_users,
-            "sap_all_count":     len(sap_all),
-            "rfc_no_logon_count": rfc_no_logon,
+            "sap_all_count":        len(sap_all),
+            "rfc_no_logon_count":   rfc_no_logon,
+            "inactive_users_count": inactive_users,
+            "never_logged_in_count": never_logged_in,
+            "sap_new_count":        sap_new_count,
         }
 
     # ── Transports: import queue size (v2) ───────────────────────────────────

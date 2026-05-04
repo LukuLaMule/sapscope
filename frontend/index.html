@@ -221,23 +221,8 @@
     .btn-hero-ghost:hover { color: var(--fg); border-color: rgba(255,255,255,.3); }
     :root.light .btn-hero-ghost:hover { border-color: rgba(13,31,56,.3); }
 
-    /* Feat-visual panels are app mockups — always dark regardless of page theme */
-    :root.light .feat-visual {
-      --bg-2:   #0d1f38;
-      --fg:     #dce6f0;
-      --fg-2:   #8da9c4;
-      --fg-3:   #4a7090;
-      --accent: #4a9eff;
-      --green:  #2dd4a0;
-      --orange: #f59e0b;
-      --red:    #f87171;
-      --border: rgba(74,158,255,0.15);
-      --border-2: rgba(74,158,255,0.07);
-      --card:   rgba(255,255,255,0.03);
-      background: #0d1f38;
-      border-color: rgba(74,158,255,0.15);
-      color: #8da9c4;
-    }
+    /* En mode light, les barres de progression utilisent un fond visible */
+    :root.light .fv-bar-wrap { background: rgba(0,0,0,.10); }
 
     /* Trial inputs nearly invisible in light mode */
     :root.light .trial-input {
@@ -406,13 +391,21 @@
     }
     .feat-item.active .feat-item-title,
     .feat-item:hover  .feat-item-title { color: var(--fg); }
-    .feat-item-desc {
-      font-size: 14px; color: var(--fg-3); line-height: 1.65;
-      margin-top: 0; max-height: 0; overflow: hidden; opacity: 0;
-      transition: max-height .35s ease, margin-top .35s ease, opacity .3s;
+    .feat-item-desc-wrap {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition: grid-template-rows .38s ease, opacity .28s ease, margin-top .38s ease;
+      margin-top: 0;
     }
-    .feat-item.active .feat-item-desc {
-      max-height: 100px; margin-top: 8px; opacity: 1;
+    .feat-item.active .feat-item-desc-wrap {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      margin-top: 8px;
+    }
+    .feat-item-desc {
+      overflow: hidden;
+      font-size: 14px; color: var(--fg-3); line-height: 1.65;
     }
     .feat-panel { position: sticky; top: 80px; }
     .feat-visual-panel { display: none; }
@@ -734,17 +727,59 @@
 
     /* ── RESPONSIVE ───────────────────────────────────────────────────────── */
     @media (max-width: 768px) {
+      /* Nav */
       .nav-links { display: none; }
       .nav-mobile-toggle { display: block; }
-      .feat-switcher { grid-template-columns: 1fr; gap: 36px; }
-      .feat-panel { position: static; }
-      .pricing-grid { grid-template-columns: 1fr; }
-      .step { grid-template-columns: 1fr; gap: 32px; }
+      .btn-ghost, .btn-nav-primary { display: none; }
+
+      /* Sections — padding réduit */
+      .section { padding: 72px 20px; }
+      .step { grid-template-columns: 1fr; gap: 32px; padding: 56px 0; }
       .step.reverse { direction: ltr; }
-      .stats-inner { grid-template-columns: 1fr; gap: 24px; }
+
+      /* Hero */
+      .hero { padding: 100px 20px 60px; }
+      .hero h1 { letter-spacing: -1.5px; }
       .hero-actions { flex-direction: column; align-items: center; }
       .btn-hero-primary, .btn-hero-ghost { width: 100%; max-width: 320px; text-align: center; }
-      .mockup-app { height: 280px; }
+
+      /* Mockup — cacher sidebar sur mobile, centrer contenu */
+      .mockup-app { height: 220px; }
+      .mockup-wrap { max-width: 100%; }
+
+      /* Features */
+      .feat-switcher { grid-template-columns: 1fr; gap: 36px; }
+      .feat-panel { position: static; }
+
+      /* Stats */
+      .stats-inner { grid-template-columns: 1fr; gap: 24px; }
+      .stat-value { font-size: 40px; }
+
+      /* Pricing */
+      .pricing-grid { grid-template-columns: 1fr; }
+      .pricing-card.featured { transform: none; }
+
+      /* Steps */
+      .step-title { font-size: 28px; }
+      .step-text { font-size: 15px; }
+
+      /* CTA final */
+      .cta-section { padding: 72px 20px; }
+
+      /* Footer */
+      .footer-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .footer-links { flex-wrap: wrap; gap: 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 42px; letter-spacing: -1px; }
+      .hero p { font-size: 16px; }
+      .section-title { font-size: 30px; letter-spacing: -1px; }
+      .section-sub { font-size: 15px; }
+      .stat-value { font-size: 36px; }
+      .pricing-card { padding: 28px 22px; }
+      .mockup-app { height: 180px; }
+      .trial-card { padding: 28px 20px; }
     }
     .lang-dropdown { position: relative; }
     .lang-dropdown-btn {
@@ -961,42 +996,42 @@
           <div class="feat-item-progress"></div>
           <div class="feat-item-num">01</div>
           <div class="feat-item-title" data-i18n="feat1_title">Automatic RFC collection</div>
-          <div class="feat-item-desc" data-i18n="feat1_text">An agent runs on your SAP server and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.</div>
+          <div class="feat-item-desc-wrap"><div class="feat-item-desc" data-i18n="feat1_text">An agent runs on any server with RFC access and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.</div></div>
         </div>
 
         <div class="feat-item" data-idx="1">
           <div class="feat-item-progress"></div>
           <div class="feat-item-num">02</div>
           <div class="feat-item-title" data-i18n="feat2_title">AI-powered diagnostics</div>
-          <div class="feat-item-desc" data-i18n="feat2_text">Every snapshot generates a structured report: maintenance status, identified risks, prioritized recommendations, actions to schedule.</div>
+          <div class="feat-item-desc-wrap"><div class="feat-item-desc" data-i18n="feat2_text">Every snapshot generates a structured report: maintenance status, identified risks, prioritized recommendations, actions to schedule.</div></div>
         </div>
 
         <div class="feat-item" data-idx="2">
           <div class="feat-item-progress"></div>
           <div class="feat-item-num">03</div>
           <div class="feat-item-title" data-i18n="feat3_title">Snapshot comparison</div>
-          <div class="feat-item-desc" data-i18n="feat3_text">See exactly what changed between two dates: added or updated components, applied patches, evolution of custom objects.</div>
+          <div class="feat-item-desc-wrap"><div class="feat-item-desc" data-i18n="feat3_text">See exactly what changed between two dates: added or updated components, applied patches, evolution of custom objects.</div></div>
         </div>
 
         <div class="feat-item" data-idx="3">
           <div class="feat-item-progress"></div>
           <div class="feat-item-num">04</div>
           <div class="feat-item-title" data-i18n="feat4_title">Multi-client, multi-system</div>
-          <div class="feat-item-desc" data-i18n="feat4_text">Manage multiple SAP clients from a single interface. Each scope is isolated, with its own agent tokens and assigned consultants.</div>
+          <div class="feat-item-desc-wrap"><div class="feat-item-desc" data-i18n="feat4_text">Manage multiple SAP clients from a single interface. Each scope is isolated, with its own agent tokens and assigned consultants.</div></div>
         </div>
 
         <div class="feat-item" data-idx="4">
           <div class="feat-item-progress"></div>
           <div class="feat-item-num">05</div>
           <div class="feat-item-title" data-i18n="feat5_title">Isolation &amp; confidentiality</div>
-          <div class="feat-item-desc" data-i18n="feat5_text">Single-use agent tokens, read-only consultant access. Your SAP data stays within your perimeter — never exposed to the outside.</div>
+          <div class="feat-item-desc-wrap"><div class="feat-item-desc" data-i18n="feat5_text">Single-use agent tokens, read-only consultant access. Your SAP data stays within your perimeter — never exposed to the outside.</div></div>
         </div>
 
         <div class="feat-item" data-idx="5">
           <div class="feat-item-progress"></div>
           <div class="feat-item-num">06</div>
           <div class="feat-item-title" data-i18n="feat6_title">Continuous history</div>
-          <div class="feat-item-desc" data-i18n="feat6_text">Every snapshot is archived. Go back to any date, compare periods, track drift before it becomes an incident.</div>
+          <div class="feat-item-desc-wrap"><div class="feat-item-desc" data-i18n="feat6_text">Every snapshot is archived. Go back to any date, compare periods, track drift before it becomes an incident.</div></div>
         </div>
 
       </div>
@@ -1142,8 +1177,8 @@
       <div class="step fade-up">
         <div>
           <div class="step-num" data-i18n="step1_num">Step 01</div>
-          <h3 class="step-title" data-i18n="step1_title">Install the agent on your SAP server</h3>
-          <p class="step-text" data-i18n="step1_text">The pyrfc agent deploys in a few commands on any SAP application server. It connects via local RFC to read system metadata — no inbound external access required.</p>
+          <h3 class="step-title" data-i18n="step1_title">Deploy the agent on any server with network access to SAP</h3>
+          <p class="step-text" data-i18n="step1_text">The pyrfc agent runs on any server — your monitoring server, a VM, or a Docker container — and connects to SAP via RFC on port 33XX. No software installed on SAP servers. No inbound connection required.</p>
         </div>
         <div class="step-visual">
           <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">curl -O https://app.sapscope.com/dist/agent.tar.gz</span></div>
@@ -1241,7 +1276,7 @@
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq3_a">
-          Less than <strong>10 minutes</strong>. Once your subscription is activated, you receive an API key. Simply copy-paste the agent installation command on the SAP server and enter the key. That's it.
+          Less than <strong>10 minutes</strong>. Once your subscription is activated, you receive an API key. Simply copy-paste the agent installation command on any server with network access to SAP and enter the key. That's it.
         </div></div>
       </div>
 
@@ -1475,6 +1510,10 @@
       <a href="https://app.sapscope.com/docs" data-i18n="foot_docs">Documentation</a>
       <a href="https://app.sapscope.com" data-i18n="foot_app">Application</a>
       <a href="mailto:contact@sapscope.com" data-i18n="foot_contact">Contact</a>
+      <a href="/legal.html" data-i18n="foot_legal">Mentions légales</a>
+      <a href="/privacy.html" data-i18n="foot_privacy">Confidentialité</a>
+      <a href="/terms.html" data-i18n="foot_terms">CGU</a>
+      <a href="/sales.html" data-i18n="foot_cgv">CGV</a>
     </div>
     <div class="footer-copy" data-i18n="foot_copy">© 2026 SAPscope. All rights reserved.</div>
   </div>
@@ -1510,13 +1549,16 @@
       : 'display:flex;flex-direction:column;position:fixed;top:52px;left:0;right:0;background:#0a0a0a;padding:20px 24px;gap:20px;border-bottom:1px solid rgba(255,255,255,.1)';
   });
 
-  // Navbar background on scroll
+  // Navbar background on scroll — respecte le thème actif
   const nav = document.querySelector('nav');
-  window.addEventListener('scroll', () => {
-    nav.style.background = window.scrollY > 10
-      ? 'rgba(0,0,0,0.92)'
-      : 'rgba(0,0,0,0.72)';
-  }, { passive: true });
+  function updateNavBg() {
+    const light = document.documentElement.classList.contains('light');
+    const scrolled = window.scrollY > 10;
+    nav.style.background = light
+      ? (scrolled ? 'rgba(244,247,252,0.97)' : 'rgba(244,247,252,0.88)')
+      : (scrolled ? 'rgba(0,0,0,0.92)'       : 'rgba(0,0,0,0.72)');
+  }
+  window.addEventListener('scroll', updateNavBg, { passive: true });
 
   // ── i18n ──────────────────────────────────────────────────────────────────
   const TRANSLATIONS = {
@@ -1545,7 +1587,7 @@
       feat_title: 'Everything a Basis consultant<br>always wanted.',
       feat_sub: 'No more running SM51, SE16, SPAM one after another to reconstruct a picture of your system.',
       feat1_title: 'Automatic RFC collection',
-      feat1_text: 'An agent runs on your SAP server and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.',
+      feat1_text: 'An agent runs on any server with RFC access and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.',
       feat2_title: 'AI-powered diagnostics',
       feat2_text: 'Every snapshot generates a structured report: maintenance status, identified risks, prioritized recommendations, actions to schedule.',
       feat3_title: 'Snapshot comparison',
@@ -1560,8 +1602,8 @@
       hiw_title: 'Up and running in 10 minutes.',
       hiw_sub: "No complex RFC setup. No BTP access. Just a Python agent, a cron job, and you're done.",
       step1_num: 'Step 01',
-      step1_title: 'Install the agent on your SAP server',
-      step1_text: 'The pyrfc agent deploys in a few commands on any SAP application server. It connects via local RFC to read system metadata — no inbound external access required.',
+      step1_title: 'Deploy the agent — on any server with RFC access',
+      step1_text: 'The pyrfc agent runs on any server — your monitoring server, a VM, or a Docker container — and connects to SAP via RFC on port 33XX. No software installed on SAP servers. No inbound connection required.',
       mock_snapshot_ok: 'Snapshot sent — PRD, 47 components',
       mock_systems: 'Systems',
       mock_ai_title: 'AI Analysis — PRD',
@@ -1597,7 +1639,7 @@
       faq2_q: 'Does my SAP data leave my infrastructure?',
       faq2_a: 'No. The agent runs <strong>on your infrastructure</strong> and only sends SAPscope <strong>anonymized technical metrics</strong> (performance, jobs, system logs). No business data, no table content is ever transmitted.',
       faq3_q: 'How long does installation take?',
-      faq3_a: "Less than <strong>10 minutes</strong>. Once your subscription is activated, you receive an API key. Simply copy-paste the agent installation command on the SAP server and enter the key. That's it.",
+      faq3_a: "Less than <strong>10 minutes</strong>. Once your subscription is activated, you receive an API key. Simply copy-paste the agent installation command on any server with network access to SAP and enter the key. That's it.",
       faq4_q: 'What SAP authorizations does the agent need?',
       faq4_a: 'A <strong>System (A) type</strong> user with a minimal read-only authorization profile. We provide an ABAP program <code>ZSAPSCOPE_SETUP</code> that creates the user and assigns exactly the required authorizations. See the <a href="/docs#sap-rfc-user-setup">RFC guide</a>.',
       faq5_q: 'Does the AI have access to my business data?',
@@ -1609,7 +1651,7 @@
       faq8_q: 'How often does the agent collect data?',
       faq8_a: 'By default, the agent runs <strong>once every 24 hours</strong> via a systemd timer. You can adjust this interval — hourly collection is supported for critical systems. Each run takes under 30 seconds and has negligible impact on system performance.',
       faq9_q: 'Does SAPscope work behind a SAProuter or Message Server?',
-      faq9_a: 'Yes. The agent connects <strong>locally from within the SAP server</strong> via RFC — no inbound connection from the internet is needed. SAProuter and Message Server (logon groups) are supported through the <code>systems.yaml</code> configuration file.',
+      faq9_a: 'Yes. The agent connects to SAP <strong>via outbound RFC on port 33XX</strong> from any server with network access — it does not need to run on the SAP server itself. No inbound connection is needed. SAProuter and Message Server (logon groups) are supported through the <code>systems.yaml</code> configuration file.',
       faq10_q: 'Can I monitor S/4HANA and ECC systems in the same dashboard?',
       faq10_a: 'Yes. SAPscope automatically detects the system type (S/4HANA, ECC, BW, SolMan, PI/PO…) from installed components. All system types are displayed in a <strong>unified landscape view</strong>, with transport routes visualized across the whole STMS domain.',
       pricing_toggle_monthly: 'Monthly',
@@ -1676,6 +1718,10 @@
       foot_docs: 'Documentation',
       foot_app: 'Application',
       foot_contact: 'Contact',
+      foot_legal: 'Legal Notice',
+      foot_privacy: 'Privacy',
+      foot_terms: 'Terms of Use',
+      foot_cgv: 'Terms of Sale',
       foot_copy: '© 2026 SAPscope. All rights reserved.'
     },
     fr: {
@@ -1703,7 +1749,7 @@
       feat_title: 'Tout ce qu\'un consultant Basis<br>a toujours voulu avoir.',
       feat_sub: 'Fini les transactions SM51, SE16, SPAM en rafale pour reconstituer une image de votre système.',
       feat1_title: 'Collecte RFC automatique',
-      feat1_text: 'Un agent tourne sur votre serveur SAP et remonte automatiquement composants, support packages, niveaux kernel et objets ABAP custom — sans intervention manuelle.',
+      feat1_text: 'Un agent tourne sur n\'importe quel serveur avec accès RFC et remonte automatiquement composants, support packages, niveaux kernel et objets ABAP custom — sans intervention manuelle.',
       feat2_title: 'Diagnostic par intelligence artificielle',
       feat2_text: 'Chaque snapshot génère un rapport structuré : état de maintenance, risques identifiés, recommandations priorisées, actions à planifier.',
       feat3_title: 'Comparaison entre snapshots',
@@ -1718,7 +1764,7 @@
       hiw_title: 'Opérationnel en 10 minutes.',
       hiw_sub: 'Pas de RFC compliqués à configurer. Pas d\'accès BTP. Juste un agent Python, un cron, et c\'est parti.',
       step1_num: 'Étape 01',
-      step1_title: 'Installez l\'agent sur votre serveur SAP',
+      step1_title: 'Déployez l\'agent — sur n\'importe quel serveur avec accès RFC',
       mock_snapshot_ok: 'Snapshot envoyé — PRD, 47 composants',
       mock_systems: 'Systèmes',
       mock_ai_title: 'Analyse IA — PRD',
@@ -1740,7 +1786,7 @@
       mock_agent_qas_sub: 'Dernier snapshot : il y a 3h · 47 composants · 1 199 objets custom',
       mock_agent_dev_label: 'DEV — inactif',
       mock_agent_dev_sub: 'Dernier snapshot : il y a 26h · Vérifier le timer',
-      step1_text: 'L\'agent pyrfc se déploie en quelques commandes sur n\'importe quel serveur applicatif SAP. Il se connecte en RFC local pour lire les métadonnées système — sans accès externe entrant.',
+      step1_text: 'L\'agent pyrfc tourne sur n\'importe quel serveur (votre infra monitoring, une VM, un container Docker) et se connecte au SAP via RFC sur le port 33XX. Aucun logiciel installé sur le serveur SAP. SAProuter et Message Server supportés.',
       step2_num: 'Étape 02',
       step2_title: 'Les données remontent automatiquement',
       step2_text: 'Un systemd timer déclenche l\'agent toutes les 24h. Chaque exécution envoie un snapshot complet : composants installés, support packages, kernel, objets custom ABAP, infos DB.',
@@ -1755,7 +1801,7 @@
       faq2_q: 'Mes données SAP quittent-elles mon infrastructure ?',
       faq2_a: 'Non. L\'agent s\'exécute <strong>sur votre infrastructure</strong> et n\'envoie à SAPscope que des <strong>métriques techniques anonymisées</strong> (performances, jobs, logs système). Aucune donnée métier, aucun contenu de table n\'est transmis.',
       faq3_q: 'Combien de temps prend l\'installation ?',
-      faq3_a: 'Moins de <strong>10 minutes</strong>. Dès votre abonnement activé, vous obtenez une clé API. Il suffit de copier-coller la commande d\'installation de l\'agent sur le serveur SAP et de renseigner la clé. C\'est tout.',
+      faq3_a: 'Moins de <strong>10 minutes</strong>. Dès votre abonnement activé, vous obtenez une clé API. Il suffit de copier-coller la commande d\'installation de l\'agent sur n\'importe quel serveur avec accès réseau au SAP et de renseigner la clé. C\'est tout.',
       faq4_q: 'Quels droits SAP sont nécessaires pour l\'agent ?',
       faq4_a: 'Un utilisateur de type <strong>Système (A)</strong> avec un profil d\'autorisation minimal en lecture seule. Nous fournissons un programme ABAP <code>ZSAPSCOPE_SETUP</code> qui crée l\'utilisateur et affecte exactement les autorisations requises. Voir le <a href="/docs#sap-rfc-user-setup">guide RFC</a>.',
       faq5_q: 'L\'IA a-t-elle accès à mes données métier ?',
@@ -1767,7 +1813,7 @@
       faq8_q: 'À quelle fréquence l\'agent collecte-t-il les données ?',
       faq8_a: 'Par défaut, l\'agent s\'exécute <strong>une fois toutes les 24 heures</strong> via un timer systemd. Vous pouvez ajuster cet intervalle — la collecte horaire est supportée pour les systèmes critiques. Chaque exécution prend moins de 30 secondes et a un impact négligeable sur les performances système.',
       faq9_q: 'SAPscope fonctionne-t-il derrière un SAProuter ou un Message Server ?',
-      faq9_a: 'Oui. L\'agent se connecte <strong>localement depuis le serveur SAP</strong> via RFC — aucune connexion entrante depuis internet n\'est nécessaire. SAProuter et Message Server (groupes de logon) sont supportés via le fichier de configuration <code>systems.yaml</code>.',
+      faq9_a: 'Oui. L\'agent se connecte au SAP <strong>via RFC sortant sur le port 33XX</strong> depuis n\'importe quel serveur ayant un accès réseau — il n\'est pas nécessaire qu\'il tourne sur le serveur SAP lui-même. Aucune connexion entrante requise. SAProuter et Message Server (groupes de logon) sont supportés via <code>systems.yaml</code>.',
       faq10_q: 'Peut-on surveiller des systèmes S/4HANA et ECC dans le même tableau de bord ?',
       faq10_a: 'Oui. SAPscope détecte automatiquement le type de système (S/4HANA, ECC, BW, SolMan, PI/PO…) à partir des composants installés. Tous les types sont affichés dans une <strong>vue landscape unifiée</strong>, avec les routes de transport visualisées sur l\'ensemble du domaine STMS.',
       pricing_toggle_monthly: 'Mensuel',
@@ -1834,6 +1880,10 @@
       foot_docs: 'Documentation',
       foot_app: 'Application',
       foot_contact: 'Contact',
+      foot_legal: 'Mentions légales',
+      foot_privacy: 'Confidentialité',
+      foot_terms: 'CGU',
+      foot_cgv: 'CGV',
       foot_copy: '© 2026 SAPscope. Tous droits réservés.'
     },
     de: {
@@ -1861,7 +1911,7 @@
       feat_title: 'Alles, was sich ein Basis-Berater<br>schon immer gewünscht hat.',
       feat_sub: 'Schluss mit SM51, SE16, SPAM nacheinander aufrufen, um ein Bild Ihres Systems zu rekonstruieren.',
       feat1_title: 'Automatische RFC-Erfassung',
-      feat1_text: 'Ein Agent läuft auf Ihrem SAP-Server und sammelt automatisch Komponenten, Support Packages, Kernel-Levels und Custom-ABAP-Objekte — ohne manuelle Eingriffe.',
+      feat1_text: 'Ein Agent läuft auf beliebigen Servern mit RFC-Zugang und sammelt automatisch Komponenten, Support Packages, Kernel-Levels und Custom-ABAP-Objekte — ohne manuelle Eingriffe.',
       feat2_title: 'KI-gestützte Diagnose',
       feat2_text: 'Jeder Snapshot generiert einen strukturierten Bericht: Wartungsstatus, erkannte Risiken, priorisierte Empfehlungen, geplante Maßnahmen.',
       feat3_title: 'Snapshot-Vergleich',
@@ -1876,7 +1926,7 @@
       hiw_title: 'In 10 Minuten einsatzbereit.',
       hiw_sub: "Kein komplexes RFC-Setup. Kein BTP-Zugang. Nur ein Python-Agent, ein Cron-Job, und los geht's.",
       step1_num: 'Schritt 01',
-      step1_title: 'Agent auf dem SAP-Server installieren',
+      step1_title: 'Agent auf beliebigem Server mit RFC-Zugang bereitstellen',
       mock_snapshot_ok: 'Snapshot gesendet — PRD, 47 Komponenten',
       mock_systems: 'Systeme',
       mock_ai_title: 'KI-Analyse — PRD',
@@ -1898,7 +1948,7 @@
       mock_agent_qas_sub: 'Letzter Snapshot: vor 3h · 47 Komponenten · 1.199 Custom-Objekte',
       mock_agent_dev_label: 'DEV — inaktiv',
       mock_agent_dev_sub: 'Letzter Snapshot: vor 26h · Timer prüfen',
-      step1_text: 'Der pyrfc-Agent wird mit wenigen Befehlen auf jedem SAP-Applikationsserver bereitgestellt. Er verbindet sich über lokalen RFC, um System-Metadaten zu lesen — ohne eingehenden externen Zugang.',
+      step1_text: 'Der pyrfc-Agent läuft auf beliebigen Servern (Monitoring-Infra, VM, Docker-Container) und verbindet sich via RFC auf Port 33XX mit SAP. Keine Software auf SAP-Servern. SAProuter und Message Server werden unterstützt.',
       step2_num: 'Schritt 02',
       step2_title: 'Daten werden automatisch übertragen',
       step2_text: 'Ein systemd-Timer aktiviert den Agenten alle 24 Stunden. Jede Ausführung sendet einen vollständigen Snapshot: installierte Komponenten, Support Packages, Kernel, Custom-ABAP-Objekte, DB-Infos.',
@@ -1913,7 +1963,7 @@
       faq2_q: 'Verlassen meine SAP-Daten meine Infrastruktur?',
       faq2_a: 'Nein. Der Agent läuft <strong>auf Ihrer Infrastruktur</strong> und sendet an SAPscope nur <strong>anonymisierte technische Metriken</strong> (Performance, Jobs, Systemlogs). Keine Geschäftsdaten, kein Tabelleninhalt wird übertragen.',
       faq3_q: 'Wie lange dauert die Installation?',
-      faq3_a: "Weniger als <strong>10 Minuten</strong>. Sobald Ihr Abonnement aktiviert ist, erhalten Sie einen API-Schlüssel. Kopieren Sie einfach den Installationsbefehl für den Agenten auf den SAP-Server und geben Sie den Schlüssel ein. Das war's.",
+      faq3_a: "Weniger als <strong>10 Minuten</strong>. Sobald Ihr Abonnement aktiviert ist, erhalten Sie einen API-Schlüssel. Kopieren Sie einfach den Installationsbefehl auf einen beliebigen Server mit Netzwerkzugang zu SAP und geben Sie den Schlüssel ein. Das war's.",
       faq4_q: 'Welche SAP-Berechtigungen benötigt der Agent?',
       faq4_a: 'Ein Benutzer vom Typ <strong>System (A)</strong> mit einem minimalen Nur-Lesen-Berechtigungsprofil. Wir stellen ein ABAP-Programm <code>ZSAPSCOPE_SETUP</code> bereit, das den Benutzer erstellt und genau die erforderlichen Berechtigungen zuweist. Siehe <a href="/docs#sap-rfc-user-setup">RFC-Anleitung</a>.',
       faq5_q: 'Hat die KI Zugang zu meinen Geschäftsdaten?',
@@ -1925,7 +1975,7 @@
       faq8_q: 'Wie oft erfasst der Agent Daten?',
       faq8_a: 'Standardmäßig läuft der Agent <strong>einmal alle 24 Stunden</strong> über einen systemd-Timer. Sie können dieses Intervall anpassen — stündliche Erfassung wird für kritische Systeme unterstützt. Jede Ausführung dauert unter 30 Sekunden und hat vernachlässigbare Auswirkungen auf die Systemleistung.',
       faq9_q: 'Funktioniert SAPscope hinter einem SAProuter oder Message Server?',
-      faq9_a: 'Ja. Der Agent verbindet sich <strong>lokal vom SAP-Server</strong> über RFC — keine eingehende Internetverbindung ist erforderlich. SAProuter und Message Server (Anmeldegruppen) werden über die Konfigurationsdatei <code>systems.yaml</code> unterstützt.',
+      faq9_a: 'Ja. Der Agent verbindet sich <strong>über ausgehenden RFC auf Port 33XX</strong> von beliebigen Servern mit Netzwerkzugang — er muss nicht auf dem SAP-Server selbst laufen. Keine eingehende Verbindung erforderlich. SAProuter und Message Server werden über <code>systems.yaml</code> unterstützt.',
       faq10_q: 'Kann ich S/4HANA- und ECC-Systeme im selben Dashboard überwachen?',
       faq10_a: 'Ja. SAPscope erkennt den Systemtyp (S/4HANA, ECC, BW, SolMan, PI/PO…) automatisch anhand installierter Komponenten. Alle Typen werden in einer <strong>einheitlichen Landscape-Ansicht</strong> angezeigt, mit visualisierten Transportrouten über das gesamte STMS-Domain.',
       pricing_toggle_monthly: 'Monatlich',
@@ -1992,6 +2042,10 @@
       foot_docs: 'Dokumentation',
       foot_app: 'Anwendung',
       foot_contact: 'Kontakt',
+      foot_legal: 'Impressum',
+      foot_privacy: 'Datenschutz',
+      foot_terms: 'AGB Nutzung',
+      foot_cgv: 'AGB Verkauf',
       foot_copy: '© 2026 SAPscope. Alle Rechte vorbehalten.'
     }
   };
@@ -2146,6 +2200,7 @@
     function setTheme(theme) {
       htmlEl.classList.toggle('light', theme === 'light');
       localStorage.setItem(KEY, theme);
+      if (typeof updateNavBg === 'function') updateNavBg();
     }
 
     // Init: saved pref → system pref → dark default

@@ -5,6 +5,7 @@ import {
   updateClientLogo,
   fetchUsers, createUser, assignClient, unassignClient,
   fetchTokens, issueToken, revokeToken,
+  fetchClients,
   type ApiClient, type ApiUser, type ApiToken, type ApiTokenCreated,
 } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -14,9 +15,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/sap-utils";
-import { Plus, Copy, Terminal, Users, Key, Building2, Trash2, RefreshCw, ImagePlus, X, FileText } from "lucide-react";
+import { Plus, Copy, Terminal, Users, Key, Building2, Trash2, RefreshCw, ImagePlus, X, FileText, Server, ScrollText } from "lucide-react";
 import { toast } from "sonner";
 import ReportConfigPanel from "@/components/ReportConfigPanel";
+import AgentHealthPanel from "@/components/AgentHealthPanel";
+import DecommissionPanel from "@/components/DecommissionPanel";
+import { AgentLogsPanel } from "@/components/AgentLogsPanel";
 
 export default function AdminPage() {
   return (
@@ -28,14 +32,16 @@ export default function AdminPage() {
 
       <Tabs defaultValue="clients" className="space-y-4">
         <TabsList className="bg-[hsl(var(--surface-1))] border border-border">
-          <TabsTrigger value="clients" className="gap-1.5"><Building2 className="w-3.5 h-3.5" />Clients</TabsTrigger>
-          <TabsTrigger value="users"   className="gap-1.5"><Users      className="w-3.5 h-3.5" />Users</TabsTrigger>
-          <TabsTrigger value="tokens"  className="gap-1.5"><Key        className="w-3.5 h-3.5" />Tokens</TabsTrigger>
+          <TabsTrigger value="clients"        className="gap-1.5"><Building2 className="w-3.5 h-3.5" />Clients</TabsTrigger>
+          <TabsTrigger value="users"          className="gap-1.5"><Users      className="w-3.5 h-3.5" />Users</TabsTrigger>
+          <TabsTrigger value="tokens"         className="gap-1.5"><Key        className="w-3.5 h-3.5" />Tokens</TabsTrigger>
+          <TabsTrigger value="infrastructure" className="gap-1.5"><Server     className="w-3.5 h-3.5" />Infrastructure</TabsTrigger>
         </TabsList>
 
         <TabsContent value="clients"><ClientsTab /></TabsContent>
         <TabsContent value="users"><UsersTab /></TabsContent>
         <TabsContent value="tokens"><TokensTab /></TabsContent>
+        <TabsContent value="infrastructure"><InfrastructureTab /></TabsContent>
       </Tabs>
     </div>
   );
@@ -389,6 +395,57 @@ function UsersTab() {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Infrastructure tab ────────────────────────────────────────────────────────
+
+function InfrastructureTab() {
+  const { data: clients = [] } = useQuery({ queryKey: ["clients"], queryFn: fetchClients });
+  const [logsClientId, setLogsClientId] = useState("");
+
+  const effectiveClientId = logsClientId || (clients[0]?.id ? String(clients[0].id) : "");
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-1">Santé des agents</h2>
+        <p className="text-xs text-muted-foreground mb-3">
+          Statut de connexion de chaque agent au serveur SAPscope.
+        </p>
+        <AgentHealthPanel />
+      </div>
+
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-1">Candidats à la décommission</h2>
+        <p className="text-xs text-muted-foreground mb-3">
+          Systèmes inactifs détectés automatiquement. Confirmez la décommission pour supprimer les données historiques.
+        </p>
+        <DecommissionPanel />
+      </div>
+
+      <div>
+        <div className="flex items-center gap-3 mb-1">
+          <ScrollText className="w-4 h-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold text-foreground">Logs agent</h2>
+          {clients.length > 1 && (
+            <select
+              value={logsClientId}
+              onChange={e => setLogsClientId(e.target.value)}
+              className="ml-auto text-xs bg-[hsl(var(--surface-1))] border border-border rounded px-2 py-1 text-foreground"
+            >
+              {clients.map(c => (
+                <option key={c.id} value={String(c.id)}>{c.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">
+          Logs des 7 derniers jours remontés par l'agent à chaque collecte.
+        </p>
+        {effectiveClientId && <AgentLogsPanel clientId={effectiveClientId} />}
+      </div>
     </div>
   );
 }
