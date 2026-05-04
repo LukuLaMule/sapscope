@@ -79,12 +79,15 @@ function buildDbContext(payload: Record<string, any>): DbContext {
     dbStats.db_version     ??
     null;
 
+  const isHanaByRfc      = raw === "HDB" || raw === "HANA";
+  const isHanaByType     = !raw && (systemType === "S/4HANA" || systemType === "BW/4HANA");
+
   return {
-    type:        (DB_LABELS[raw] ?? raw) || "Inconnu",
+    type:        (DB_LABELS[raw] ?? (isHanaByRfc ? "SAP HANA" : raw)) || "Inconnu",
     raw,
     version,
     system_type: systemType,
-    is_hana:     raw === "HDB",
+    is_hana:     isHanaByRfc || isHanaByType,
   };
 }
 
@@ -342,17 +345,8 @@ function hanaIndicators(payload: Record<string, any>): SizingIndicator[] {
       recommendation: "Limite mémoire HANA non disponible. Vérifier global.ini > [memorymanager] > global_allocation_limit.",
       sap_note:       "SAP Note 1999997",
     });
-  } else {
-    // Pas de données mémoire HANA — agent pas encore v3+
-    indicators.push({
-      label:          "Mémoire HANA",
-      status:         "UNKNOWN",
-      score:          0,
-      value:          "Non disponible — agent v3+ requis",
-      recommendation: "Mettre à jour l'agent SAPscope pour collecter les métriques HANA (M_SERVICE_MEMORY).",
-      sap_note:       null,
-    });
   }
+  // Si aucune donnée HANA disponible, on n'ajoute pas de placeholder — pas de signal utile
 
   // ── Column Store HANA ───────────────────────────────────────────────────
   const colStoreGb = parseNum(dbStats.hana_column_store_gb);
