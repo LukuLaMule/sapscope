@@ -66,6 +66,25 @@
       --border-2: rgba(74,158,255,0.07);
       --card:     rgba(255,255,255,0.03);
       --r:        10px;
+      color-scheme: dark;
+    }
+
+    :root.light {
+      --bg:       #f4f7fc;
+      --bg-2:     #eaf0f9;
+      --bg-3:     #dde8f5;
+      --fg:       #0d1f38;
+      --fg-2:     #3d5a7a;
+      --fg-3:     #7a9ab8;
+      --accent:   #2563eb;
+      --gold:     #a16207;
+      --green:    #15803d;
+      --orange:   #b45309;
+      --red:      #b91c1c;
+      --border:   rgba(37,99,235,0.18);
+      --border-2: rgba(37,99,235,0.09);
+      --card:     rgba(255,255,255,0.7);
+      color-scheme: light;
     }
 
     html { scroll-behavior: smooth; }
@@ -87,7 +106,23 @@
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       background: rgba(10,22,40,0.85);
       border-bottom: 1px solid var(--border-2);
+      transition: background .3s;
     }
+    :root.light nav { background: rgba(244,247,252,0.88); }
+
+    /* ── Theme toggle ─────────────────────────────────────────────────────── */
+    .theme-toggle {
+      background: none; border: none; cursor: pointer; padding: 6px;
+      border-radius: 8px; color: var(--fg-2);
+      display: flex; align-items: center; justify-content: center;
+      transition: color .2s, background .2s;
+    }
+    .theme-toggle:hover { color: var(--fg); background: rgba(255,255,255,.06); }
+    :root.light .theme-toggle:hover { background: rgba(0,0,0,.06); }
+    .theme-toggle svg { width: 17px; height: 17px; transition: transform .4s cubic-bezier(.4,0,.2,1), opacity .25s; }
+    .icon-moon { display: none; }
+    :root.light .icon-sun  { display: none; }
+    :root.light .icon-moon { display: block; }
     .nav-inner {
       max-width: 1100px; margin: 0 auto;
       display: flex; align-items: center; justify-content: space-between;
@@ -730,6 +765,16 @@
           <button class="lang-dropdown-item" data-lang="de" role="menuitem">DE — Deutsch</button>
         </div>
       </div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+        <!-- Sun — visible in dark mode -->
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <!-- Moon — visible in light mode -->
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
       <a href="https://app.sapscope.com" class="btn-ghost" data-i18n="nav_signin">Sign in</a>
       <a href="https://app.sapscope.com" class="btn-nav-primary" data-i18n="nav_cta">Free trial →</a>
     </div>
@@ -1956,6 +2001,30 @@
   })();
 
   // Lang dropdown
+  // ── Theme toggle ──────────────────────────────────────────────────────────
+  (function () {
+    const btn    = document.getElementById('theme-toggle');
+    const htmlEl = document.getElementById('html-root');
+    const KEY    = 'sapscope_theme';
+
+    function setTheme(theme) {
+      htmlEl.classList.toggle('light', theme === 'light');
+      localStorage.setItem(KEY, theme);
+    }
+
+    // Init: saved pref → system pref → dark default
+    const saved = localStorage.getItem(KEY);
+    if (saved) {
+      setTheme(saved);
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setTheme('light');
+    }
+
+    btn.addEventListener('click', function () {
+      setTheme(htmlEl.classList.contains('light') ? 'dark' : 'light');
+    });
+  })();
+
   // ── Feature switcher ──────────────────────────────────────────────────────
   (function () {
     const items  = document.querySelectorAll('.feat-item');
