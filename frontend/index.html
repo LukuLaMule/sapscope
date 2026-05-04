@@ -189,6 +189,9 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
     }
+    :root.light .hero h1 {
+      background: linear-gradient(180deg, #0d1f38 60%, rgba(13,31,56,.6) 100%);
+    }
     .hero p {
       font-size: clamp(17px, 2.2vw, 21px); font-weight: 400;
       color: var(--fg-2); max-width: 620px; line-height: 1.6;
@@ -213,6 +216,7 @@
       transition: border-color .2s, color .2s;
     }
     .btn-hero-ghost:hover { color: var(--fg); border-color: rgba(255,255,255,.3); }
+    :root.light .btn-hero-ghost:hover { border-color: rgba(13,31,56,.3); }
 
     /* ── MOCKUP ──────────────────────────────────────────────────────────── */
     .mockup-wrap {
@@ -620,6 +624,9 @@
       letter-spacing: -2px; margin-bottom: 20px;
       background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,.6) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    :root.light .cta-section h2 {
+      background: linear-gradient(135deg, #0d1f38 0%, rgba(13,31,56,.7) 100%);
     }
     .cta-section p { font-size: 18px; color: var(--fg-2); margin-bottom: 44px; }
     .cta-section small { display: block; margin-top: 20px; font-size: 13px; color: var(--fg-3); }
