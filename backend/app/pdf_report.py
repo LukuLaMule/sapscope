@@ -447,8 +447,8 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="cover-brand" style="margin-bottom: 0;">SAP<span>scope</span></div>
   {% endif %}
 
-  <!-- Client name -->
-  <div class="cover-client">{{ client_name }}</div>
+  <!-- Client name / custom title -->
+  <div class="cover-client">{{ report_title or client_name }}</div>
 
   <!-- Global health score -->
   <div class="cover-score" style="color: {{ global_score_color }};">{{ global_score }}</div>
@@ -498,6 +498,7 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
   </div>
 
   <!-- Health by domain -->
+  {% if sys.show_health_domains and sys.domain_rows %}
   <div class="section-title">
     {% if language == "fr" %}Santé par domaine{% else %}Health by domain{% endif %}
   </div>
@@ -505,7 +506,7 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
     <thead>
       <tr>
         <th style="width:35%">{% if language == "fr" %}Domaine{% else %}Domain{% endif %}</th>
-        <th style="width:45%">{% if language == "fr" %}Score{% else %}Score{% endif %}</th>
+        <th style="width:45%">Score</th>
         <th style="width:20%">{% if language == "fr" %}Statut{% else %}Status{% endif %}</th>
       </tr>
     </thead>
@@ -530,9 +531,10 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
       {% endfor %}
     </tbody>
   </table>
+  {% endif %}
 
   <!-- Key metrics -->
-  {% if sys.metrics %}
+  {% if sys.show_key_metrics and sys.metrics %}
   <div class="section-title">
     {% if language == "fr" %}Indicateurs clés{% else %}Key metrics{% endif %}
   </div>
@@ -561,7 +563,7 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
   {% endif %}
 
   <!-- AI Assessment -->
-  {% if sys.analysis %}
+  {% if sys.show_ai_analysis and sys.analysis %}
   <div class="ai-box">
     <div class="ai-title">
       {% if language == "fr" %}Analyse IA{% else %}AI Assessment{% endif %}
@@ -589,6 +591,8 @@ async def generate_client_pdf(
     # Each item: {sid, score, status, indicators, analysis, snapshot_date, prev_score}
     language: str = "fr",
     report_date: str | None = None,
+    report_title: str | None = None,
+    sections: dict | None = None,
 ) -> bytes:
     """
     Génère un PDF professionnel pour un client ESN.
@@ -601,6 +605,11 @@ async def generate_client_pdf(
 
     if report_date is None:
         report_date = datetime.now(timezone.utc).strftime("%d/%m/%Y")
+
+    sec = sections or {}
+    show_health_domains = sec.get("health_domains", True)
+    show_key_metrics    = sec.get("key_metrics",    True)
+    show_ai_analysis    = sec.get("ai_analysis",    True)
 
     slabels = _STATUS_LABEL.get(language, _STATUS_LABEL["fr"])
 
@@ -643,11 +652,14 @@ async def generate_client_pdf(
             "status_label": slabels.get(status, status),
             "status_color": _status_color(status),
             "status_bg":    _status_bg(status),
-            "domain_rows":  _build_domain_rows(indicators, language),
-            "metrics":      _extract_key_metrics(indicators, language),
-            "analysis":     analysis,
+            "domain_rows":  _build_domain_rows(indicators, language) if show_health_domains else [],
+            "metrics":      _extract_key_metrics(indicators, language) if show_key_metrics else [],
+            "analysis":     analysis if show_ai_analysis else None,
             "trend":        trend,
             "trend_color":  trend_color,
+            "show_health_domains": show_health_domains,
+            "show_key_metrics":    show_key_metrics,
+            "show_ai_analysis":    show_ai_analysis,
         })
 
     # Extraire logo_b64 (sans le préfixe data:... s'il est présent)
@@ -664,6 +676,7 @@ async def generate_client_pdf(
     template = env.from_string(_HTML_TEMPLATE)
     html_str = template.render(
         client_name=client.name,
+        report_title=report_title or "",
         logo_b64=logo_b64,
         global_score=global_score,
         global_score_color=global_score_color,

@@ -13,7 +13,7 @@ import {
 } from "@/lib/sap-utils";
 import {
   ArrowLeft, Shield, Truck, Clock, Server, Cpu, FileText,
-  Activity, Database, Layers, Box, Sparkles, Copy, AlertTriangle, Printer, StickyNote, Pencil, Trash2, Gauge,
+  Activity, Database, Layers, Box, Sparkles, Copy, AlertTriangle, StickyNote, Pencil, Trash2, Gauge,
   GitFork, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -232,15 +232,11 @@ export default function SystemDetailPage() {
             </div>
           </div>
 
-          {/* Quick KPIs + Print */}
+          {/* Quick KPIs */}
           <div className="hidden lg:flex items-center gap-3">
             {snap.avg_response_ms != null && <QuickKPI label="Dialog" value={`${snap.avg_response_ms} ms`} warn={snap.avg_response_ms > 600} />}
             <QuickKPI label="Components" value={String(snap.components_count)} />
             <QuickKPI label="Snapshot" value={timeAgo(snap.collected_at)} />
-            <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 ml-2 print:hidden">
-              <Printer className="w-3.5 h-3.5" />
-              Export PDF
-            </Button>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { fetchClients, fetchSnapshots } from "@/lib/api";
 import { snapshotToSystem } from "@/lib/data-adapter";
 import { getScoreColor, getTierBadgeClass, getStatusBadgeClass, timeAgo } from "@/lib/sap-utils";
-import { getKernelStatus, getKernelStatusLabel, VERSION_STATUS_CLASS } from "@/lib/sap-versions";
+import { getKernelStatus, getKernelStatusLabel, getVersionStatusStyle } from "@/lib/sap-versions";
 import { Download, Search, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -251,7 +251,8 @@ export default function InventoryPage() {
                         <div className="flex items-center gap-1.5">
                           <span className="font-mono text-sm text-foreground">{kernelStr}</span>
                           {(kStatus === "warning" || kStatus === "critical") && (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${VERSION_STATUS_CLASS[kStatus]}`}>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded border font-medium"
+                              style={getVersionStatusStyle(kStatus)}>
                               {kLabel}
                             </span>
                           )}

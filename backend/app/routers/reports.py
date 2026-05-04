@@ -32,17 +32,41 @@ class ReportConfigOut(BaseModel):
     schedule_day: int
     language: str
     last_sent_at: datetime | None = None
+    report_title: str | None = None
+    include_health_domains: bool = True
+    include_key_metrics: bool = True
+    include_ai_analysis: bool = True
 
 
 class ReportConfigPatch(BaseModel):
     enabled: bool | None = None
     recipient_emails: list[str] | None = None
-    schedule: str | None = None       # daily | weekly | monthly
-    schedule_day: int | None = None   # 0-6 (weekly) or 1-28 (monthly)
-    language: str | None = None       # fr | en
+    schedule: str | None = None             # daily | weekly | monthly
+    schedule_day: int | None = None         # 0-6 (weekly) or 1-28 (monthly)
+    language: str | None = None             # fr | en
+    report_title: str | None = None
+    include_health_domains: bool | None = None
+    include_key_metrics: bool | None = None
+    include_ai_analysis: bool | None = None
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _config_to_out(cfg: ClientReportConfig) -> ReportConfigOut:
+    return ReportConfigOut(
+        client_id=cfg.client_id,
+        enabled=cfg.enabled,
+        recipient_emails=cfg.recipient_emails or [],
+        schedule=cfg.schedule,
+        schedule_day=cfg.schedule_day,
+        language=cfg.language,
+        last_sent_at=cfg.last_sent_at,
+        report_title=cfg.report_title,
+        include_health_domains=cfg.include_health_domains,
+        include_key_metrics=cfg.include_key_metrics,
+        include_ai_analysis=cfg.include_ai_analysis,
+    )
+
 
 async def _get_or_create_config(client_id: str, db: AsyncSession) -> ClientReportConfig:
     row = await db.execute(
@@ -136,15 +160,7 @@ async def get_report_config(
 ):
     await get_client_for_user(client_id, user, db)
     cfg = await _get_or_create_config(client_id, db)
-    return ReportConfigOut(
-        client_id=cfg.client_id,
-        enabled=cfg.enabled,
-        recipient_emails=cfg.recipient_emails or [],
-        schedule=cfg.schedule,
-        schedule_day=cfg.schedule_day,
-        language=cfg.language,
-        last_sent_at=cfg.last_sent_at,
-    )
+    return _config_to_out(cfg)
 
 
 @router.patch("/api/v1/clients/{client_id}/report-config", response_model=ReportConfigOut)
@@ -175,19 +191,19 @@ async def update_report_config(
         if body.language not in ("fr", "en"):
             raise HTTPException(status_code=400, detail="language must be fr | en")
         cfg.language = body.language
+    if body.report_title is not None:
+        cfg.report_title = body.report_title.strip() or None
+    if body.include_health_domains is not None:
+        cfg.include_health_domains = body.include_health_domains
+    if body.include_key_metrics is not None:
+        cfg.include_key_metrics = body.include_key_metrics
+    if body.include_ai_analysis is not None:
+        cfg.include_ai_analysis = body.include_ai_analysis
 
     await db.commit()
     await db.refresh(cfg)
 
-    return ReportConfigOut(
-        client_id=cfg.client_id,
-        enabled=cfg.enabled,
-        recipient_emails=cfg.recipient_emails or [],
-        schedule=cfg.schedule,
-        schedule_day=cfg.schedule_day,
-        language=cfg.language,
-        last_sent_at=cfg.last_sent_at,
-    )
+    return _config_to_out(cfg)
 
 
 # ── PDF download endpoint ─────────────────────────────────────────────────────
@@ -216,6 +232,11 @@ async def download_client_report_pdf(
     from ..pdf_report import generate_client_pdf
 
     report_date = datetime.now(timezone.utc).strftime("%d/%m/%Y")
+    sections = {
+        "health_domains": cfg.include_health_domains,
+        "key_metrics":    cfg.include_key_metrics,
+        "ai_analysis":    cfg.include_ai_analysis,
+    }
 
     try:
         pdf_bytes = await generate_client_pdf(
@@ -223,6 +244,8 @@ async def download_client_report_pdf(
             snapshots_data=snapshots_data,
             language=language,
             report_date=report_date,
+            report_title=cfg.report_title,
+            sections=sections,
         )
     except Exception:
         logger.exception("Erreur lors de la génération du PDF pour client %s", client_id)
@@ -270,6 +293,11 @@ async def send_report_now(
     from ..mailer import send_report_pdf_email
 
     report_date = datetime.now(timezone.utc).strftime("%d/%m/%Y")
+    sections = {
+        "health_domains": cfg.include_health_domains,
+        "key_metrics":    cfg.include_key_metrics,
+        "ai_analysis":    cfg.include_ai_analysis,
+    }
 
     try:
         pdf_bytes = await generate_client_pdf(
@@ -277,6 +305,8 @@ async def send_report_now(
             snapshots_data=snapshots_data,
             language=cfg.language,
             report_date=report_date,
+            report_title=cfg.report_title,
+            sections=sections,
         )
     except Exception:
         logger.exception("Erreur lors de la génération du PDF pour client %s", client_id)

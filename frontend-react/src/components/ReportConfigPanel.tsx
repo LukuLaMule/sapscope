@@ -31,14 +31,18 @@ export default function ReportConfigPanel({ clientId, clientName }: Props) {
   const updateMut = useUpdateReportConfig(clientId);
 
   // Local state mirrors server data
-  const [enabled, setEnabled]           = useState(false);
-  const [emails, setEmails]             = useState<string[]>([]);
-  const [emailInput, setEmailInput]     = useState("");
-  const [emailError, setEmailError]     = useState("");
-  const [schedule, setSchedule]         = useState<ApiReportConfig["schedule"]>("weekly");
-  const [scheduleDay, setScheduleDay]   = useState(0);
-  const [language, setLanguage]         = useState<ApiReportConfig["language"]>("fr");
-  const [sending, setSending]           = useState(false);
+  const [enabled, setEnabled]                 = useState(false);
+  const [emails, setEmails]                   = useState<string[]>([]);
+  const [emailInput, setEmailInput]           = useState("");
+  const [emailError, setEmailError]           = useState("");
+  const [schedule, setSchedule]               = useState<ApiReportConfig["schedule"]>("weekly");
+  const [scheduleDay, setScheduleDay]         = useState(0);
+  const [language, setLanguage]               = useState<ApiReportConfig["language"]>("fr");
+  const [reportTitle, setReportTitle]         = useState("");
+  const [inclHealthDomains, setInclHealth]    = useState(true);
+  const [inclKeyMetrics, setInclMetrics]      = useState(true);
+  const [inclAiAnalysis, setInclAi]           = useState(true);
+  const [sending, setSending]                 = useState(false);
 
   // Sync from server when data arrives
   useEffect(() => {
@@ -48,6 +52,10 @@ export default function ReportConfigPanel({ clientId, clientName }: Props) {
     setSchedule(data.schedule);
     setScheduleDay(data.schedule_day ?? 0);
     setLanguage(data.language);
+    setReportTitle(data.report_title ?? "");
+    setInclHealth(data.include_health_domains ?? true);
+    setInclMetrics(data.include_key_metrics ?? true);
+    setInclAi(data.include_ai_analysis ?? true);
   }, [data]);
 
   const handleAddEmail = () => {
@@ -72,7 +80,13 @@ export default function ReportConfigPanel({ clientId, clientName }: Props) {
 
   const handleSave = () => {
     updateMut.mutate(
-      { enabled, recipient_emails: emails, schedule, schedule_day: scheduleDay, language },
+      {
+        enabled, recipient_emails: emails, schedule, schedule_day: scheduleDay, language,
+        report_title: reportTitle.trim() || null,
+        include_health_domains: inclHealthDomains,
+        include_key_metrics:    inclKeyMetrics,
+        include_ai_analysis:    inclAiAnalysis,
+      },
       {
         onSuccess: () => toast.success("Configuration sauvegardée"),
         onError: (e: Error) => toast.error(e.message),
@@ -214,6 +228,41 @@ export default function ReportConfigPanel({ clientId, clientName }: Props) {
           <option value="fr">Français</option>
           <option value="en">English</option>
         </select>
+      </div>
+
+      {/* ── Personnalisation ── */}
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">Personnalisation</Label>
+
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Titre du rapport (optionnel)</Label>
+          <Input
+            placeholder={`Rapport SAP – ${clientName ?? "Client"}`}
+            value={reportTitle}
+            onChange={e => setReportTitle(e.target.value)}
+            className="text-sm"
+            maxLength={255}
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Affiché en page de couverture. Par défaut : nom du client.
+          </p>
+        </div>
+
+        <div className="space-y-1.5 rounded-lg border border-border bg-[hsl(var(--surface-1))] px-4 py-3">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Sections incluses</p>
+          <div className="flex items-center justify-between py-1">
+            <span className="text-sm text-foreground">Santé par domaine</span>
+            <Switch checked={inclHealthDomains} onCheckedChange={setInclHealth} />
+          </div>
+          <div className="flex items-center justify-between py-1">
+            <span className="text-sm text-foreground">Indicateurs clés</span>
+            <Switch checked={inclKeyMetrics} onCheckedChange={setInclMetrics} />
+          </div>
+          <div className="flex items-center justify-between py-1">
+            <span className="text-sm text-foreground">Analyse IA</span>
+            <Switch checked={inclAiAnalysis} onCheckedChange={setInclAi} />
+          </div>
+        </div>
       </div>
 
       {/* ── Dernier envoi ── */}

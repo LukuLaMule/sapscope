@@ -55,6 +55,10 @@ class ClientReportConfig(Base):
     schedule_day: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0)   # 0=lundi pour weekly
     language: Mapped[str] = mapped_column(String(5), nullable=False, default="fr")
     last_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    report_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    include_health_domains: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    include_key_metrics: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    include_ai_analysis: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     client: Mapped["Client"] = relationship(back_populates="report_config")
 

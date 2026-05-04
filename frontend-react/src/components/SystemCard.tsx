@@ -4,7 +4,7 @@ import {
   getStatusBadgeClass, getScoreColor, getScoreBorderColor, getScoreBgColor,
   getTierBadgeClass, timeAgo,
 } from "@/lib/sap-utils";
-import { getKernelStatus, getKernelStatusLabel, VERSION_STATUS_CLASS } from "@/lib/sap-versions";
+import { getKernelStatus, getKernelStatusLabel, getVersionStatusStyle } from "@/lib/sap-versions";
 import { AlertTriangle, Clock, Activity } from "lucide-react";
 
 interface Props {
@@ -50,7 +50,8 @@ export function SystemCard({ system }: Props) {
             const kLabel  = getKernelStatusLabel(system.kernelVersion);
             if (kStatus === "ok" || kStatus === "unknown") return null;
             return (
-              <span className={`text-[9px] px-1 py-0 rounded border font-medium leading-4 ${VERSION_STATUS_CLASS[kStatus]}`}>
+              <span className="text-[9px] px-1 py-0 rounded border font-medium leading-4"
+                style={getVersionStatusStyle(kStatus)}>
                 {kLabel}
               </span>
             );
