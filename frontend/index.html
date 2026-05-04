@@ -1287,30 +1287,30 @@
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span>How often does the agent collect data?</span>
+          <span data-i18n="faq8_q">How often does the agent collect data?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq8_a">
           By default, the agent runs <strong>once every 24 hours</strong> via a systemd timer. You can adjust this interval — hourly collection is supported for critical systems. Each run takes under 30 seconds and has negligible impact on system performance.
         </div></div>
       </div>
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span>Does SAPscope work behind a SAProuter or Message Server?</span>
+          <span data-i18n="faq9_q">Does SAPscope work behind a SAProuter or Message Server?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq9_a">
           Yes. The agent connects <strong>locally from within the SAP server</strong> via RFC — no inbound connection from the internet is needed. SAProuter and Message Server (logon groups) are supported through the <code>systems.yaml</code> configuration file.
         </div></div>
       </div>
 
       <div class="faq-item fade-up">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span>Can I monitor S/4HANA and ECC systems in the same dashboard?</span>
+          <span data-i18n="faq10_q">Can I monitor S/4HANA and ECC systems in the same dashboard?</span>
           <span class="faq-icon">+</span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">
+        <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq10_a">
           Yes. SAPscope automatically detects the system type (S/4HANA, ECC, BW, SolMan, PI/PO…) from installed components. All system types are displayed in a <strong>unified landscape view</strong>, with transport routes visualized across the whole STMS domain.
         </div></div>
       </div>
@@ -1373,11 +1373,11 @@
     <p class="section-sub fade-up" data-i18n="pricing_sub">Annual license. Deploy in 5 minutes with Docker. No cloud dependency.</p>
 
     <div class="pricing-toggle fade-up">
-      <span class="pricing-toggle-label" id="toggle-label-monthly">Monthly</span>
+      <span class="pricing-toggle-label" id="toggle-label-monthly" data-i18n="pricing_toggle_monthly">Monthly</span>
       <div class="pricing-toggle-track annual" id="pricing-toggle-track" onclick="togglePricing()">
         <div class="pricing-toggle-thumb"></div>
       </div>
-      <span class="pricing-toggle-label active" id="toggle-label-annual">Annual <span class="pricing-save-badge">Save 17%</span></span>
+      <span class="pricing-toggle-label active" id="toggle-label-annual"><span data-i18n="pricing_toggle_annual">Annual</span> <span class="pricing-save-badge" data-i18n="pricing_save_badge">Save 17%</span></span>
     </div>
 
     <div class="pricing-grid">
@@ -1606,6 +1606,17 @@
       faq6_a: 'Yes, no commitment, no fees. You can cancel from your account or by contacting us at <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. Cancellation takes effect at the end of the current period. We also offer a <strong>14-day money-back guarantee</strong>.',
       faq7_q: 'Is there an on-premise / self-hosted option?',
       faq7_a: 'Yes, <strong>SAPscope is exclusively self-hosted</strong> — your SAP data never leaves your infrastructure. You install SAPscope with Docker Compose on your own server. <a href="mailto:contact@sapscope.fr">Contact us</a> for a custom quote.',
+      faq8_q: 'How often does the agent collect data?',
+      faq8_a: 'By default, the agent runs <strong>once every 24 hours</strong> via a systemd timer. You can adjust this interval — hourly collection is supported for critical systems. Each run takes under 30 seconds and has negligible impact on system performance.',
+      faq9_q: 'Does SAPscope work behind a SAProuter or Message Server?',
+      faq9_a: 'Yes. The agent connects <strong>locally from within the SAP server</strong> via RFC — no inbound connection from the internet is needed. SAProuter and Message Server (logon groups) are supported through the <code>systems.yaml</code> configuration file.',
+      faq10_q: 'Can I monitor S/4HANA and ECC systems in the same dashboard?',
+      faq10_a: 'Yes. SAPscope automatically detects the system type (S/4HANA, ECC, BW, SolMan, PI/PO…) from installed components. All system types are displayed in a <strong>unified landscape view</strong>, with transport routes visualized across the whole STMS domain.',
+      pricing_toggle_monthly: 'Monthly',
+      pricing_toggle_annual: 'Annual',
+      pricing_save_badge: 'Save 17%',
+      pricing_period_year: 'per year',
+      pricing_period_month: 'per month',
       trial_eyebrow: 'Free Trial',
       trial_title: 'Try SAPscope free for 30 days',
       trial_sub: 'Self-hosted on your servers. No credit card required.',
@@ -1753,6 +1764,17 @@
       faq6_a: 'Oui, sans engagement ni frais. Vous pouvez résilier depuis votre espace client ou en nous contactant à <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. La résiliation prend effet à la fin de la période en cours. Nous proposons également une <strong>garantie satisfait ou remboursé de 14 jours</strong>.',
       faq7_q: 'Existe-t-il une offre on-premise / self-hosted ?',
       faq7_a: 'Oui, <strong>SAPscope est exclusivement self-hosted</strong> — vos données SAP ne quittent jamais votre infrastructure. Vous installez SAPscope avec Docker Compose sur votre propre serveur. <a href="mailto:contact@sapscope.fr">Contactez-nous</a> pour un devis personnalisé.',
+      faq8_q: 'À quelle fréquence l\'agent collecte-t-il les données ?',
+      faq8_a: 'Par défaut, l\'agent s\'exécute <strong>une fois toutes les 24 heures</strong> via un timer systemd. Vous pouvez ajuster cet intervalle — la collecte horaire est supportée pour les systèmes critiques. Chaque exécution prend moins de 30 secondes et a un impact négligeable sur les performances système.',
+      faq9_q: 'SAPscope fonctionne-t-il derrière un SAProuter ou un Message Server ?',
+      faq9_a: 'Oui. L\'agent se connecte <strong>localement depuis le serveur SAP</strong> via RFC — aucune connexion entrante depuis internet n\'est nécessaire. SAProuter et Message Server (groupes de logon) sont supportés via le fichier de configuration <code>systems.yaml</code>.',
+      faq10_q: 'Peut-on surveiller des systèmes S/4HANA et ECC dans le même tableau de bord ?',
+      faq10_a: 'Oui. SAPscope détecte automatiquement le type de système (S/4HANA, ECC, BW, SolMan, PI/PO…) à partir des composants installés. Tous les types sont affichés dans une <strong>vue landscape unifiée</strong>, avec les routes de transport visualisées sur l\'ensemble du domaine STMS.',
+      pricing_toggle_monthly: 'Mensuel',
+      pricing_toggle_annual: 'Annuel',
+      pricing_save_badge: 'Économisez 17 %',
+      pricing_period_year: 'par an',
+      pricing_period_month: 'par mois',
       trial_eyebrow: 'Essai gratuit',
       trial_title: 'Testez SAPscope gratuitement pendant 30 jours',
       trial_sub: 'Sur vos serveurs. Sans carte bancaire.',
@@ -1900,6 +1922,17 @@
       faq6_a: 'Ja, ohne Vertragsbindung und ohne Gebühren. Sie können über Ihr Kundenkonto kündigen oder uns unter <a href="mailto:contact@sapscope.com">contact@sapscope.com</a> kontaktieren. Die Kündigung tritt am Ende des laufenden Zeitraums in Kraft. Wir bieten auch eine <strong>14-tägige Geld-zurück-Garantie</strong>.',
       faq7_q: 'Gibt es eine On-Premise / Self-Hosted-Option?',
       faq7_a: 'Ja, <strong>SAPscope ist ausschließlich self-hosted</strong> — Ihre SAP-Daten verlassen niemals Ihre Infrastruktur. Sie installieren SAPscope mit Docker Compose auf Ihrem eigenen Server. <a href="mailto:contact@sapscope.fr">Kontaktieren Sie uns</a> für ein individuelles Angebot.',
+      faq8_q: 'Wie oft erfasst der Agent Daten?',
+      faq8_a: 'Standardmäßig läuft der Agent <strong>einmal alle 24 Stunden</strong> über einen systemd-Timer. Sie können dieses Intervall anpassen — stündliche Erfassung wird für kritische Systeme unterstützt. Jede Ausführung dauert unter 30 Sekunden und hat vernachlässigbare Auswirkungen auf die Systemleistung.',
+      faq9_q: 'Funktioniert SAPscope hinter einem SAProuter oder Message Server?',
+      faq9_a: 'Ja. Der Agent verbindet sich <strong>lokal vom SAP-Server</strong> über RFC — keine eingehende Internetverbindung ist erforderlich. SAProuter und Message Server (Anmeldegruppen) werden über die Konfigurationsdatei <code>systems.yaml</code> unterstützt.',
+      faq10_q: 'Kann ich S/4HANA- und ECC-Systeme im selben Dashboard überwachen?',
+      faq10_a: 'Ja. SAPscope erkennt den Systemtyp (S/4HANA, ECC, BW, SolMan, PI/PO…) automatisch anhand installierter Komponenten. Alle Typen werden in einer <strong>einheitlichen Landscape-Ansicht</strong> angezeigt, mit visualisierten Transportrouten über das gesamte STMS-Domain.',
+      pricing_toggle_monthly: 'Monatlich',
+      pricing_toggle_annual: 'Jährlich',
+      pricing_save_badge: '17 % sparen',
+      pricing_period_year: 'pro Jahr',
+      pricing_period_month: 'pro Monat',
       trial_eyebrow: 'Kostenlose Testversion',
       trial_title: '30 Tage kostenlos testen',
       trial_sub: 'Auf Ihren Servern. Keine Kreditkarte erforderlich.',
@@ -2143,13 +2176,16 @@
       items[idx].classList.add('active');
       panels[idx].classList.add('active');
 
-      // Restart progress bar animation
+      // Restart progress bar animation (double rAF évite le reflow synchrone qui fait sauter la page)
       const prog = items[idx].querySelector('.feat-item-progress');
       prog.style.transition = 'none';
       prog.style.height = '0%';
-      prog.offsetHeight; // force reflow
-      prog.style.transition = 'height ' + DURATION + 'ms linear';
-      prog.style.height = '100%';
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          prog.style.transition = 'height ' + DURATION + 'ms linear';
+          prog.style.height = '100%';
+        });
+      });
 
       current = idx;
     }
@@ -2193,8 +2229,9 @@
       var val = pricingAnnual ? el.dataset.annual : el.dataset.monthly;
       el.textContent = Number(val).toLocaleString('fr-FR');
     });
+    var t = TRANSLATIONS[getCurrentLang()] || TRANSLATIONS['en'];
     document.querySelectorAll('.price-period').forEach(function(el) {
-      el.textContent = pricingAnnual ? 'per year' : 'per month';
+      el.textContent = pricingAnnual ? (t.pricing_period_year || 'per year') : (t.pricing_period_month || 'per month');
     });
   }
 

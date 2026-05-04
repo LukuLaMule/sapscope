@@ -111,6 +111,30 @@ cp docs/guide-XX-*.fr.md frontend/docs/
 | Landscape / vue globale | guide-02-landscape |
 | Admin utilisateurs/clients/tokens | guide-07, guide-08 |
 
+## Landing page — règle i18n
+
+Tout texte visible ajouté dans `frontend/index.html` doit être internationalisé. Sans exception.
+
+**Règle :** chaque élément contenant du texte utilisateur doit porter :
+- `data-i18n="cle"` pour le contenu texte simple
+- `data-i18n-html="cle"` pour le contenu HTML (liens, `<strong>`, etc.)
+
+Et la clé correspondante doit être ajoutée dans le bloc `TRANSLATIONS` pour les **3 langues** : `en`, `fr`, `de`.
+
+**Vérification avant commit :** greper `data-i18n` pour s'assurer que tout nouveau contenu textuel est couvert. Si un élément texte n'a pas d'attribut `data-i18n`, c'est un oubli à corriger.
+
+**Exemple correct :**
+```html
+<span data-i18n="pricing_toggle_monthly">Monthly</span>
+```
+```js
+TRANSLATIONS = {
+  en: { pricing_toggle_monthly: "Monthly" },
+  fr: { pricing_toggle_monthly: "Mensuel" },
+  de: { pricing_toggle_monthly: "Monatlich" },
+}
+```
+
 ## Debugging
 
 When debugging issues, identify the root cause before making changes. Check API response payloads, field name mismatches, and data flow end-to-end rather than investigating broadly with many tool calls.
