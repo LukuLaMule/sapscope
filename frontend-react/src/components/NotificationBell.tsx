@@ -61,7 +61,7 @@ export function NotificationBell() {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={6} className="w-[360px] p-0">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center justify-between px-4 py-3">
           <span className="text-sm font-semibold">Notifications</span>
           {unreadCount > 0 && (
             <Button
@@ -90,7 +90,7 @@ export function NotificationBell() {
                     key={n.id}
                     onClick={() => handleMarkRead(n)}
                     className={[
-                      "flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/60 border-b border-border/50 last:border-0",
+                      "flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/60 rounded-sm mx-1",
                       isUnread ? "bg-muted/40" : "opacity-60",
                     ].join(" ")}
                   >
