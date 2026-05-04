@@ -290,12 +290,12 @@ export default function SystemDetailPage() {
           )}
 
           {/* Performance charts */}
-          {(scoreHistory.length > 0 || responseData.length > 0 || wpData.length > 0) && (
-            <div className="section-card">
-              <div className="section-header">
-                <div className="section-icon"><Activity className="w-4 h-4" /></div>
-                <h3 className="text-sm font-semibold text-foreground">Performance &amp; History</h3>
-              </div>
+          <div className="section-card">
+            <div className="section-header">
+              <div className="section-icon"><Activity className="w-4 h-4" /></div>
+              <h3 className="text-sm font-semibold text-foreground">Performance &amp; History</h3>
+            </div>
+            {(scoreHistory.length > 0 || responseData.length > 0 || wpData.length > 0) ? (
               <div className="space-y-4">
                 {scoreHistory.length > 1 && (
                   <HealthScoreChart data={scoreHistory} sid={snap.system_sid} />
@@ -305,8 +305,12 @@ export default function SystemDetailPage() {
                   {wpData.length > 0 && <WorkProcessChart data={wpData} />}
                 </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+                Not enough data yet — charts will appear after a few snapshots.
+              </div>
+            )}
+          </div>
 
           {/* ─── Sizing / Dimensionnement ─── */}
           <SizingSection payload={snap.payload} />
