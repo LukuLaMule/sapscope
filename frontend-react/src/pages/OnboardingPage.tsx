@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { fetchOnboarding } from "@/lib/api";
+import { fetchOnboarding, fetchClients, fetchSnapshots } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   CheckCircle, Copy, Terminal, Rocket, ArrowRight,
@@ -26,6 +26,7 @@ export default function OnboardingPage() {
   const [step, setStep]     = useState(0);
   const [platform, setPlatform] = useState<Platform>("linux");
   const [copied, setCopied] = useState(false);
+  const [snapshotReceived, setSnapshotReceived] = useState(false);
 
   const { data: onboarding, isLoading } = useQuery({
     queryKey:  ["onboarding"],
@@ -43,6 +44,28 @@ export default function OnboardingPage() {
 
   const token       = onboarding?.token ?? null;
   const clientName  = onboarding?.client_name ?? "";
+
+  const { data: clients = [] } = useQuery({
+    queryKey:  ["clients"],
+    queryFn:   fetchClients,
+    enabled:   step === 3,
+    staleTime: Infinity,
+  });
+  const pollingClientId = onboarding?.client_id ?? clients[0]?.id ?? null;
+
+  const { data: pollingSnapshots } = useQuery({
+    queryKey:     ["onboarding-snapshots", pollingClientId],
+    queryFn:      () => fetchSnapshots(pollingClientId!),
+    enabled:      step === 3 && !!pollingClientId && !snapshotReceived,
+    refetchInterval: 5000,
+  });
+
+  useEffect(() => {
+    if (pollingSnapshots && pollingSnapshots.length > 0) {
+      setSnapshotReceived(true);
+      localStorage.setItem("sapscope_onboarding_done", "1");
+    }
+  }, [pollingSnapshots]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -232,24 +255,39 @@ export default function OnboardingPage() {
           )}
 
           {/* ── Step 3 : Done ── */}
-          {step === 3 && (
+          {step === 3 && !snapshotReceived && (
+            <div className="text-center space-y-5">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto animate-pulse">
+                <Activity className="w-8 h-8 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">Waiting for first snapshot…</h2>
+                <p className="text-muted-foreground mt-2">
+                  Run the agent on your SAP server. The dashboard will update automatically.
+                </p>
+              </div>
+              <div className="rounded-lg bg-[hsl(var(--surface-1))] border border-border p-4 text-left space-y-2">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Quick check</div>
+                <div className="font-mono text-xs text-foreground">python agent.py --once</div>
+              </div>
+              <Button variant="outline" onClick={() => navigate("/")}>
+                Skip — go to dashboard
+              </Button>
+            </div>
+          )}
+
+          {step === 3 && snapshotReceived && (
             <div className="text-center space-y-5">
               <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--status-ok))]/10 border border-[hsl(var(--status-ok))]/20 flex items-center justify-center mx-auto">
                 <CheckCircle className="w-8 h-8 text-[hsl(var(--status-ok))]" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">You're all set!</h2>
-                <p className="text-muted-foreground mt-2">
-                  Once the agent runs, your first snapshot will appear on the dashboard within a minute.
-                </p>
+                <h2 className="text-2xl font-bold text-foreground">First snapshot received!</h2>
+                <p className="text-muted-foreground mt-2">Your SAP system is now monitored. Head to the dashboard.</p>
               </div>
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <Button variant="outline" onClick={() => navigate("/admin")}>
-                  Admin panel
-                </Button>
-                <Button onClick={() => navigate("/")}>
-                  Go to dashboard <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                <Button variant="outline" onClick={() => navigate("/admin")}>Admin panel</Button>
+                <Button onClick={() => navigate("/")}>Go to dashboard <ArrowRight className="w-4 h-4 ml-2" /></Button>
               </div>
             </div>
           )}

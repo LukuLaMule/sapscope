@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { fetchClients, fetchSnapshots, fetchMe, fetchHistory } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { buildClientOverview } from "@/lib/data-adapter";
 import { getScoreColor, getScoreBorderColor, getScoreBgColor, timeAgo } from "@/lib/sap-utils";
 import {
@@ -17,6 +18,7 @@ export default function OverviewPage() {
   const navigate = useNavigate();
   const [params]  = useSearchParams();
   const [search, setSearch] = useState("");
+  const { isAdmin } = useAuth();
 
   // Redirect to onboarding wizard after Stripe activation
   useEffect(() => {
@@ -50,6 +52,20 @@ export default function OverviewPage() {
       staleTime: 300_000, // 5 min — moins volatile que les snapshots
     })),
   });
+
+  const snapsDoneLoading = snapQueries.every(q => !q.isLoading);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    if (localStorage.getItem("sapscope_onboarding_done")) return;
+    if (isLoading || !snapsDoneLoading) return;
+    const hasAnySnapshot = snapQueries.some(q => (q.data?.length ?? 0) > 0);
+    if (!hasAnySnapshot) {
+      navigate("/onboarding");
+    } else {
+      localStorage.setItem("sapscope_onboarding_done", "1");
+    }
+  }, [isAdmin, isLoading, snapsDoneLoading, navigate]);
 
   const snapUpdatedAt = snapQueries.map(q => q.dataUpdatedAt).join(",");
   const histUpdatedAt = historyQueries.map(q => q.dataUpdatedAt).join(",");
