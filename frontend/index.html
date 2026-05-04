@@ -313,28 +313,51 @@
       font-size: 18px; color: var(--fg-2); text-align: center;
       max-width: 560px; margin: 0 auto 64px; line-height: 1.6;
     }
-    /* ── FEATURE ROWS ──────────────────────────────────────────────────── */
-    .feat-rows { margin-top: 72px; }
-    .feat-row {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 80px; align-items: center;
-      padding: 64px 0;
-      border-top: 1px solid var(--border-2);
+    /* ── FEATURE SWITCHER ───────────────────────────────────────────────── */
+    .feat-switcher {
+      display: grid; grid-template-columns: 5fr 7fr;
+      gap: 64px; align-items: start; margin-top: 72px;
     }
-    .feat-row:last-child { border-bottom: 1px solid var(--border-2); }
-    .feat-row.reverse .feat-row-visual { order: -1; }
-    .feat-row-num {
+    .feat-list { display: flex; flex-direction: column; }
+    .feat-item {
+      position: relative; padding: 20px 0 20px 22px;
+      border-left: 2px solid var(--border-2);
+      cursor: pointer; user-select: none;
+    }
+    .feat-item-progress {
+      position: absolute; left: -2px; top: 0;
+      width: 2px; height: 0; background: var(--accent);
+    }
+    .feat-item-num {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; font-weight: 500;
-      color: var(--accent); letter-spacing: .12em;
-      margin-bottom: 18px;
+      font-size: 10px; font-weight: 500;
+      color: var(--fg-3); letter-spacing: .1em; margin-bottom: 5px;
     }
-    .feat-row-title {
-      font-size: 30px; font-weight: 700;
-      letter-spacing: -.6px; line-height: 1.15;
-      margin-bottom: 16px;
+    .feat-item-title {
+      font-size: 16px; font-weight: 600;
+      color: var(--fg-2); letter-spacing: -.2px;
+      transition: color .2s;
     }
-    .feat-row-desc { font-size: 16px; color: var(--fg-2); line-height: 1.75; }
+    .feat-item.active .feat-item-title,
+    .feat-item:hover  .feat-item-title { color: var(--fg); }
+    .feat-item-desc {
+      font-size: 14px; color: var(--fg-3); line-height: 1.65;
+      margin-top: 0; max-height: 0; overflow: hidden; opacity: 0;
+      transition: max-height .35s ease, margin-top .35s ease, opacity .3s;
+    }
+    .feat-item.active .feat-item-desc {
+      max-height: 100px; margin-top: 8px; opacity: 1;
+    }
+    .feat-panel { position: sticky; top: 80px; }
+    .feat-visual-panel { display: none; }
+    .feat-visual-panel.active {
+      display: block;
+      animation: feat-in .35s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes feat-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
     /* ── Mini UI visuals ── */
     .feat-visual {
@@ -641,9 +664,8 @@
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-mobile-toggle { display: block; }
-      .feat-row { grid-template-columns: 1fr; gap: 32px; padding: 48px 0; }
-      .feat-row.reverse .feat-row-visual { order: 1; }
-      .feat-row-title { font-size: 24px; }
+      .feat-switcher { grid-template-columns: 1fr; gap: 36px; }
+      .feat-panel { position: static; }
       .pricing-grid { grid-template-columns: 1fr; }
       .step { grid-template-columns: 1fr; gap: 32px; }
       .step.reverse { direction: ltr; }
@@ -820,16 +842,60 @@
     <h2 class="section-title fade-up" data-i18n-html="feat_title">Everything a Basis consultant<br>always wanted.</h2>
     <p class="section-sub fade-up" data-i18n="feat_sub">No more running SM51, SE16, SPAM one after another to reconstruct a picture of your system.</p>
 
-    <div class="feat-rows">
+    <div class="feat-switcher fade-up">
 
-      <!-- 01 — RFC collection -->
-      <div class="feat-row fade-up">
-        <div class="feat-row-text">
-          <div class="feat-row-num">01</div>
-          <div class="feat-row-title" data-i18n="feat1_title">Automatic RFC collection</div>
-          <div class="feat-row-desc" data-i18n="feat1_text">An agent runs on your SAP server and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.</div>
+      <!-- ── Left : feature list ── -->
+      <div class="feat-list" id="feat-list">
+
+        <div class="feat-item" data-idx="0">
+          <div class="feat-item-progress"></div>
+          <div class="feat-item-num">01</div>
+          <div class="feat-item-title" data-i18n="feat1_title">Automatic RFC collection</div>
+          <div class="feat-item-desc" data-i18n="feat1_text">An agent runs on your SAP server and automatically collects components, support packages, kernel levels and custom ABAP objects — no manual work required.</div>
         </div>
-        <div class="feat-row-visual">
+
+        <div class="feat-item" data-idx="1">
+          <div class="feat-item-progress"></div>
+          <div class="feat-item-num">02</div>
+          <div class="feat-item-title" data-i18n="feat2_title">AI-powered diagnostics</div>
+          <div class="feat-item-desc" data-i18n="feat2_text">Every snapshot generates a structured report: maintenance status, identified risks, prioritized recommendations, actions to schedule.</div>
+        </div>
+
+        <div class="feat-item" data-idx="2">
+          <div class="feat-item-progress"></div>
+          <div class="feat-item-num">03</div>
+          <div class="feat-item-title" data-i18n="feat3_title">Snapshot comparison</div>
+          <div class="feat-item-desc" data-i18n="feat3_text">See exactly what changed between two dates: added or updated components, applied patches, evolution of custom objects.</div>
+        </div>
+
+        <div class="feat-item" data-idx="3">
+          <div class="feat-item-progress"></div>
+          <div class="feat-item-num">04</div>
+          <div class="feat-item-title" data-i18n="feat4_title">Multi-client, multi-system</div>
+          <div class="feat-item-desc" data-i18n="feat4_text">Manage multiple SAP clients from a single interface. Each scope is isolated, with its own agent tokens and assigned consultants.</div>
+        </div>
+
+        <div class="feat-item" data-idx="4">
+          <div class="feat-item-progress"></div>
+          <div class="feat-item-num">05</div>
+          <div class="feat-item-title" data-i18n="feat5_title">Isolation &amp; confidentiality</div>
+          <div class="feat-item-desc" data-i18n="feat5_text">Single-use agent tokens, read-only consultant access. Your SAP data stays within your perimeter — never exposed to the outside.</div>
+        </div>
+
+        <div class="feat-item" data-idx="5">
+          <div class="feat-item-progress"></div>
+          <div class="feat-item-num">06</div>
+          <div class="feat-item-title" data-i18n="feat6_title">Continuous history</div>
+          <div class="feat-item-desc" data-i18n="feat6_text">Every snapshot is archived. Go back to any date, compare periods, track drift before it becomes an incident.</div>
+        </div>
+
+      </div>
+
+      <!-- ── Right : visual panels ── -->
+      <div class="feat-panel" id="feat-panel">
+
+        <!-- Panel 01 — Agent terminal -->
+        <div class="feat-visual-panel" data-idx="0">
           <div class="feat-visual">
             <div class="fv-header">agent · PRD</div>
             <div class="fv-line"><span class="fv-prompt">$</span><span class="fv-dim">python agent.py --sid PRD</span></div>
@@ -841,16 +907,9 @@
             <div class="fv-success">Snapshot PRD · sent · 1.2s</div>
           </div>
         </div>
-      </div>
 
-      <!-- 02 — Diagnostics -->
-      <div class="feat-row reverse fade-up">
-        <div class="feat-row-text">
-          <div class="feat-row-num">02</div>
-          <div class="feat-row-title" data-i18n="feat2_title">AI-powered diagnostics</div>
-          <div class="feat-row-desc" data-i18n="feat2_text">Every snapshot generates a structured report: maintenance status, identified risks, prioritized recommendations, actions to schedule.</div>
-        </div>
-        <div class="feat-row-visual">
+        <!-- Panel 02 — Health bars -->
+        <div class="feat-visual-panel" data-idx="1">
           <div class="feat-visual">
             <div class="fv-header">health overview · Acme Corp</div>
             <div class="fv-bar-row">
@@ -873,16 +932,9 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 03 — Snapshot comparison -->
-      <div class="feat-row fade-up">
-        <div class="feat-row-text">
-          <div class="feat-row-num">03</div>
-          <div class="feat-row-title" data-i18n="feat3_title">Snapshot comparison</div>
-          <div class="feat-row-desc" data-i18n="feat3_text">See exactly what changed between two dates: added or updated components, applied patches, evolution of custom objects.</div>
-        </div>
-        <div class="feat-row-visual">
+        <!-- Panel 03 — Diff -->
+        <div class="feat-visual-panel" data-idx="2">
           <div class="feat-visual">
             <div class="fv-header">diff · PRD · Oct 14 → Nov 3</div>
             <div class="fv-diff-row fv-diff-updated">~ SAP_BASIS &nbsp;&nbsp;756.00 → 756.01</div>
@@ -892,16 +944,9 @@
             <div class="fv-diff-row fv-diff-same">&nbsp;= ZFINREP_V2 &nbsp;no change</div>
           </div>
         </div>
-      </div>
 
-      <!-- 04 — Multi-client -->
-      <div class="feat-row reverse fade-up">
-        <div class="feat-row-text">
-          <div class="feat-row-num">04</div>
-          <div class="feat-row-title" data-i18n="feat4_title">Multi-client, multi-system</div>
-          <div class="feat-row-desc" data-i18n="feat4_text">Manage multiple SAP clients from a single interface. Each scope is isolated, with its own agent tokens and assigned consultants.</div>
-        </div>
-        <div class="feat-row-visual">
+        <!-- Panel 04 — Landscape -->
+        <div class="feat-visual-panel" data-idx="3">
           <div class="feat-visual">
             <div class="fv-header">landscape · all clients</div>
             <div class="fv-client-row">
@@ -928,16 +973,9 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 05 — Isolation -->
-      <div class="feat-row fade-up">
-        <div class="feat-row-text">
-          <div class="feat-row-num">05</div>
-          <div class="feat-row-title" data-i18n="feat5_title">Isolation &amp; confidentiality</div>
-          <div class="feat-row-desc" data-i18n="feat5_text">Single-use agent tokens, read-only consultant access. Your SAP data stays within your perimeter — never exposed to the outside.</div>
-        </div>
-        <div class="feat-row-visual">
+        <!-- Panel 05 — Tokens -->
+        <div class="feat-visual-panel" data-idx="4">
           <div class="feat-visual">
             <div class="fv-header">agent tokens · Acme Corp</div>
             <div class="fv-token-row">
@@ -952,39 +990,32 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 06 — History -->
-      <div class="feat-row reverse fade-up">
-        <div class="feat-row-text">
-          <div class="feat-row-num">06</div>
-          <div class="feat-row-title" data-i18n="feat6_title">Continuous history</div>
-          <div class="feat-row-desc" data-i18n="feat6_text">Every snapshot is archived. Go back to any date, compare periods, track drift before it becomes an incident.</div>
-        </div>
-        <div class="feat-row-visual">
+        <!-- Panel 06 — History -->
+        <div class="feat-visual-panel" data-idx="5">
           <div class="feat-visual">
             <div class="fv-header">health score · PRD · 30 days</div>
             <div class="fv-sparkline">
               <div class="fv-spark lo" style="height:40%"></div>
               <div class="fv-spark lo" style="height:38%"></div>
-              <div class="fv-spark" style="height:50%"></div>
-              <div class="fv-spark" style="height:55%"></div>
-              <div class="fv-spark" style="height:60%"></div>
-              <div class="fv-spark" style="height:65%"></div>
-              <div class="fv-spark" style="height:70%"></div>
-              <div class="fv-spark" style="height:75%"></div>
-              <div class="fv-spark" style="height:72%"></div>
-              <div class="fv-spark" style="height:78%"></div>
+              <div class="fv-spark"    style="height:50%"></div>
+              <div class="fv-spark"    style="height:58%"></div>
+              <div class="fv-spark"    style="height:63%"></div>
+              <div class="fv-spark"    style="height:68%"></div>
+              <div class="fv-spark"    style="height:72%"></div>
+              <div class="fv-spark"    style="height:75%"></div>
+              <div class="fv-spark"    style="height:73%"></div>
+              <div class="fv-spark"    style="height:79%"></div>
               <div class="fv-spark hi" style="height:87%"></div>
               <div class="fv-spark hi" style="height:87%"></div>
             </div>
             <div class="fv-hist-row"><span class="fv-hist-date">Today</span><span class="fv-hist-score fv-ok">87</span></div>
             <div class="fv-hist-row"><span class="fv-hist-date">-7d &nbsp;</span><span class="fv-hist-score fv-ok">78</span></div>
-            <div class="fv-hist-row"><span class="fv-hist-date">-30d &nbsp;</span><span class="fv-hist-score fv-crit">38</span></div>
+            <div class="fv-hist-row"><span class="fv-hist-date">-30d</span><span class="fv-hist-score fv-crit">38</span></div>
           </div>
         </div>
-      </div>
 
+      </div>
     </div>
   </div>
 </div>
@@ -1925,6 +1956,57 @@
   })();
 
   // Lang dropdown
+  // ── Feature switcher ──────────────────────────────────────────────────────
+  (function () {
+    const items  = document.querySelectorAll('.feat-item');
+    const panels = document.querySelectorAll('.feat-visual-panel');
+    if (!items.length) return;
+    const DURATION = 4000;
+    let current = 0;
+    let timer   = null;
+
+    function activate(idx) {
+      items.forEach(i  => i.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      items[idx].classList.add('active');
+      panels[idx].classList.add('active');
+
+      // Restart progress bar animation
+      const prog = items[idx].querySelector('.feat-item-progress');
+      prog.style.transition = 'none';
+      prog.style.height = '0%';
+      prog.offsetHeight; // force reflow
+      prog.style.transition = 'height ' + DURATION + 'ms linear';
+      prog.style.height = '100%';
+
+      current = idx;
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(function () {
+        activate((current + 1) % items.length);
+      }, DURATION);
+    }
+
+    items.forEach(function (item) {
+      item.addEventListener('click', function () {
+        activate(parseInt(item.dataset.idx));
+        startTimer();
+      });
+    });
+
+    // Pause on hover
+    const switcher = document.querySelector('.feat-switcher');
+    if (switcher) {
+      switcher.addEventListener('mouseenter', function () { clearInterval(timer); });
+      switcher.addEventListener('mouseleave', function () { startTimer(); });
+    }
+
+    activate(0);
+    startTimer();
+  })();
+
   const dropdown = document.getElementById('lang-dropdown');
   const dropdownBtn = document.getElementById('lang-dropdown-btn');
   if (dropdown && dropdownBtn) {
