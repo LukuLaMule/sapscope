@@ -6,6 +6,7 @@ GET    /clients/{id}/snapshots — consultant JWT (read-only)
 GET    /clients/{id}/snapshots/{snap_id}
 """
 
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
@@ -188,7 +189,9 @@ async def ingest_snapshot(
             db.add(notif)
             await db.commit()
     except Exception:
-        pass
+        logging.getLogger(__name__).warning(
+            "Notification generation failed for %s/%s", client.id, sid, exc_info=True
+        )
 
     return SnapshotCreated(id=snap.id, received_at=snap.received_at)
 
