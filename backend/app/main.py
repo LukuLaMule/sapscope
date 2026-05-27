@@ -14,11 +14,10 @@ from slowapi.errors import RateLimitExceeded
 from sqlalchemy import delete
 
 from .database import engine
-from .license import validate as validate_license
 from .limiter import limiter
 from .models import Base, OnboardingToken, PasswordResetToken, User
 from .reporter import send_daily_reports
-from .routers import admin, analysis, auth, billing, diff, history, license_server, license_status, notes, snapshots
+from .routers import admin, analysis, auth, billing, diff, history, notes, snapshots
 from .routers.benchmarks import router as benchmarks_router
 from .routers.compliance import router as compliance_router
 from .routers.agent_logs import router as agent_logs_router
@@ -26,15 +25,10 @@ from .routers.heartbeat import router as heartbeat_router
 from .routers.notifications import router as notifications_router
 from .routers.reports import router as reports_router
 from .routers.trends import router as trends_router
-from .routers.trial import router as trial_router
 from .scheduled_reports import send_scheduled_reports
-from .trial_reminder import send_trial_reminders
 from .settings import settings
 
 logger = logging.getLogger(__name__)
-
-# Validate license at import time so it appears in startup logs
-license_info = validate_license(settings.license_key)
 
 
 async def _create_admin_if_needed() -> None:
@@ -81,15 +75,6 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     await _purge_expired_tokens()
     await _create_admin_if_needed()
-    if license_info.mode == "self-hosted":
-        if not license_info.is_valid:
-            logger.error("INVALID LICENSE: %s", license_info.warning)
-        elif license_info.warning:
-            logger.warning("LICENSE WARNING: %s", license_info.warning)
-        else:
-            logger.info(
-                "Self-hosted license OK — org=%s tier=%s", license_info.org, license_info.tier
-            )
 
     # Rapport journalier automatique
     scheduler = AsyncIOScheduler(timezone=settings.report_tz)
@@ -104,12 +89,6 @@ async def lifespan(app: FastAPI):
             "Rapport journalier activé — envoi chaque jour à %02dh00 (%s)",
             settings.report_hour, settings.report_tz,
         )
-    scheduler.add_job(
-        send_trial_reminders,
-        CronTrigger(hour=9, minute=0),
-        id="trial_reminders",
-        replace_existing=True,
-    )
     scheduler.add_job(
         send_scheduled_reports,
         CronTrigger(minute=0),
@@ -175,25 +154,12 @@ app.include_router(history.router)
 app.include_router(notes.router)
 app.include_router(admin.router)
 app.include_router(billing.router)
-app.include_router(license_status.router)
-app.include_router(trial_router)
 app.include_router(notifications_router)
 app.include_router(reports_router)
 app.include_router(agent_logs_router)
 app.include_router(heartbeat_router)
-if settings.is_license_server:
-    app.include_router(license_server.router)
 
 
 @app.get("/healthz", tags=["ops"])
 async def healthz():
-    info: dict = {"status": "ok", "mode": license_info.mode}
-    if license_info.mode == "self-hosted":
-        info["license"] = {
-            "org":   license_info.org,
-            "tier":  license_info.tier,
-            "valid": license_info.is_valid,
-        }
-        if license_info.warning:
-            info["license"]["warning"] = license_info.warning
-    return info
+    return {"status": "ok"}

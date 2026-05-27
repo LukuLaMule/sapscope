@@ -79,7 +79,6 @@ Stack : **Python 3.12** · **FastAPI** · **PostgreSQL** · **React 18 + TypeScr
 - Docker + Docker Compose v2
 - Une clé API Anthropic ([console.anthropic.com](https://console.anthropic.com))
 - Un reverse proxy avec TLS (Traefik, nginx, Caddy…)
-- Une clé de licence SAPscope — demandez un **essai gratuit 30 jours** à [pro@luku.fr](mailto:pro@luku.fr?subject=SAPscope%20Trial)
 
 ### 1 — Cloner et configurer
 
@@ -95,7 +94,6 @@ cp deploy/.env.example .env
 POSTGRES_PASSWORD=a-changer
 SAPSCOPE_JWT_SECRET=chaine-aleatoire-32-caracteres-minimum
 ANTHROPIC_API_KEY=sk-ant-...
-LICENSE_KEY=<votre-cle-dessai>
 ALLOWED_ORIGINS=https://votre-domaine.com
 ```
 
@@ -248,7 +246,6 @@ Depuis l'interface web (onglet Admin — comptes `is_admin` uniquement) :
 | `DATABASE_URL` | oui | URL PostgreSQL asyncpg |
 | `SAPSCOPE_JWT_SECRET` | oui | Secret JWT — min. 32 caractères |
 | `ANTHROPIC_API_KEY` | oui | Clé API Anthropic pour les analyses IA |
-| `LICENSE_KEY` | oui | JWT de licence émis par SAPscope |
 | `REGISTRATION_ENABLED` | non | `true` = inscription ouverte. Défaut : `false` |
 | `ALLOWED_ORIGINS` | non | Origines CORS autorisées |
 | `ENV` | non | `development` active les logs SQL et `/docs` |

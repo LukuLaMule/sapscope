@@ -23,8 +23,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..mailer import send_license_email, send_welcome_email
-from ..models import AgentToken, Client, License, OnboardingToken, Subscription, User, UserClient
+from ..mailer import send_welcome_email
+from ..models import AgentToken, Client, OnboardingToken, Subscription, User, UserClient
 from ..settings import settings
 
 logger = logging.getLogger(__name__)
@@ -118,11 +118,6 @@ def _attr(obj, *keys, default=None):
 
 
 async def _handle_checkout_completed(session, db: AsyncSession) -> None:
-    checkout_type = _attr(session, "metadata", "checkout_type", default="saas")
-    if checkout_type == "self_hosted_license":
-        await _handle_self_hosted_license_checkout(session, db)
-        return
-
     user_id = _attr(session, "client_reference_id") or _attr(session, "metadata", "user_id")
     tier    = _attr(session, "metadata", "tier", default="solo")
 
@@ -186,71 +181,6 @@ async def _handle_checkout_completed(session, db: AsyncSession) -> None:
             tier=tier,
             client_name=client_name,
             agent_token=plaintext,
-        )
-    )
-
-
-async def _handle_self_hosted_license_checkout(session, db: AsyncSession) -> None:
-    """Génère et envoie une licence JWT self-hosted après paiement Stripe."""
-    email   = _attr(session, "customer_email") or _attr(session, "metadata", "email", default="")
-    plan    = _attr(session, "metadata", "plan", default="solo")
-    months  = int(_attr(session, "metadata", "months", default=12))
-    org     = _attr(session, "metadata", "org", default="")
-
-    if not email:
-        logger.error("self_hosted_license checkout: email manquant (session %s)", _attr(session, "id"))
-        return
-
-    if not settings.license_private_key:
-        logger.error("LICENSE_PRIVATE_KEY_B64 non configuré — impossible de générer la licence pour %s", email)
-        return
-
-    plan_limits = {
-        "solo":       {"max_users": 1,   "max_clients": 3},
-        "team":       {"max_users": 5,   "max_clients": 20},
-        "enterprise": {"max_users": -1,  "max_clients": -1},
-    }
-    limits = plan_limits.get(plan, plan_limits["solo"])
-
-    now        = datetime.now(tz=timezone.utc)
-    expires_at = now + timedelta(days=months * 30)
-
-    payload = {
-        "sub":         email,
-        "org":         org or email,
-        "tier":        plan,
-        "max_users":   limits["max_users"],
-        "max_clients": limits["max_clients"],
-        "exp":         int(expires_at.timestamp()),
-        "iat":         int(now.timestamp()),
-    }
-
-    license_key = jwt.encode(payload, settings.license_private_key, algorithm="RS256")
-
-    # Idempotency — skip if already issued for this email+plan
-    existing = await db.execute(select(License).where(License.email == email, License.plan == plan))
-    if existing.scalar_one_or_none():
-        logger.warning("Licence déjà émise pour %s (plan=%s), ignorée", email, plan)
-        return
-
-    db.add(License(
-        key=license_key,
-        email=email,
-        plan=plan,
-        expires_at=expires_at,
-        active=True,
-    ))
-    await db.commit()
-    logger.info("Licence self-hosted générée pour %s (plan=%s, expires=%s)", email, plan, expires_at.date())
-
-    expires_str = expires_at.strftime("%d/%m/%Y")
-    asyncio.create_task(
-        send_license_email(
-            to_email=email,
-            plan=plan,
-            license_key=license_key,
-            expires_at=expires_str,
-            org=org,
         )
     )
 
