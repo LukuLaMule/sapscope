@@ -19,6 +19,7 @@ services:
       - internal
 
   backend:
+    image: ghcr.io/lukulamule/sapscope-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -63,13 +64,15 @@ services:
       - internal
 
   frontend:
-    image: nginx:alpine
+    image: ghcr.io/lukulamule/sapscope-frontend:latest
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
       - backend
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
-      - ./frontend-react/dist:/usr/share/nginx/react-app:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - web
