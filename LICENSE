@@ -1,0 +1,19 @@
+Copyright (c) 2026 SAPscope — Lucas Lautrec (pro@luku.fr)
+
+Source Available License
+
+Permission is hereby granted to any person to:
+  - Read, study, and fork this source code for personal or educational purposes
+  - Deploy SAPscope on your own infrastructure using the provided Docker images
+    or by building from source, for internal use within your organization
+
+The following are NOT permitted without prior written permission:
+  - Redistribution of this software or substantial portions of it
+  - Sublicensing, selling, or offering this software as a commercial service
+  - Modifying and redistributing a derived version under a different name
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.
+
+For commercial licensing or partnership inquiries: pro@luku.fr

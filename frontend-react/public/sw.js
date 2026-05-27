@@ -1,4 +1,4 @@
-const CACHE = 'sapscope-v1';
+const CACHE = 'sapscope-v2';
 const APP_SHELL = ['/', '/index.html'];
 
 self.addEventListener('install', e => {
@@ -14,9 +14,13 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Ne pas intercepter les appels API
+  // Ne pas intercepter les appels API ni les assets Vite (déjà versionnés par hash)
   if (e.request.url.includes('/api/')) return;
+  if (e.request.url.includes('/assets/')) return;
+
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request)
+      .then(cached => cached || fetch(e.request))
+      .catch(() => caches.match('/index.html'))
   );
 });

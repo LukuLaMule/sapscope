@@ -34,11 +34,8 @@
     "description": "SAP landscape monitoring and diagnostics tool. Automatic metadata collection and AI-powered analysis.",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
-    "offers": [
-      { "@type": "Offer", "name": "Solo", "price": "490", "priceCurrency": "EUR", "eligibleQuantity": { "@type": "QuantitativeValue", "value": 1, "unitText": "year" } },
-      { "@type": "Offer", "name": "Team", "price": "1490", "priceCurrency": "EUR", "eligibleQuantity": { "@type": "QuantitativeValue", "value": 1, "unitText": "year" } },
-      { "@type": "Offer", "name": "Enterprise", "availability": "https://schema.org/OnlineOnly", "description": "Custom pricing — contact us" }
-    ]
+    "license": "https://github.com/LukuLaMule/sapscope/blob/main/LICENSE",
+    "isAccessibleForFree": true
   }
   </script>
 
@@ -571,89 +568,6 @@
     .faq-a-inner a { color: var(--accent); }
     .faq-item.open .faq-a { max-height: 400px; }
 
-    /* ── PRICING ──────────────────────────────────────────────────────────── */
-    .pricing-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-      align-items: start;
-    }
-    .pricing-card {
-      background: var(--card); border: 1px solid var(--border-2);
-      border-radius: var(--r); padding: 36px; position: relative;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .pricing-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,.35); }
-    .pricing-card.featured {
-      background: linear-gradient(160deg, rgba(41,151,255,.1) 0%, rgba(41,151,255,.04) 100%);
-      border-color: rgba(41,151,255,.55);
-      box-shadow: 0 0 48px rgba(41,151,255,.2), 0 20px 60px rgba(0,0,0,.35);
-      transform: scale(1.04);
-    }
-    .pricing-card.featured:hover { transform: scale(1.04) translateY(-5px); }
-    .pricing-popular {
-      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-      font-size: 11px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: #fff;
-      background: linear-gradient(90deg, #4a9eff, #5b5bd6); padding: 5px 18px; border-radius: 8px;
-      white-space: nowrap; box-shadow: 0 4px 16px rgba(41,151,255,.4);
-    }
-    .pricing-tier { font-size: 13px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .1em; color: var(--fg-3); margin-bottom: 20px; }
-    .pricing-tier-featured { color: #4a9eff; }
-    .pricing-price { margin-bottom: 8px; }
-    .pricing-amount { font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
-    .pricing-amount span { font-size: 22px; font-weight: 500; color: var(--fg-2); vertical-align: top; margin-top: 10px; display: inline-block; }
-    .pricing-amount-custom { font-size: 36px; letter-spacing: -1px; }
-    .pricing-period { font-size: 14px; color: var(--fg-3); margin-top: 4px; }
-    .pricing-save { display: inline-block; font-size: 11px; font-weight: 700;
-      color: #34d399; background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.25);
-      padding: 2px 8px; border-radius: 6px; margin-top: 6px; letter-spacing: .03em; }
-    .pricing-desc { font-size: 15px; color: var(--fg-2); line-height: 1.6; margin: 20px 0; }
-    .pricing-divider { border: none; border-top: 1px solid var(--border-2); margin: 20px 0; }
-    .pricing-cta {
-      display: block; width: 100%; text-align: center;
-      padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600;
-      transition: opacity .2s, transform .2s; margin-bottom: 28px;
-    }
-    .pricing-cta-primary {
-      background: linear-gradient(135deg, #4a9eff 0%, #5b5bd6 100%);
-      color: #fff; box-shadow: 0 4px 20px rgba(41,151,255,.35);
-    }
-    .pricing-cta-secondary { background: transparent; border: 1px solid var(--border); color: var(--fg); }
-    .pricing-cta:hover { opacity: .88; transform: scale(1.02); }
-    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 11px; }
-    .pricing-features li { font-size: 14px; color: var(--fg-2); display: flex; align-items: center; gap: 10px; }
-    .pricing-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
-    .pricing-trust {
-      display: flex; justify-content: center; align-items: center;
-      gap: 36px; margin-top: 32px; flex-wrap: wrap;
-    }
-    .pricing-trust-item {
-      font-size: 13px; color: var(--fg-3);
-      display: flex; align-items: center; gap: 7px;
-    }
-    .pricing-trust-item::before { content: '✓'; color: var(--green); font-weight: 700; }
-
-    /* ── FINAL CTA ────────────────────────────────────────────────────────── */
-    .cta-section {
-      text-align: center; padding: 120px 24px;
-      background: var(--bg-2);
-      border-top: 1px solid var(--border-2);
-    }
-    .cta-section h2 {
-      font-size: clamp(36px, 5vw, 64px); font-weight: 800;
-      letter-spacing: -2px; margin-bottom: 20px;
-      color: #fff;
-    }
-    :root:not(.light) .cta-section h2 {
-      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,.6) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    :root.light .cta-section h2 {
-      color: #0d1f38;
-    }
-    .cta-section p { font-size: 18px; color: var(--fg-2); margin-bottom: 44px; }
-    .cta-section small { display: block; margin-top: 20px; font-size: 13px; color: var(--fg-3); }
-
     /* ── FOOTER ───────────────────────────────────────────────────────────── */
     footer {
       border-top: 1px solid var(--border-2);
@@ -670,50 +584,6 @@
     .footer-links a { font-size: 13px; color: var(--fg-3); transition: color .2s; }
     .footer-links a:hover { color: var(--fg); }
     .footer-copy { font-size: 13px; color: var(--fg-3); }
-
-    /* ── FREE TRIAL FORM ─────────────────────────────────────────────────── */
-    #trial { background: var(--bg-2); border-top: 1px solid var(--border-2); }
-    .trial-card {
-      max-width: 480px; margin: 0 auto;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 44px 40px;
-      box-shadow: 0 0 48px rgba(74,158,255,.08), 0 24px 64px rgba(0,0,0,.35);
-    }
-    .trial-form { display: flex; flex-direction: column; gap: 14px; margin-top: 32px; }
-    .trial-input {
-      width: 100%; padding: 13px 16px;
-      background: rgba(255,255,255,.05); border: 1px solid var(--border);
-      border-radius: 10px; color: var(--fg);
-      font-family: 'IBM Plex Sans', sans-serif; font-size: 15px;
-      transition: border-color .2s, background .2s;
-      outline: none;
-    }
-    .trial-input::placeholder { color: var(--fg-3); }
-    .trial-input:focus { border-color: rgba(74,158,255,.55); background: rgba(74,158,255,.06); }
-    .trial-btn {
-      width: 100%; padding: 15px;
-      background: linear-gradient(135deg, #4a9eff 0%, #5b5bd6 100%);
-      color: #fff; border: none; border-radius: 10px;
-      font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 600;
-      cursor: pointer; margin-top: 4px;
-      transition: opacity .2s, transform .2s;
-      box-shadow: 0 4px 20px rgba(74,158,255,.35);
-    }
-    .trial-btn:hover:not(:disabled) { opacity: .88; transform: scale(1.02); }
-    .trial-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-    .trial-success {
-      display: none; text-align: center; padding: 20px 0 4px;
-      font-size: 17px; font-weight: 600; color: var(--green); line-height: 1.5;
-    }
-    .trial-error {
-      display: none;
-      padding: 12px 16px; border-radius: 8px;
-      background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.25);
-      color: var(--red); font-size: 14px; text-align: center;
-    }
-    @media (max-width: 560px) {
-      .trial-card { padding: 32px 20px; }
-    }
 
     /* ── ANIMATIONS ───────────────────────────────────────────────────────── */
     .fade-up {
@@ -755,16 +625,9 @@
       .stats-inner { grid-template-columns: 1fr; gap: 24px; }
       .stat-value { font-size: 40px; }
 
-      /* Pricing */
-      .pricing-grid { grid-template-columns: 1fr; }
-      .pricing-card.featured { transform: none; }
-
       /* Steps */
       .step-title { font-size: 28px; }
       .step-text { font-size: 15px; }
-
-      /* CTA final */
-      .cta-section { padding: 72px 20px; }
 
       /* Footer */
       .footer-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
@@ -777,9 +640,7 @@
       .section-title { font-size: 30px; letter-spacing: -1px; }
       .section-sub { font-size: 15px; }
       .stat-value { font-size: 36px; }
-      .pricing-card { padding: 28px 22px; }
       .mockup-app { height: 180px; }
-      .trial-card { padding: 28px 20px; }
     }
     .lang-dropdown { position: relative; }
     .lang-dropdown-btn {
@@ -811,33 +672,6 @@
     .lang-dropdown-item:hover { background: rgba(74,158,255,.08); color: var(--fg); }
     .lang-dropdown-item.active { color: var(--accent); }
 
-    /* ── PRICING TOGGLE ──────────────────────────────────────────────────────── */
-    .pricing-toggle {
-      display: flex; align-items: center; justify-content: center;
-      gap: 12px; margin-bottom: 48px;
-    }
-    .pricing-toggle-track {
-      position: relative; width: 48px; height: 26px;
-      background: var(--border-2); border-radius: 13px;
-      cursor: pointer; transition: background .25s;
-      border: 1px solid var(--border);
-    }
-    .pricing-toggle-track.annual { background: var(--accent); }
-    .pricing-toggle-thumb {
-      position: absolute; top: 3px; left: 3px;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: #fff; transition: transform .25s;
-    }
-    .pricing-toggle-track.annual .pricing-toggle-thumb { transform: translateX(22px); }
-    .pricing-toggle-label {
-      font-size: 14px; font-weight: 500; color: var(--fg-2); transition: color .2s;
-    }
-    .pricing-toggle-label.active { color: var(--fg); font-weight: 600; }
-    .pricing-save-badge {
-      font-size: 11px; font-weight: 700; color: var(--green);
-      background: rgba(45,212,160,.1); border: 1px solid rgba(45,212,160,.25);
-      padding: 2px 8px; border-radius: 6px; margin-left: 4px;
-    }
   </style>
 </head>
 <body>
@@ -849,9 +683,7 @@
     <div class="nav-links">
       <a href="#features" data-i18n="nav_features">Features</a>
       <a href="#how" data-i18n="nav_how">How it works</a>
-      <a href="#trial" data-i18n="nav_trial">Free Trial</a>
-      <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
-      <a href="https://app.sapscope.com/docs" data-i18n="nav_docs">Documentation</a>
+      <a href="/docs" data-i18n="nav_docs">Documentation</a>
     </div>
     <div class="nav-cta">
       <div class="lang-dropdown" id="lang-dropdown">
@@ -875,8 +707,9 @@
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
       </button>
-      <a href="https://app.sapscope.com" class="btn-ghost" data-i18n="nav_signin">Sign in</a>
-      <a href="https://app.sapscope.com" class="btn-nav-primary" data-i18n="nav_cta">Free trial →</a>
+      <a href="https://github.com/LukuLaMule/sapscope" target="_blank" rel="noopener" class="btn-ghost" data-i18n="nav_github">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="display:inline;vertical-align:-2px;margin-right:5px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg><span data-i18n="nav_github">GitHub</span>
+      </a>
     </div>
     <button class="nav-mobile-toggle" id="nav-toggle" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -895,8 +728,8 @@
   <p data-i18n="hero_p">SAPscope automatically collects data from your SAP systems and generates precise architecture diagnostics powered by AI. In seconds.</p>
 
   <div class="hero-actions">
-    <a href="https://app.sapscope.com" class="btn-hero-primary" data-i18n="hero_cta1">Get started for free →</a>
-    <a href="#features" class="btn-hero-ghost" data-i18n="hero_cta2">Discover features</a>
+    <a href="https://github.com/LukuLaMule/sapscope" target="_blank" rel="noopener" class="btn-hero-primary" data-i18n="hero_cta1">★ View on GitHub →</a>
+    <a href="mailto:pro@luku.fr?subject=SAPscope%20Trial" class="btn-hero-ghost" data-i18n="hero_cta2">Request a licence key</a>
   </div>
 
   <!-- CSS Mockup -->
@@ -905,7 +738,7 @@
       <div class="dot dot-r"></div>
       <div class="dot dot-y"></div>
       <div class="dot dot-g"></div>
-      <div class="mockup-url">app.sapscope.com</div>
+      <div class="mockup-url">sapscope.luku.fr</div>
     </div>
     <div class="mockup-app" style="position:relative">
       <!-- Topbar -->
@@ -1181,11 +1014,10 @@
           <p class="step-text" data-i18n="step1_text">The pyrfc agent runs on any server — your monitoring server, a VM, or a Docker container — and connects to SAP via RFC on port 33XX. No software installed on SAP servers. No inbound connection required.</p>
         </div>
         <div class="step-visual">
-          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">curl -O https://app.sapscope.com/dist/agent.tar.gz</span></div>
-          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">tar -xzf agent.tar.gz && cd sap-agent</span></div>
-          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">pip install -r requirements.txt</span></div>
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">git clone https://github.com/LukuLaMule/sapscope.git</span></div>
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">cd sapscope/agent && pip install -r requirements.txt</span></div>
           <div class="code-line"><span class="code-prompt">$</span><span class="code-comment"># SAPSCOPE_TOKEN=your_token_here</span></div>
-          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">python agent.py --once</span></div>
+          <div class="code-line"><span class="code-prompt">$</span><span class="code-cmd">python -m agent --dry-run</span></div>
           <div class="code-line"><span class="code-prompt" style="color:#2dd4a0">✓</span><span style="color:#2dd4a0;font-family:monospace;font-size:13px" data-i18n="mock_snapshot_ok">Snapshot sent — PRD, 47 components</span></div>
         </div>
       </div>
@@ -1276,7 +1108,7 @@
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq3_a">
-          Less than <strong>10 minutes</strong>. Once your subscription is activated, you receive an API key. Simply copy-paste the agent installation command on any server with network access to SAP and enter the key. That's it.
+          Less than <strong>10 minutes</strong>. Clone the repo, copy-paste <code>deploy/.env.example</code> to <code>.env</code>, run <code>docker compose up -d</code>. Then install the agent on any server with RFC access to SAP. That's it.
         </div></div>
       </div>
 
@@ -1306,7 +1138,7 @@
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq6_a">
-          Yes, no commitment, no fees. You can cancel from your account or by contacting us at <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. Cancellation takes effect at the end of the current period. We also offer a <strong>14-day money-back guarantee</strong>.
+          SAPscope is <strong>self-hosted</strong> — you own the deployment. Your licence key activates the AI analysis engine. If you need a new key or want to change plans, contact us at <a href="mailto:pro@luku.fr">pro@luku.fr</a>.
         </div></div>
       </div>
 
@@ -1316,7 +1148,7 @@
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-a"><div class="faq-a-inner" data-i18n-html="faq7_a">
-          Yes, <strong>SAPscope is exclusively self-hosted</strong> — your SAP data never leaves your infrastructure. You install SAPscope with Docker Compose on your own server. <a href="mailto:contact@sapscope.fr">Contact us</a> for a custom quote.
+          Yes, <strong>SAPscope is exclusively self-hosted</strong> — your SAP data never leaves your infrastructure. You install SAPscope with Docker Compose on your own server. <a href="mailto:pro@luku.fr">Contact us</a> for a custom quote.
         </div></div>
       </div>
 
@@ -1354,151 +1186,19 @@
   </div>
 </div>
 
-<!-- ── FREE TRIAL ────────────────────────────────────────────────────────────── -->
+<!-- ── GET STARTED ───────────────────────────────────────────────────────────── -->
 <div id="trial">
   <div class="section">
-    <div class="section-eyebrow fade-up" data-i18n="trial_eyebrow">Free Trial</div>
-    <h2 class="section-title fade-up" data-i18n="trial_title">Try SAPscope free for 30 days</h2>
-    <p class="section-sub fade-up" data-i18n="trial_sub">Self-hosted on your servers. No credit card required.</p>
-
-    <div class="trial-card fade-up">
-      <form class="trial-form" id="trial-form" novalidate>
-        <input
-          class="trial-input"
-          type="text"
-          id="trial-name"
-          name="name"
-          autocomplete="name"
-          data-i18n-placeholder="trial_name_placeholder"
-          placeholder="Your name (optional)"
-        >
-        <input
-          class="trial-input"
-          type="text"
-          id="trial-org"
-          name="org"
-          autocomplete="organization"
-          required
-          data-i18n-placeholder="trial_org_placeholder"
-          placeholder="Company name"
-        >
-        <input
-          class="trial-input"
-          type="email"
-          id="trial-email"
-          name="email"
-          autocomplete="email"
-          required
-          data-i18n-placeholder="trial_email_placeholder"
-          placeholder="Professional email"
-        >
-        <div class="trial-error" id="trial-error-msg"></div>
-        <button type="submit" class="trial-btn" id="trial-submit-btn" data-i18n="trial_btn">Get my free trial →</button>
-      </form>
-      <div class="trial-success" id="trial-success-msg" data-i18n="trial_success">✓ Check your email! Your trial kit is on its way.</div>
+    <div class="section-eyebrow fade-up" data-i18n="trial_eyebrow">Get started</div>
+    <h2 class="section-title fade-up" data-i18n="trial_title">Self-hosted. Deploy in 5 minutes.</h2>
+    <p class="section-sub fade-up" data-i18n="trial_sub">Clone the repo, fill in your <code>.env</code>, run <code>docker compose up</code>. Your data never leaves your servers.</p>
+    <div class="hero-actions fade-up" style="justify-content:center;margin-top:32px">
+      <a href="https://github.com/LukuLaMule/sapscope" target="_blank" rel="noopener" class="btn-hero-primary" data-i18n="trial_btn">★ View on GitHub →</a>
+      <a href="mailto:pro@luku.fr?subject=SAPscope%20Trial" class="btn-hero-ghost" data-i18n="trial_contact">Request a licence key</a>
     </div>
   </div>
 </div>
 
-<!-- ── PRICING ────────────────────────────────────────────────────────────────── -->
-<div id="pricing">
-  <div class="section">
-    <div class="section-eyebrow fade-up" data-i18n="pricing_eyebrow">Pricing</div>
-    <h2 class="section-title fade-up" data-i18n="pricing_title">Self-hosted. Your data stays on your servers.</h2>
-    <p class="section-sub fade-up" data-i18n="pricing_sub">Annual license. Deploy in 5 minutes with Docker. No cloud dependency.</p>
-
-    <div class="pricing-toggle fade-up">
-      <span class="pricing-toggle-label" id="toggle-label-monthly" data-i18n="pricing_toggle_monthly">Monthly</span>
-      <div class="pricing-toggle-track annual" id="pricing-toggle-track" onclick="togglePricing()">
-        <div class="pricing-toggle-thumb"></div>
-      </div>
-      <span class="pricing-toggle-label active" id="toggle-label-annual"><span data-i18n="pricing_toggle_annual">Annual</span> <span class="pricing-save-badge" data-i18n="pricing_save_badge">Save 17%</span></span>
-    </div>
-
-    <div class="pricing-grid">
-      <!-- Solo -->
-      <div class="pricing-card fade-up">
-        <div class="pricing-tier">Solo</div>
-        <div class="pricing-price">
-          <div class="pricing-amount"><span>€</span><span data-annual="490" data-monthly="59" class="price-val">490</span></div>
-          <div class="pricing-period price-period" data-i18n="pricing_per_month">per year</div>
-        </div>
-        <p class="pricing-desc" data-i18n="solo_desc">For independent SAP Basis consultants monitoring their own clients.</p>
-        <a href="mailto:contact@sapscope.fr?subject=Solo%20License" class="pricing-cta pricing-cta-secondary" data-i18n="solo_cta">Get a license →</a>
-        <hr class="pricing-divider">
-        <ul class="pricing-features">
-          <li data-i18n="solo_f1">1 user</li>
-          <li data-i18n="solo_f2">Up to 3 SAP systems</li>
-          <li data-i18n="solo_f3">Self-hosted deployment</li>
-          <li data-i18n="solo_f4">Full history &amp; diff</li>
-          <li data-i18n="solo_f5">PDF client reports</li>
-          <li data-i18n="solo_f6">Email support</li>
-        </ul>
-      </div>
-
-      <!-- Team -->
-      <div class="pricing-card featured fade-up delay-1">
-        <div class="pricing-popular" data-i18n="pricing_popular">⭐ Most popular</div>
-        <div class="pricing-tier pricing-tier-featured">Team</div>
-        <div class="pricing-price">
-          <div class="pricing-amount"><span>€</span><span data-annual="1490" data-monthly="149" class="price-val">1 490</span></div>
-          <div class="pricing-period price-period" data-i18n="pricing_per_month">per year</div>
-        </div>
-        <p class="pricing-desc" data-i18n="team_desc">For SAP consulting firms managing multiple client landscapes.</p>
-        <a href="mailto:contact@sapscope.fr?subject=Team%20License" class="pricing-cta pricing-cta-primary" data-i18n="team_cta">Get a license →</a>
-        <hr class="pricing-divider">
-        <ul class="pricing-features">
-          <li data-i18n="team_f1">5 users</li>
-          <li data-i18n="team_f2">Up to 20 SAP systems</li>
-          <li data-i18n="team_f3">Self-hosted deployment</li>
-          <li data-i18n="team_f4">Full history &amp; diff</li>
-          <li data-i18n="team_f5">PDF reports with client logo</li>
-          <li data-i18n="team_f6">HANA HSR monitoring</li>
-          <li data-i18n="team_f7">Priority email support</li>
-          <li data-i18n="team_f8">30-day trial available</li>
-        </ul>
-      </div>
-
-      <!-- Enterprise -->
-      <div class="pricing-card fade-up delay-2">
-        <div class="pricing-tier">Enterprise</div>
-        <div class="pricing-price">
-          <div class="pricing-amount pricing-amount-custom" data-i18n="ent_price">Custom</div>
-          <div class="pricing-period" data-i18n="ent_period">annual quote</div>
-        </div>
-        <p class="pricing-desc" data-i18n="ent_desc">For large ESNs with compliance requirements and dedicated infrastructure.</p>
-        <a href="mailto:contact@sapscope.fr?subject=Enterprise%20Quote" class="pricing-cta pricing-cta-secondary" data-i18n="ent_cta">Contact us →</a>
-        <hr class="pricing-divider">
-        <ul class="pricing-features">
-          <li data-i18n="ent_f1">Unlimited users</li>
-          <li data-i18n="ent_f2">Unlimited SAP systems</li>
-          <li data-i18n="ent_f3">Self-hosted deployment</li>
-          <li data-i18n="ent_f4">White-label (your logo)</li>
-          <li data-i18n="ent_f5">SSO / Active Directory</li>
-          <li data-i18n="ent_f6">Guaranteed SLA</li>
-          <li data-i18n="ent_f7">Dedicated support</li>
-          <li data-i18n="ent_f8">Perpetual license option</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Trust signals -->
-    <div class="pricing-trust fade-up">
-      <span class="pricing-trust-item" data-i18n="trust1">Data stays on your servers</span>
-      <span class="pricing-trust-item" data-i18n="trust2">Deploy in 5 min with Docker</span>
-      <span class="pricing-trust-item" data-i18n="trust3">30-day free trial on Team</span>
-      <span class="pricing-trust-item" data-i18n="trust4">Annual license, support included</span>
-    </div>
-  </div>
-</div>
-
-<!-- ── FINAL CTA ───────────────────────────────────────────────────────────────── -->
-<div class="cta-section">
-  <h2 class="fade-up" data-i18n-html="cta_title">Ready to finally see<br>clearly in your SAP?</h2>
-  <p class="fade-up" data-i18n="cta_p">Instant activation. Your first results in under 5 minutes.</p>
-  <a href="https://app.sapscope.com" class="btn-hero-primary fade-up" data-i18n="cta_btn">Create my account →</a>
-  <small class="fade-up"><span data-i18n="cta_already">Already have an account?</span> <a href="https://app.sapscope.com" style="color:var(--accent)" data-i18n="cta_signin">Sign in →</a></small>
-</div>
 
 <!-- ── FOOTER ──────────────────────────────────────────────────────────────────── -->
 <footer>
@@ -1506,14 +1206,9 @@
     <div class="footer-logo">SAP<span>scope</span></div>
     <div class="footer-links">
       <a href="#features" data-i18n="foot_features">Features</a>
-      <a href="#pricing" data-i18n="foot_pricing">Pricing</a>
-      <a href="https://app.sapscope.com/docs" data-i18n="foot_docs">Documentation</a>
-      <a href="https://app.sapscope.com" data-i18n="foot_app">Application</a>
-      <a href="mailto:contact@sapscope.com" data-i18n="foot_contact">Contact</a>
-      <a href="/legal.html" data-i18n="foot_legal">Mentions légales</a>
-      <a href="/privacy.html" data-i18n="foot_privacy">Confidentialité</a>
-      <a href="/terms.html" data-i18n="foot_terms">CGU</a>
-      <a href="/sales.html" data-i18n="foot_cgv">CGV</a>
+      <a href="/docs" data-i18n="foot_docs">Documentation</a>
+      <a href="https://github.com/LukuLaMule/sapscope" target="_blank" rel="noopener" data-i18n="foot_github">GitHub</a>
+      <a href="mailto:pro@luku.fr" data-i18n="foot_contact">Contact</a>
     </div>
     <div class="footer-copy" data-i18n="foot_copy">© 2026 SAPscope. All rights reserved.</div>
   </div>
@@ -1570,16 +1265,13 @@
       og_locale: 'en_US',
       nav_features: 'Features',
       nav_how: 'How it works',
-      nav_trial: 'Free Trial',
-      nav_pricing: 'Pricing',
       nav_docs: 'Documentation',
-      nav_signin: 'Sign in',
-      nav_cta: 'Free trial →',
-      hero_badge: 'Open Beta — free access',
+      nav_github: 'GitHub',
+      hero_badge: 'Open Source — self-hosted',
       hero_h1: 'Master your<br>SAP landscape.',
       hero_p: 'SAPscope automatically collects data from your SAP systems and generates precise architecture diagnostics powered by AI. In seconds.',
-      hero_cta1: 'Get started for free →',
-      hero_cta2: 'Discover features',
+      hero_cta1: '★ View on GitHub →',
+      hero_cta2: 'Request a licence key',
       stat1_lbl: 'To analyze a complete system',
       stat2_lbl: 'Automated — zero manual input',
       stat3_lbl: 'Components, patches, custom objects',
@@ -1639,89 +1331,30 @@
       faq2_q: 'Does my SAP data leave my infrastructure?',
       faq2_a: 'No. The agent runs <strong>on your infrastructure</strong> and only sends SAPscope <strong>anonymized technical metrics</strong> (performance, jobs, system logs). No business data, no table content is ever transmitted.',
       faq3_q: 'How long does installation take?',
-      faq3_a: "Less than <strong>10 minutes</strong>. Once your subscription is activated, you receive an API key. Simply copy-paste the agent installation command on any server with network access to SAP and enter the key. That's it.",
+      faq3_a: "Less than <strong>10 minutes</strong>. Clone the repo, copy-paste <code>deploy/.env.example</code> to <code>.env</code>, run <code>docker compose up -d</code>. Then install the agent on any server with RFC access to SAP. That's it.",
       faq4_q: 'What SAP authorizations does the agent need?',
       faq4_a: 'A <strong>System (A) type</strong> user with a minimal read-only authorization profile. We provide an ABAP program <code>ZSAPSCOPE_SETUP</code> that creates the user and assigns exactly the required authorizations. See the <a href="/docs#sap-rfc-user-setup">RFC guide</a>.',
       faq5_q: 'Does the AI have access to my business data?',
       faq5_a: 'No. AI diagnostics are based <strong>only on technical metrics</strong>: system performance, background job statuses, error logs. No table data (customers, orders, accounting…) is ever transmitted to the model.',
-      faq6_q: 'Can I cancel at any time?',
-      faq6_a: 'Yes, no commitment, no fees. You can cancel from your account or by contacting us at <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. Cancellation takes effect at the end of the current period. We also offer a <strong>14-day money-back guarantee</strong>.',
+      faq6_q: 'How does the licence work?',
+      faq6_a: 'SAPscope is <strong>self-hosted</strong> — you own the deployment. Your licence key activates the AI analysis engine. If you need a new key or want to change plans, contact us at <a href="mailto:pro@luku.fr">pro@luku.fr</a>.',
       faq7_q: 'Is there an on-premise / self-hosted option?',
-      faq7_a: 'Yes, <strong>SAPscope is exclusively self-hosted</strong> — your SAP data never leaves your infrastructure. You install SAPscope with Docker Compose on your own server. <a href="mailto:contact@sapscope.fr">Contact us</a> for a custom quote.',
+      faq7_a: 'Yes, <strong>SAPscope is exclusively self-hosted</strong> — your SAP data never leaves your infrastructure. You install SAPscope with Docker Compose on your own server. <a href="mailto:pro@luku.fr">Contact us</a> for a custom quote.',
       faq8_q: 'How often does the agent collect data?',
       faq8_a: 'By default, the agent runs <strong>once every 24 hours</strong> via a systemd timer. You can adjust this interval — hourly collection is supported for critical systems. Each run takes under 30 seconds and has negligible impact on system performance.',
       faq9_q: 'Does SAPscope work behind a SAProuter or Message Server?',
       faq9_a: 'Yes. The agent connects to SAP <strong>via outbound RFC on port 33XX</strong> from any server with network access — it does not need to run on the SAP server itself. No inbound connection is needed. SAProuter and Message Server (logon groups) are supported through the <code>systems.yaml</code> configuration file.',
       faq10_q: 'Can I monitor S/4HANA and ECC systems in the same dashboard?',
       faq10_a: 'Yes. SAPscope automatically detects the system type (S/4HANA, ECC, BW, SolMan, PI/PO…) from installed components. All system types are displayed in a <strong>unified landscape view</strong>, with transport routes visualized across the whole STMS domain.',
-      pricing_toggle_monthly: 'Monthly',
-      pricing_toggle_annual: 'Annual',
-      pricing_save_badge: 'Save 17%',
-      pricing_period_year: 'per year',
-      pricing_period_month: 'per month',
-      trial_eyebrow: 'Free Trial',
-      trial_title: 'Try SAPscope free for 30 days',
-      trial_sub: 'Self-hosted on your servers. No credit card required.',
-      trial_name_placeholder: 'Your name (optional)',
-      trial_org_placeholder: 'Company name',
-      trial_email_placeholder: 'Professional email',
-      trial_btn: 'Get my free trial →',
-      trial_success: '✓ Check your email! Your trial kit is on its way.',
-      trial_error_409: 'This email already has an active trial.',
-      trial_error: 'Something went wrong. Try again.',
-      pricing_eyebrow: 'Pricing',
-      pricing_title: 'Self-hosted. Your data stays on your servers.',
-      pricing_sub: 'Annual license. Deploy in 5 minutes with Docker. No cloud dependency.',
-      pricing_popular: '⭐ Most popular',
-      pricing_per_month: 'per year',
-      solo_desc: 'For independent SAP Basis consultants monitoring their own clients.',
-      solo_cta: 'Get a license →',
-      solo_f1: '1 user',
-      solo_f2: 'Up to 3 SAP systems',
-      solo_f3: 'Self-hosted deployment',
-      solo_f4: 'Full history & diff',
-      solo_f5: 'PDF client reports',
-      solo_f6: 'Email support',
-      team_desc: 'For SAP consulting firms managing multiple client landscapes.',
-      team_cta: 'Get a license →',
-      team_f1: '5 users',
-      team_f2: 'Up to 20 SAP systems',
-      team_f3: 'Self-hosted deployment',
-      team_f4: 'Full history & diff',
-      team_f5: 'PDF reports with client logo',
-      team_f6: 'HANA HSR monitoring',
-      team_f7: 'Priority email support',
-      team_f8: '30-day trial available',
-      ent_price: 'Custom',
-      ent_period: 'annual quote',
-      ent_desc: 'For large ESNs with compliance requirements and dedicated infrastructure.',
-      ent_cta: 'Contact us →',
-      ent_f1: 'Unlimited users',
-      ent_f2: 'Unlimited SAP systems',
-      ent_f3: 'Self-hosted deployment',
-      ent_f4: 'White-label (your logo)',
-      ent_f5: 'SSO / Active Directory',
-      ent_f6: 'Guaranteed SLA',
-      ent_f7: 'Dedicated support',
-      ent_f8: 'Perpetual license option',
-      trust1: 'Data stays on your servers',
-      trust2: 'Deploy in 5 min with Docker',
-      trust3: '30-day free trial on Team',
-      trust4: 'Annual license, support included',
-      cta_title: 'Ready to finally see<br>clearly in your SAP?',
-      cta_p: 'Instant activation. Your first results in under 5 minutes.',
-      cta_btn: 'Create my account →',
-      cta_already: 'Already have an account?',
-      cta_signin: 'Sign in →',
+      trial_eyebrow: 'Get started',
+      trial_title: 'Self-hosted. Deploy in 5 minutes.',
+      trial_sub: 'Clone the repo, fill in your .env, run docker compose up. Your data never leaves your servers.',
+      trial_btn: '★ View on GitHub →',
+      trial_contact: 'Request a licence key',
       foot_features: 'Features',
-      foot_pricing: 'Pricing',
       foot_docs: 'Documentation',
-      foot_app: 'Application',
+      foot_github: 'GitHub',
       foot_contact: 'Contact',
-      foot_legal: 'Legal Notice',
-      foot_privacy: 'Privacy',
-      foot_terms: 'Terms of Use',
-      foot_cgv: 'Terms of Sale',
       foot_copy: '© 2026 SAPscope. All rights reserved.'
     },
     fr: {
@@ -1732,16 +1365,13 @@
       og_locale: 'fr_FR',
       nav_features: 'Fonctionnalités',
       nav_how: 'Comment ça marche',
-      nav_trial: 'Essai gratuit',
-      nav_pricing: 'Tarifs',
       nav_docs: 'Documentation',
-      nav_signin: 'Se connecter',
-      nav_cta: 'Essai gratuit →',
-      hero_badge: 'Bêta ouverte — accès gratuit',
+      nav_github: 'GitHub',
+      hero_badge: 'Open Source — auto-hébergé',
       hero_h1: 'Maîtrisez votre<br>paysage SAP.',
       hero_p: 'SAPscope collecte automatiquement les données de vos systèmes SAP et génère des diagnostics d\'architecture précis par intelligence artificielle. En quelques secondes.',
-      hero_cta1: 'Commencer gratuitement →',
-      hero_cta2: 'Découvrir les fonctionnalités',
+      hero_cta1: '★ Voir sur GitHub →',
+      hero_cta2: 'Demander une clé de licence',
       stat1_lbl: 'Pour analyser un système complet',
       stat2_lbl: 'Automatisé — zéro saisie manuelle',
       stat3_lbl: 'Vue composants, patches, objets custom',
@@ -1801,89 +1431,30 @@
       faq2_q: 'Mes données SAP quittent-elles mon infrastructure ?',
       faq2_a: 'Non. L\'agent s\'exécute <strong>sur votre infrastructure</strong> et n\'envoie à SAPscope que des <strong>métriques techniques anonymisées</strong> (performances, jobs, logs système). Aucune donnée métier, aucun contenu de table n\'est transmis.',
       faq3_q: 'Combien de temps prend l\'installation ?',
-      faq3_a: 'Moins de <strong>10 minutes</strong>. Dès votre abonnement activé, vous obtenez une clé API. Il suffit de copier-coller la commande d\'installation de l\'agent sur n\'importe quel serveur avec accès réseau au SAP et de renseigner la clé. C\'est tout.',
+      faq3_a: 'Moins de <strong>10 minutes</strong>. Clonez le repo, copiez <code>deploy/.env.example</code> dans <code>.env</code>, lancez <code>docker compose up -d</code>. Ensuite installez l\'agent sur n\'importe quel serveur ayant accès RFC au SAP. C\'est tout.',
       faq4_q: 'Quels droits SAP sont nécessaires pour l\'agent ?',
       faq4_a: 'Un utilisateur de type <strong>Système (A)</strong> avec un profil d\'autorisation minimal en lecture seule. Nous fournissons un programme ABAP <code>ZSAPSCOPE_SETUP</code> qui crée l\'utilisateur et affecte exactement les autorisations requises. Voir le <a href="/docs#sap-rfc-user-setup">guide RFC</a>.',
       faq5_q: 'L\'IA a-t-elle accès à mes données métier ?',
       faq5_a: 'Non. Les diagnostics IA portent <strong>uniquement sur les métriques techniques</strong> : performances système, statuts des jobs background, logs d\'erreur. Aucune donnée de table (clients, commandes, comptabilité…) n\'est jamais transmise au modèle.',
-      faq6_q: 'Puis-je résilier à tout moment ?',
-      faq6_a: 'Oui, sans engagement ni frais. Vous pouvez résilier depuis votre espace client ou en nous contactant à <a href="mailto:contact@sapscope.com">contact@sapscope.com</a>. La résiliation prend effet à la fin de la période en cours. Nous proposons également une <strong>garantie satisfait ou remboursé de 14 jours</strong>.',
+      faq6_q: 'Comment fonctionne la licence ?',
+      faq6_a: 'SAPscope est <strong>self-hosted</strong> — vous contrôlez votre déploiement. La clé de licence active le moteur d\'analyse IA. Pour obtenir une nouvelle clé ou changer de plan, contactez-nous à <a href="mailto:pro@luku.fr">pro@luku.fr</a>.',
       faq7_q: 'Existe-t-il une offre on-premise / self-hosted ?',
-      faq7_a: 'Oui, <strong>SAPscope est exclusivement self-hosted</strong> — vos données SAP ne quittent jamais votre infrastructure. Vous installez SAPscope avec Docker Compose sur votre propre serveur. <a href="mailto:contact@sapscope.fr">Contactez-nous</a> pour un devis personnalisé.',
+      faq7_a: 'Oui, <strong>SAPscope est exclusivement self-hosted</strong> — vos données SAP ne quittent jamais votre infrastructure. Vous installez SAPscope avec Docker Compose sur votre propre serveur. <a href="mailto:pro@luku.fr">Contactez-nous</a> pour un devis personnalisé.',
       faq8_q: 'À quelle fréquence l\'agent collecte-t-il les données ?',
       faq8_a: 'Par défaut, l\'agent s\'exécute <strong>une fois toutes les 24 heures</strong> via un timer systemd. Vous pouvez ajuster cet intervalle — la collecte horaire est supportée pour les systèmes critiques. Chaque exécution prend moins de 30 secondes et a un impact négligeable sur les performances système.',
       faq9_q: 'SAPscope fonctionne-t-il derrière un SAProuter ou un Message Server ?',
       faq9_a: 'Oui. L\'agent se connecte au SAP <strong>via RFC sortant sur le port 33XX</strong> depuis n\'importe quel serveur ayant un accès réseau — il n\'est pas nécessaire qu\'il tourne sur le serveur SAP lui-même. Aucune connexion entrante requise. SAProuter et Message Server (groupes de logon) sont supportés via <code>systems.yaml</code>.',
       faq10_q: 'Peut-on surveiller des systèmes S/4HANA et ECC dans le même tableau de bord ?',
       faq10_a: 'Oui. SAPscope détecte automatiquement le type de système (S/4HANA, ECC, BW, SolMan, PI/PO…) à partir des composants installés. Tous les types sont affichés dans une <strong>vue landscape unifiée</strong>, avec les routes de transport visualisées sur l\'ensemble du domaine STMS.',
-      pricing_toggle_monthly: 'Mensuel',
-      pricing_toggle_annual: 'Annuel',
-      pricing_save_badge: 'Économisez 17 %',
-      pricing_period_year: 'par an',
-      pricing_period_month: 'par mois',
-      trial_eyebrow: 'Essai gratuit',
-      trial_title: 'Testez SAPscope gratuitement pendant 30 jours',
-      trial_sub: 'Sur vos serveurs. Sans carte bancaire.',
-      trial_name_placeholder: 'Votre nom (optionnel)',
-      trial_org_placeholder: "Nom de l'entreprise",
-      trial_email_placeholder: 'Email professionnel',
-      trial_btn: 'Obtenir mon essai gratuit →',
-      trial_success: '✓ Vérifiez vos emails ! Votre kit d\'essai arrive.',
-      trial_error_409: 'Cet email a déjà un essai en cours.',
-      trial_error: 'Une erreur s\'est produite. Réessayez.',
-      pricing_eyebrow: 'Tarifs',
-      pricing_title: 'Self-hosted. Vos données restent sur vos serveurs.',
-      pricing_sub: 'Licence annuelle. Déploiement en 5 minutes avec Docker. Aucune dépendance cloud.',
-      pricing_popular: '⭐ Le plus populaire',
-      pricing_per_month: 'par an',
-      solo_desc: 'Pour le consultant SAP Basis indépendant qui surveille ses propres clients.',
-      solo_cta: 'Obtenir une licence →',
-      solo_f1: '1 utilisateur',
-      solo_f2: 'Jusqu\'à 3 systèmes SAP',
-      solo_f3: 'Déploiement self-hosted',
-      solo_f4: 'Historique complet & diff',
-      solo_f5: 'Rapports PDF clients',
-      solo_f6: 'Support par email',
-      team_desc: 'Pour les ESN et cabinets de conseil SAP qui gèrent plusieurs landscapes clients.',
-      team_cta: 'Obtenir une licence →',
-      team_f1: '5 utilisateurs',
-      team_f2: 'Jusqu\'à 20 systèmes SAP',
-      team_f3: 'Déploiement self-hosted',
-      team_f4: 'Historique complet & diff',
-      team_f5: 'Rapports PDF avec logo client',
-      team_f6: 'Monitoring HANA HSR',
-      team_f7: 'Support email prioritaire',
-      team_f8: 'Essai 30 jours disponible',
-      ent_price: 'Sur devis',
-      ent_period: 'devis annuel',
-      ent_desc: 'Pour les grandes ESN avec des exigences de conformité et une infrastructure dédiée.',
-      ent_cta: 'Nous contacter →',
-      ent_f1: 'Utilisateurs illimités',
-      ent_f2: 'Systèmes SAP illimités',
-      ent_f3: 'Déploiement self-hosted',
-      ent_f4: 'White-label (votre logo)',
-      ent_f5: 'SSO / Active Directory',
-      ent_f6: 'SLA garanti',
-      ent_f7: 'Support dédié',
-      ent_f8: 'Option licence perpétuelle',
-      trust1: 'Données sur vos serveurs',
-      trust2: 'Déploiement Docker en 5 min',
-      trust3: 'Essai 30 jours sur Team',
-      trust4: 'Licence annuelle, support inclus',
-      cta_title: 'Prêt à enfin voir<br>clair dans votre SAP ?',
-      cta_p: 'Activation immédiate. Vos premiers résultats en moins de 5 minutes.',
-      cta_btn: 'Créer mon compte →',
-      cta_already: 'Déjà un compte ?',
-      cta_signin: 'Se connecter →',
+      trial_eyebrow: 'Démarrer',
+      trial_title: 'Self-hosted. Déployez en 5 minutes.',
+      trial_sub: 'Clonez le repo, renseignez votre .env, lancez docker compose up. Vos données ne quittent jamais vos serveurs.',
+      trial_btn: '★ Voir sur GitHub →',
+      trial_contact: 'Demander une clé de licence',
       foot_features: 'Fonctionnalités',
-      foot_pricing: 'Tarifs',
       foot_docs: 'Documentation',
-      foot_app: 'Application',
+      foot_github: 'GitHub',
       foot_contact: 'Contact',
-      foot_legal: 'Mentions légales',
-      foot_privacy: 'Confidentialité',
-      foot_terms: 'CGU',
-      foot_cgv: 'CGV',
       foot_copy: '© 2026 SAPscope. Tous droits réservés.'
     },
     de: {
@@ -1894,16 +1465,13 @@
       og_locale: 'de_DE',
       nav_features: 'Funktionen',
       nav_how: "So funktioniert's",
-      nav_trial: 'Kostenlos testen',
-      nav_pricing: 'Preise',
       nav_docs: 'Dokumentation',
-      nav_signin: 'Anmelden',
-      nav_cta: 'Kostenlos starten →',
-      hero_badge: 'Offene Beta — kostenloser Zugang',
+      nav_github: 'GitHub',
+      hero_badge: 'Open Source — selbst gehostet',
       hero_h1: 'Behalten Sie Ihre<br>SAP-Landschaft im Blick.',
       hero_p: 'SAPscope sammelt automatisch Daten aus Ihren SAP-Systemen und erstellt präzise Architekturdiagnosen mithilfe von KI. In wenigen Sekunden.',
-      hero_cta1: 'Kostenlos starten →',
-      hero_cta2: 'Funktionen entdecken',
+      hero_cta1: '★ Auf GitHub ansehen →',
+      hero_cta2: 'Lizenzschlüssel anfordern',
       stat1_lbl: 'Zur Analyse eines vollständigen Systems',
       stat2_lbl: 'Automatisiert — keine manuelle Eingabe',
       stat3_lbl: 'Komponenten, Patches, Custom-Objekte',
@@ -1963,89 +1531,30 @@
       faq2_q: 'Verlassen meine SAP-Daten meine Infrastruktur?',
       faq2_a: 'Nein. Der Agent läuft <strong>auf Ihrer Infrastruktur</strong> und sendet an SAPscope nur <strong>anonymisierte technische Metriken</strong> (Performance, Jobs, Systemlogs). Keine Geschäftsdaten, kein Tabelleninhalt wird übertragen.',
       faq3_q: 'Wie lange dauert die Installation?',
-      faq3_a: "Weniger als <strong>10 Minuten</strong>. Sobald Ihr Abonnement aktiviert ist, erhalten Sie einen API-Schlüssel. Kopieren Sie einfach den Installationsbefehl auf einen beliebigen Server mit Netzwerkzugang zu SAP und geben Sie den Schlüssel ein. Das war's.",
+      faq3_a: "Weniger als <strong>10 Minuten</strong>. Repository klonen, <code>deploy/.env.example</code> nach <code>.env</code> kopieren, <code>docker compose up -d</code> starten. Dann den Agenten auf einem beliebigen Server mit RFC-Zugang zu SAP installieren. Das war's.",
       faq4_q: 'Welche SAP-Berechtigungen benötigt der Agent?',
       faq4_a: 'Ein Benutzer vom Typ <strong>System (A)</strong> mit einem minimalen Nur-Lesen-Berechtigungsprofil. Wir stellen ein ABAP-Programm <code>ZSAPSCOPE_SETUP</code> bereit, das den Benutzer erstellt und genau die erforderlichen Berechtigungen zuweist. Siehe <a href="/docs#sap-rfc-user-setup">RFC-Anleitung</a>.',
       faq5_q: 'Hat die KI Zugang zu meinen Geschäftsdaten?',
       faq5_a: 'Nein. KI-Diagnosen basieren <strong>ausschließlich auf technischen Metriken</strong>: System-Performance, Background-Job-Status, Fehlerprotokolle. Keine Tabellendaten (Kunden, Bestellungen, Buchhaltung…) werden jemals an das Modell übermittelt.',
-      faq6_q: 'Kann ich jederzeit kündigen?',
-      faq6_a: 'Ja, ohne Vertragsbindung und ohne Gebühren. Sie können über Ihr Kundenkonto kündigen oder uns unter <a href="mailto:contact@sapscope.com">contact@sapscope.com</a> kontaktieren. Die Kündigung tritt am Ende des laufenden Zeitraums in Kraft. Wir bieten auch eine <strong>14-tägige Geld-zurück-Garantie</strong>.',
+      faq6_q: 'Wie funktioniert die Lizenzierung?',
+      faq6_a: 'SAPscope ist <strong>self-hosted</strong> — Sie kontrollieren Ihre Instanz. Der Lizenzschlüssel aktiviert die KI-Analyse-Engine. Für einen neuen Schlüssel oder einen Planwechsel kontaktieren Sie uns unter <a href="mailto:pro@luku.fr">pro@luku.fr</a>.',
       faq7_q: 'Gibt es eine On-Premise / Self-Hosted-Option?',
-      faq7_a: 'Ja, <strong>SAPscope ist ausschließlich self-hosted</strong> — Ihre SAP-Daten verlassen niemals Ihre Infrastruktur. Sie installieren SAPscope mit Docker Compose auf Ihrem eigenen Server. <a href="mailto:contact@sapscope.fr">Kontaktieren Sie uns</a> für ein individuelles Angebot.',
+      faq7_a: 'Ja, <strong>SAPscope ist ausschließlich self-hosted</strong> — Ihre SAP-Daten verlassen niemals Ihre Infrastruktur. Sie installieren SAPscope mit Docker Compose auf Ihrem eigenen Server. <a href="mailto:pro@luku.fr">Kontaktieren Sie uns</a> für ein individuelles Angebot.',
       faq8_q: 'Wie oft erfasst der Agent Daten?',
       faq8_a: 'Standardmäßig läuft der Agent <strong>einmal alle 24 Stunden</strong> über einen systemd-Timer. Sie können dieses Intervall anpassen — stündliche Erfassung wird für kritische Systeme unterstützt. Jede Ausführung dauert unter 30 Sekunden und hat vernachlässigbare Auswirkungen auf die Systemleistung.',
       faq9_q: 'Funktioniert SAPscope hinter einem SAProuter oder Message Server?',
       faq9_a: 'Ja. Der Agent verbindet sich <strong>über ausgehenden RFC auf Port 33XX</strong> von beliebigen Servern mit Netzwerkzugang — er muss nicht auf dem SAP-Server selbst laufen. Keine eingehende Verbindung erforderlich. SAProuter und Message Server werden über <code>systems.yaml</code> unterstützt.',
       faq10_q: 'Kann ich S/4HANA- und ECC-Systeme im selben Dashboard überwachen?',
       faq10_a: 'Ja. SAPscope erkennt den Systemtyp (S/4HANA, ECC, BW, SolMan, PI/PO…) automatisch anhand installierter Komponenten. Alle Typen werden in einer <strong>einheitlichen Landscape-Ansicht</strong> angezeigt, mit visualisierten Transportrouten über das gesamte STMS-Domain.',
-      pricing_toggle_monthly: 'Monatlich',
-      pricing_toggle_annual: 'Jährlich',
-      pricing_save_badge: '17 % sparen',
-      pricing_period_year: 'pro Jahr',
-      pricing_period_month: 'pro Monat',
-      trial_eyebrow: 'Kostenlose Testversion',
-      trial_title: '30 Tage kostenlos testen',
-      trial_sub: 'Auf Ihren Servern. Keine Kreditkarte erforderlich.',
-      trial_name_placeholder: 'Ihr Name (optional)',
-      trial_org_placeholder: 'Unternehmensname',
-      trial_email_placeholder: 'Geschäftliche E-Mail',
-      trial_btn: 'Kostenlos testen →',
-      trial_success: '✓ Prüfen Sie Ihre E-Mails! Ihr Testpaket ist unterwegs.',
-      trial_error_409: 'Diese E-Mail hat bereits eine aktive Testversion.',
-      trial_error: 'Etwas ist schiefgelaufen. Versuchen Sie es erneut.',
-      pricing_eyebrow: 'Preise',
-      pricing_title: 'Self-hosted. Ihre Daten bleiben auf Ihren Servern.',
-      pricing_sub: 'Jahreslizenz. Deployment in 5 Minuten mit Docker. Keine Cloud-Abhängigkeit.',
-      pricing_popular: '⭐ Am beliebtesten',
-      pricing_per_month: 'pro Jahr',
-      solo_desc: 'Für unabhängige SAP Basis Berater, die ihre eigenen Kunden überwachen.',
-      solo_cta: 'Lizenz anfordern →',
-      solo_f1: '1 Benutzer',
-      solo_f2: 'Bis zu 3 SAP-Systeme',
-      solo_f3: 'Self-hosted Deployment',
-      solo_f4: 'Vollständiger Verlauf & Diff',
-      solo_f5: 'PDF Kundenberichte',
-      solo_f6: 'E-Mail-Support',
-      team_desc: 'Für SAP-Beratungsunternehmen, die mehrere Kundenlandschaften verwalten.',
-      team_cta: 'Lizenz anfordern →',
-      team_f1: '5 Benutzer',
-      team_f2: 'Bis zu 20 SAP-Systeme',
-      team_f3: 'Self-hosted Deployment',
-      team_f4: 'Vollständiger Verlauf & Diff',
-      team_f5: 'PDF-Berichte mit Kundenlogo',
-      team_f6: 'HANA HSR Monitoring',
-      team_f7: 'Prioritäts-E-Mail-Support',
-      team_f8: '30-Tage-Testversion verfügbar',
-      ent_price: 'Auf Anfrage',
-      ent_period: 'Jahresangebot',
-      ent_desc: 'Für große Beratungsunternehmen mit Compliance-Anforderungen und dedizierter Infrastruktur.',
-      ent_cta: 'Kontakt aufnehmen →',
-      ent_f1: 'Unbegrenzte Benutzer',
-      ent_f2: 'Unbegrenzte SAP-Systeme',
-      ent_f3: 'Self-hosted Deployment',
-      ent_f4: 'White-Label (Ihr Logo)',
-      ent_f5: 'SSO / Active Directory',
-      ent_f6: 'Garantierter SLA',
-      ent_f7: 'Dedizierter Support',
-      ent_f8: 'Option Dauerlizenz',
-      trust1: 'Daten auf Ihren Servern',
-      trust2: 'Docker-Deployment in 5 Min',
-      trust3: '30-Tage-Test für Team',
-      trust4: 'Jahreslizenz, Support inklusive',
-      cta_title: 'Bereit, endlich einen klaren<br>Blick auf Ihr SAP zu haben?',
-      cta_p: 'Sofortige Aktivierung. Ihre ersten Ergebnisse in unter 5 Minuten.',
-      cta_btn: 'Konto erstellen →',
-      cta_already: 'Bereits ein Konto?',
-      cta_signin: 'Anmelden →',
+      trial_eyebrow: 'Loslegen',
+      trial_title: 'Self-hosted. In 5 Minuten bereit.',
+      trial_sub: 'Repository klonen, .env ausfüllen, docker compose up starten. Ihre Daten verlassen niemals Ihre Server.',
+      trial_btn: '★ Auf GitHub ansehen →',
+      trial_contact: 'Lizenzschlüssel anfordern',
       foot_features: 'Funktionen',
-      foot_pricing: 'Preise',
       foot_docs: 'Dokumentation',
-      foot_app: 'Anwendung',
+      foot_github: 'GitHub',
       foot_contact: 'Kontakt',
-      foot_legal: 'Impressum',
-      foot_privacy: 'Datenschutz',
-      foot_terms: 'AGB Nutzung',
-      foot_cgv: 'AGB Verkauf',
       foot_copy: '© 2026 SAPscope. Alle Rechte vorbehalten.'
     }
   };
@@ -2109,85 +1618,6 @@
                : supported.includes(browser) ? browser
                : 'en';
     applyLang(lang);
-  })();
-
-  // ── Free Trial form ───────────────────────────────────────────────────────
-  (function() {
-    const form      = document.getElementById('trial-form');
-    const btn       = document.getElementById('trial-submit-btn');
-    const errMsg    = document.getElementById('trial-error-msg');
-    const successEl = document.getElementById('trial-success-msg');
-    if (!form) return;
-
-    function getCurrentLang() {
-      return localStorage.getItem('sapscope_lang_landing') || 'en';
-    }
-
-    function showError(msg) {
-      errMsg.textContent = msg;
-      errMsg.style.display = 'block';
-    }
-
-    function hideError() {
-      errMsg.style.display = 'none';
-    }
-
-    function isValidEmail(email) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-    }
-
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      hideError();
-
-      const name  = document.getElementById('trial-name').value.trim();
-      const org   = document.getElementById('trial-org').value.trim();
-      const email = document.getElementById('trial-email').value.trim();
-      const t     = TRANSLATIONS[getCurrentLang()] || TRANSLATIONS['en'];
-
-      // Validation
-      if (!org) {
-        showError(t.trial_org_placeholder + ' — ' + (getCurrentLang() === 'fr' ? 'champ requis' : getCurrentLang() === 'de' ? 'Pflichtfeld' : 'required field'));
-        document.getElementById('trial-org').focus();
-        return;
-      }
-      if (!email || !isValidEmail(email)) {
-        showError(t.trial_email_placeholder + ' — ' + (getCurrentLang() === 'fr' ? 'format invalide' : getCurrentLang() === 'de' ? 'ungültiges Format' : 'invalid format'));
-        document.getElementById('trial-email').focus();
-        return;
-      }
-
-      // Loading state
-      btn.disabled = true;
-      const originalText = btn.textContent;
-      btn.textContent = getCurrentLang() === 'fr' ? 'Envoi en cours…' : getCurrentLang() === 'de' ? 'Wird gesendet…' : 'Sending…';
-
-      try {
-        const res = await fetch('/api/v1/trial/request', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, org, name })
-        });
-
-        if (res.status === 201) {
-          form.style.display = 'none';
-          successEl.style.display = 'block';
-          successEl.textContent = t.trial_success;
-        } else if (res.status === 409) {
-          showError(t.trial_error_409);
-          btn.disabled = false;
-          btn.textContent = originalText;
-        } else {
-          showError(t.trial_error);
-          btn.disabled = false;
-          btn.textContent = originalText;
-        }
-      } catch (err) {
-        showError((TRANSLATIONS[getCurrentLang()] || TRANSLATIONS['en']).trial_error);
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-    });
   })();
 
   // Lang dropdown
@@ -2269,26 +1699,6 @@
     activate(0);
     startTimer();
   })();
-
-  // ── Pricing toggle ────────────────────────────────────────────────────────
-  var pricingAnnual = true;
-  function togglePricing() {
-    pricingAnnual = !pricingAnnual;
-    var track = document.getElementById('pricing-toggle-track');
-    var labelM = document.getElementById('toggle-label-monthly');
-    var labelA = document.getElementById('toggle-label-annual');
-    track.classList.toggle('annual', pricingAnnual);
-    labelM.classList.toggle('active', !pricingAnnual);
-    labelA.classList.toggle('active', pricingAnnual);
-    document.querySelectorAll('.price-val').forEach(function(el) {
-      var val = pricingAnnual ? el.dataset.annual : el.dataset.monthly;
-      el.textContent = Number(val).toLocaleString('fr-FR');
-    });
-    var t = TRANSLATIONS[getCurrentLang()] || TRANSLATIONS['en'];
-    document.querySelectorAll('.price-period').forEach(function(el) {
-      el.textContent = pricingAnnual ? (t.pricing_period_year || 'per year') : (t.pricing_period_month || 'per month');
-    });
-  }
 
   const dropdown = document.getElementById('lang-dropdown');
   const dropdownBtn = document.getElementById('lang-dropdown-btn');

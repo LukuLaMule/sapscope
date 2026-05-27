@@ -45,6 +45,20 @@ sapscope_license.pem
 backups/
 
 # Claude Code internals
-.claude/worktrees/
+.claude/
 .agents/
 skills-lock.json
+
+# Internal project files — not for public repo
+CLAUDE.md
+
+# Commercial/internal files — not for public repo
+deal-kit/
+stitch/
+stitch-prompt.md
+remotion/
+frontend/index-preview.html
+frontend/legal.html
+frontend/terms.html
+frontend/privacy.html
+frontend/sales.html
