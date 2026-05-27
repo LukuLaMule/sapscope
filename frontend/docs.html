@@ -22,6 +22,20 @@
       --orange:   #fb923c;
       --r:        14px;
       --sidebar:  260px;
+      color-scheme: dark;
+    }
+
+    :root.light {
+      --bg:       #f4f7fc;
+      --bg-2:     #eaf0f9;
+      --card:     #ffffff;
+      --border:   rgba(37,99,235,.18);
+      --border-2: rgba(37,99,235,.09);
+      --fg:       #0d1f38;
+      --fg-2:     rgba(13,31,56,.7);
+      --fg-3:     rgba(13,31,56,.4);
+      --accent:   #2563eb;
+      color-scheme: light;
     }
 
     html, body { height: 100%; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -34,7 +48,21 @@
       background: rgba(10,10,10,.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border-2);
+      transition: background .3s;
     }
+    :root.light nav { background: rgba(244,247,252,.9); }
+    .theme-toggle {
+      background: none; border: none; cursor: pointer; padding: 6px;
+      border-radius: 8px; color: var(--fg-2);
+      display: flex; align-items: center; justify-content: center;
+      transition: color .2s, background .2s;
+    }
+    .theme-toggle:hover { color: var(--fg); background: rgba(255,255,255,.06); }
+    :root.light .theme-toggle:hover { background: rgba(0,0,0,.06); }
+    .theme-toggle svg { width: 17px; height: 17px; transition: transform .4s cubic-bezier(.4,0,.2,1), opacity .25s; }
+    .icon-moon { display: none; }
+    :root.light .icon-sun  { display: none; }
+    :root.light .icon-moon { display: block; }
     .nav-logo { font-size: 15px; font-weight: 700; color: var(--fg); text-decoration: none; }
     .nav-logo span { color: var(--accent); }
     .nav-right { display: flex; gap: 20px; align-items: center; }
@@ -174,11 +202,19 @@
 <body>
 
 <nav>
-  <a href="/" class="nav-logo">SAP<span>scope</span></a>
+  <a href="https://sapscope.com" class="nav-logo">SAP<span>scope</span></a>
   <div class="nav-right">
     <button class="sidebar-toggle" id="sidebarToggle">☰ Guides</button>
-    <a href="/#pricing">Tarifs</a>
-    <a href="/app" class="btn-nav">Accéder à l'app →</a>
+    <a href="https://sapscope.com/#pricing">Tarifs</a>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+    <a href="https://app.sapscope.com" class="btn-nav">Accéder à l'app →</a>
   </div>
 </nav>
 
@@ -194,25 +230,26 @@
 
     <!-- Guides list -->
     <div class="sidebar-section">
-      <div class="sidebar-section-title">Guides utilisateur</div>
-      <a class="sidebar-link" data-guide="guide-01-connexion" onclick="loadGuide(this)">01 — Connexion</a>
-      <a class="sidebar-link" data-guide="guide-02-landscape" onclick="loadGuide(this)">02 — Vue Landscape</a>
-      <a class="sidebar-link" data-guide="guide-03-detail-systeme" onclick="loadGuide(this)">03 — Détail système</a>
-      <a class="sidebar-link" data-guide="guide-04-diagnostic-ia" onclick="loadGuide(this)">04 — Diagnostic IA</a>
-      <a class="sidebar-link" data-guide="guide-05-diff" onclick="loadGuide(this)">05 — Comparaison snapshots</a>
-      <a class="sidebar-link" data-guide="guide-06-export-pdf" onclick="loadGuide(this)">06 — Export PDF</a>
+      <div class="sidebar-section-title" data-nav-section="user_guides">Guides utilisateur</div>
+      <a class="sidebar-link" data-guide="guide-01-connexion" data-nav-en="01 — Login" data-nav-fr="01 — Connexion" onclick="loadGuide(this)">01 — Login</a>
+      <a class="sidebar-link" data-guide="guide-02-landscape" data-nav-en="02 — Landscape View" data-nav-fr="02 — Vue Landscape" onclick="loadGuide(this)">02 — Landscape View</a>
+      <a class="sidebar-link" data-guide="guide-03-detail-systeme" data-nav-en="03 — System Detail" data-nav-fr="03 — Détail système" onclick="loadGuide(this)">03 — System Detail</a>
+      <a class="sidebar-link" data-guide="guide-04-diagnostic-ia" data-nav-en="04 — AI Diagnostics" data-nav-fr="04 — Diagnostic IA" onclick="loadGuide(this)">04 — AI Diagnostics</a>
+      <a class="sidebar-link" data-guide="guide-05-diff" data-nav-en="05 — Snapshot Compare" data-nav-fr="05 — Comparaison snapshots" onclick="loadGuide(this)">05 — Snapshot Compare</a>
+      <a class="sidebar-link" data-guide="guide-06-export-pdf" data-nav-en="06 — PDF Export" data-nav-fr="06 — Export PDF" onclick="loadGuide(this)">06 — PDF Export</a>
+      <a class="sidebar-link" data-guide="guide-12-report" data-nav-en="12 — Scheduled Reports" data-nav-fr="12 — Rapports automatiques" onclick="loadGuide(this)">12 — Scheduled Reports</a>
     </div>
 
     <div class="sidebar-section">
-      <div class="sidebar-section-title">Administration</div>
-      <a class="sidebar-link" data-guide="guide-07-admin-utilisateurs" onclick="loadGuide(this)">07 — Utilisateurs</a>
-      <a class="sidebar-link" data-guide="guide-08-admin-clients-tokens" onclick="loadGuide(this)">08 — Clients &amp; Tokens</a>
-      <a class="sidebar-link" data-guide="guide-09-recovery" onclick="loadGuide(this)">09 — Récupération &amp; edge cases</a>
+      <div class="sidebar-section-title" data-nav-section="admin">Administration</div>
+      <a class="sidebar-link" data-guide="guide-07-admin-utilisateurs" data-nav-en="07 — Users" data-nav-fr="07 — Utilisateurs" onclick="loadGuide(this)">07 — Users</a>
+      <a class="sidebar-link" data-guide="guide-08-admin-clients-tokens" data-nav-en="08 — Clients &amp; Tokens" data-nav-fr="08 — Clients &amp; Tokens" onclick="loadGuide(this)">08 — Clients &amp; Tokens</a>
+      <a class="sidebar-link" data-guide="guide-09-recovery" data-nav-en="09 — Recovery &amp; edge cases" data-nav-fr="09 — Récupération &amp; edge cases" onclick="loadGuide(this)">09 — Recovery &amp; edge cases</a>
     </div>
 
     <div class="sidebar-section">
-      <div class="sidebar-section-title">Installation SAP</div>
-      <a class="sidebar-link" data-guide="sap-rfc-user-setup" onclick="loadGuide(this)">Utilisateur RFC SAP</a>
+      <div class="sidebar-section-title" data-nav-section="sap_install">SAP Setup</div>
+      <a class="sidebar-link" data-guide="sap-rfc-user-setup" data-nav-en="RFC SAP User" data-nav-fr="Utilisateur RFC SAP" onclick="loadGuide(this)">RFC SAP User</a>
     </div>
   </aside>
 
@@ -226,10 +263,28 @@
   let currentLang = 'en';
   let currentGuide = 'guide-01-connexion';
 
+  const NAV_SECTIONS = {
+    user_guides: { en: 'User Guides',    fr: 'Guides utilisateur' },
+    admin:       { en: 'Administration', fr: 'Administration'      },
+    sap_install: { en: 'SAP Setup',      fr: 'Installation SAP'   },
+  };
+
   function setLang(lang) {
     currentLang = lang;
     document.getElementById('btn-en').classList.toggle('active', lang === 'en');
     document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+
+    // Traduire les titres de section
+    document.querySelectorAll('[data-nav-section]').forEach(el => {
+      const key = el.dataset.navSection;
+      if (NAV_SECTIONS[key]) el.textContent = NAV_SECTIONS[key][lang];
+    });
+
+    // Traduire les liens
+    document.querySelectorAll('.sidebar-link[data-nav-en]').forEach(el => {
+      el.textContent = lang === 'fr' ? el.dataset.navFr : el.dataset.navEn;
+    });
+
     renderGuide(currentGuide);
   }
 
@@ -280,6 +335,32 @@
   document.getElementById('sidebarToggle').addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('open');
   });
+
+  // Dark / light toggle
+  (function () {
+    const btn    = document.getElementById('theme-toggle');
+    const htmlEl = document.documentElement;
+    const KEY    = 'sapscope_theme';
+
+    function setTheme(theme) {
+      htmlEl.classList.toggle('light', theme === 'light');
+      localStorage.setItem(KEY, theme);
+    }
+
+    const saved = localStorage.getItem(KEY);
+    if (saved) {
+      setTheme(saved);
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setTheme('light');
+    }
+
+    btn.addEventListener('click', function () {
+      setTheme(htmlEl.classList.contains('light') ? 'dark' : 'light');
+    });
+  })();
+
+  // Appliquer les titres traduits au chargement
+  setLang(currentLang);
 
   // Load from URL hash or default to first guide
   const hash = location.hash.replace('#', '');

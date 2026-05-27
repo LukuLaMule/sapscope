@@ -1,165 +1,183 @@
 🇬🇧 English | 🇫🇷 [Français](README.fr.md)
 
+[![GitHub stars](https://img.shields.io/github/stars/LukuLaMule/sapscope?style=flat-square)](https://github.com/LukuLaMule/sapscope/stargazers)
+[![CI](https://github.com/LukuLaMule/sapscope/actions/workflows/ci.yml/badge.svg)](https://github.com/LukuLaMule/sapscope/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Source%20Available-blue?style=flat-square)](LICENSE)
+[![Docker](https://img.shields.io/badge/deploy-Docker%20Compose-2496ED?style=flat-square&logo=docker)](deploy/)
+[![Python](https://img.shields.io/badge/python-3.12-3776AB?style=flat-square&logo=python)](backend/)
+
 # SAPscope
 
-SAP landscape monitoring and diagnostic tool. Automatically collects metadata from your systems (components, support packages, kernel, custom objects) and generates AI-powered analyses.
+> **AI-powered SAP landscape monitoring for Basis consultants.**  
+> RFC collection + automated diagnostics + PDF reports. Self-hosted. Deploy in 5 minutes.
 
-Two deployment modes: **SaaS** (hosted at sapscope.com) and **self-hosted** (on your own infrastructure).
-
----
-
-## SaaS — Quick start
-
-1. Create an account at [app.sapscope.com](https://app.sapscope.com/app)
-2. Contact [contact@sapscope.com](mailto:contact@sapscope.com) to activate your scope
-3. An administrator creates your SAP client, generates an agent token and sends it to you
-4. Install the agent on your SAP server (see Agent section below)
+Your SAP data never leaves your infrastructure — SAPscope runs entirely on your own servers.
 
 ---
 
-## Self-hosted — Deployment
+## Why SAPscope?
+
+If you're a Basis consultant, you know the drill:
+
+- Open SM51, SM50, ST22, SM21, SPAM, SM37, STMS one by one to build a picture of a system
+- Write manual Word/Excel status reports for clients
+- Realize 3 months later that a support package gap opened up
+
+SAPscope automates all of this. A lightweight Python agent runs on any server with RFC access, collects a complete technical snapshot every 24 hours, and feeds it into an AI analysis engine that generates structured diagnostics with prioritized recommendations.
+
+---
+
+## Features
+
+| | Feature | What it replaces |
+|---|---|---|
+| 🗺️ | **Landscape view** | Manual SM51 + STMS domain overview |
+| 🤖 | **AI diagnostics** | Writing status reports by hand |
+| 📊 | **Health scoring** | 6 domains — Stability, Performance, Connectivity, Infrastructure, Security, Transports |
+| 🔄 | **Snapshot diff** | Manual before/after comparisons |
+| 🔄 | **Cross-system diff** | PRD vs QAS side-by-side component comparison |
+| 📈 | **Predictive trends** | "CRITICAL in 7 days" warnings before incidents |
+| 📉 | **Cross-tier benchmarks** | How does my system compare to others at the same tier? |
+| 🔐 | **Security checks** | Detect SAP_ALL, SAP_NEW, inactive users, default users |
+| 📄 | **PDF client reports** | Auto-generated, scheduled, white-label with client logo |
+| ✅ | **Compliance report** | 10 checks from the SAP Security Guide (SEC-001 to SEC-010) |
+| 💓 | **Agent heartbeat** | Detect decommissioned systems automatically |
+| 🌐 | **HANA HSR monitoring** | M_SYSTEM_REPLICATION — replication lag, mode, status |
+| 📱 | **PWA** | Installable on mobile, works offline |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Your infrastructure                                 │
+│                                                      │
+│  ┌─────────────────┐     ┌────────────────────────┐ │
+│  │  SAP Server(s)  │────▶│  SAPscope Backend      │ │
+│  │                 │ RFC │  (FastAPI + PostgreSQL) │ │
+│  │  pyrfc agent    │     │                        │ │
+│  │  (systemd timer)│     │  AI analysis (Claude)  │ │
+│  └─────────────────┘     └──────────┬─────────────┘ │
+│                                      │               │
+│                           ┌──────────▼─────────────┐ │
+│                           │  React dashboard       │ │
+│                           │  (nginx, served via    │ │
+│                           │   Docker Compose)      │ │
+│                           └────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+```
+
+Stack: **Python 3.12** · **FastAPI** · **PostgreSQL** · **React 18 + TypeScript** · **Anthropic SDK** · **Docker Compose**
+
+---
+
+## Quick start (self-hosted)
 
 ### Prerequisites
 
-- Docker + Docker Compose
-- A SAPscope licence key (contact [contact@sapscope.com](mailto:contact@sapscope.com))
-- An Anthropic API key
+- Docker + Docker Compose v2
+- An Anthropic API key ([console.anthropic.com](https://console.anthropic.com))
 - A reverse proxy with TLS (Traefik, nginx, Caddy…)
+- A SAPscope licence key — request a **free 30-day trial** at [pro@luku.fr](mailto:pro@luku.fr?subject=SAPscope%20Trial)
 
-### Installation
+### 1 — Clone and configure
 
 ```bash
-git clone <repo> sapscope
+git clone https://github.com/LukuLaMule/sapscope.git
 cd sapscope
-cp .env.example .env
+cp deploy/.env.example .env
 ```
 
-Fill in `.env`:
+Edit `.env` (minimum):
 
 ```env
-POSTGRES_PASSWORD=changeme
-SAPSCOPE_JWT_SECRET=a-random-string-of-at-least-32-characters
+POSTGRES_PASSWORD=change-me
+SAPSCOPE_JWT_SECRET=at-least-32-random-characters
 ANTHROPIC_API_KEY=sk-ant-...
-LICENSE_KEY=<your-licence-key>
-REGISTRATION_ENABLED=false
+LICENSE_KEY=<your-trial-key>
 ALLOWED_ORIGINS=https://your-domain.com
 ```
 
-Start:
+### 2 — Start
 
 ```bash
 docker compose up -d
 ```
 
-### First start
-
-Create the administrator account via the API (one-time):
+### 3 — Create admin account
 
 ```bash
-# Temporarily enable registration
-# Set REGISTRATION_ENABLED=true in .env, then restart the backend
+# Enable registration temporarily
+# Set REGISTRATION_ENABLED=true in .env, then:
+docker compose restart backend
 
 curl -X POST https://your-domain.com/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@your-company.com","password":"secure-password"}'
+  -d '{"email":"admin@your-company.com","password":"secure-password-12chars"}'
 
-# Retrieve the user ID from the response, then grant admin rights:
+# Grant admin rights
 docker compose exec db psql -U sapscope -c \
   "UPDATE users SET is_admin = true WHERE email = 'admin@your-company.com';"
 
-# Set REGISTRATION_ENABLED=false again and restart
+# Disable registration
+# Set REGISTRATION_ENABLED=false in .env, then restart backend
 ```
 
-### Generate a licence (vendors only)
+### 4 — Install the SAP agent
+
+On any server with RFC access to your SAP system (Linux):
 
 ```bash
-cd backend
-python generate_license.py --org "Client name" --tier enterprise --months 12
-```
-
-The private key must be in `backend/sapscope_license.pem` (not versioned — keep it safe).
-
-Available tiers:
-
-| Tier       | Users    | SAP Clients |
-|------------|----------|-------------|
-| solo       | 1        | 3           |
-| team       | 5        | 20          |
-| enterprise | unlimited | unlimited  |
-
----
-
-## SAP Agent
-
-The agent is deployed on the SAP application server. It connects via local RFC and sends a snapshot every 24 hours.
-
-### Installation
-
-Run the installer on the SAP application server (Linux, requires root):
-
-```bash
-curl -sSL https://app.sapscope.com/install.sh | sudo bash -s -- \
-  --token <token-from-admin-panel>
-```
-
-The installer will:
-- Detect Python (install if needed)
-- Auto-discover SAP systems from `/usr/sap/`
-- Create a systemd timer for automatic collection
-- Run a first collection immediately
-
-#### Manual installation (without the installer)
-
-```bash
-curl -O https://app.sapscope.com/dist/agent.tar.gz
-curl -O https://app.sapscope.com/dist/agent.tar.gz.sha256
-sha256sum --check agent.tar.gz.sha256
-tar xzf agent.tar.gz && cd agent
+# Clone the agent
+git clone https://github.com/LukuLaMule/sapscope.git
+cd sapscope/agent
 pip install -r requirements.txt
-```
 
-Create a `.env` file:
-
-```env
-SAPSCOPE_BACKEND_URL=https://app.sapscope.com
+# Create .env
+cat > .env << EOF
+SAPSCOPE_BACKEND_URL=https://your-domain.com
 SAPSCOPE_TOKEN=<token-from-admin-panel>
 SAP_USER=SAPSCOPE_RFC
 SAP_PASSWD=<password>
 SAP_CLIENT=100
+EOF
+
+# Test RFC connection (dry-run — does not send data)
+python -m agent --dry-run
+
+# Install systemd timer for automatic 24h collection
+sudo cp deploy/sapscope-agent.service /etc/systemd/system/
+sudo systemctl enable --now sapscope-agent.timer
 ```
 
-Test and run:
+See the full installation guide: [deploy/INSTALL.md](deploy/INSTALL.md)
 
-```bash
-python -m agent --dry-run   # check RFC connection, print JSON
-python -m agent             # collect and send
-```
+---
 
-### Connection modes
+## Agent — Connection modes
 
-By default the agent connects directly to an application server (`ashost` mode). Two additional modes are supported for remote deployments or load-balanced landscapes.
+The agent connects to SAP via outbound RFC on port `33XX` — no software installed on SAP servers, no inbound connection required.
 
-#### Option 1 — `systems.yaml` (recommended for remote / multi-system setups)
-
-Create a `systems.yaml` file next to the agent package:
+### `systems.yaml` — recommended for multi-system or remote deployments
 
 ```yaml
 systems:
-  # Direct connection to application server (default — agent runs on the AS)
+  # Direct connection (agent on the application server)
   - mode: ashost
     ashost: localhost
     sysnr: "00"
     client: "100"
 
-  # Message server — connect via load balancer (agent runs on a separate host)
+  # Via Message Server / load balancer
   - mode: mshost
-    mshost: sapms.company.com   # message server hostname
-    msserv: "3601"              # port or service name (e.g. "sapmsP01")
-    r3name: P01                 # SAP System ID
-    group: PUBLIC               # logon group (default: PUBLIC)
+    mshost: sapms.company.com
+    msserv: "3601"
+    r3name: P01
+    group: PUBLIC
     client: "100"
 
-  # Direct connection through a SAProuter
+  # Via SAProuter
   - mode: ashost
     ashost: 10.0.1.5
     sysnr: "00"
@@ -167,117 +185,74 @@ systems:
     client: "000"
 ```
 
-Credentials (`SAP_USER` / `SAP_PASSWD`) are always read from environment variables. Per-entry `user`/`passwd` overrides are supported but not recommended.
-
-The `systems.yaml` file takes priority over `SAPSCOPE_SYSTEMS` and `/usr/sap/` auto-discovery.
-
-#### Option 2 — `SAPSCOPE_SYSTEMS` env var (simple multi-system on the same host)
+### `SAPSCOPE_SYSTEMS` env var — multiple local SIDs on the same host
 
 ```env
 SAPSCOPE_SYSTEMS=P01:00 Q01:01 D01:02
 ```
 
-Each entry is `SID:SYSNR`, connecting to `localhost` on that system number. Suitable when the agent runs directly on the SAP application server.
-
-#### Discovery priority
+### Discovery priority
 
 | Priority | Source | Use case |
 |---|---|---|
-| 1 | `systems.yaml` | Remote hosts, message server, SAProuter |
-| 2 | `SAPSCOPE_SYSTEMS` env var | Multiple local SIDs on same host |
-| 3 | Auto-discovery from `/usr/sap/` | Single-host auto-detected systems |
+| 1 | `systems.yaml` | Remote hosts, Message Server, SAProuter |
+| 2 | `SAPSCOPE_SYSTEMS` | Multiple local SIDs on same host |
+| 3 | Auto-discovery `/usr/sap/` | Single-host default |
 
-### Required RFC user on the SAP side
+### Required RFC user
 
-See [docs/sap-rfc-user-setup.md](docs/sap-rfc-user-setup.md) for creating the communication user and the minimum required authorisations.
+See [docs/sap-rfc-user-setup.md](docs/sap-rfc-user-setup.md) — minimum read-only authorization profile. An ABAP setup program `ZSAPSCOPE_SETUP` is provided.
 
 ---
 
-## Testing the agent locally (SAP ABAP Trial)
+## Testing with a local SAP system
 
-You can test the full collection pipeline against a free SAP ABAP trial system running on your machine.
-
-### 1 — Start an SAP ABAP Trial container
-
-Requires: Docker, 8 GB RAM, ~150 GB disk, [SAP Universal ID](https://account.sap.com) (free).
+You can test the full pipeline against a free SAP ABAP Trial container.
 
 ```bash
-docker login   # authenticate with your SAP Universal ID
+# Pull the trial image (~150 GB, requires SAP Universal ID)
 docker pull sapse/abap-platform-trial:1909
-
-docker run -d \
-  --name sap-trial \
-  --hostname vhcalnplci \
-  --stop-timeout 3600 \
-  -p 3200:3200 -p 8443:8443 \
+docker run -d --name sap-trial --hostname vhcalnplci \
+  --stop-timeout 3600 -p 3200:3200 -p 8443:8443 \
   sapse/abap-platform-trial:1909
 
-# Follow the boot (takes ~45 min on first run)
-docker logs -f sap-trial | grep -E "started|ICM|Dispatcher"
+# Default: host=localhost, sysnr=00, client=001, user=DEVELOPER, password=ABAPtr1909
+
+# Install NW RFC SDK 7.50 (from SAP Software Downloads, S-User required)
+export SAPNWRFC_HOME=/path/to/nwrfc750
+
+# Run the agent in dry-run mode
+SAP_USER=DEVELOPER SAP_PASSWD=ABAPtr1909 \
+SAP_HOST=localhost SAP_SYSNR=00 SAP_CLIENT=001 \
+SAPSCOPE_BACKEND_URL=https://your-domain.com \
+SAPSCOPE_TOKEN=<token> \
+python -m agent --dry-run
 ```
-
-Default logon: host `localhost`, system number `00`, client `001`, user `DEVELOPER`, password `ABAPtr1909`.
-
-### 2 — Install the SAP NW RFC SDK
-
-Download **SAP NW RFC SDK 7.50** (Linux 64-bit) from [SAP Software Downloads](https://support.sap.com/swdc) (S-User required).
-
-```bash
-unzip nwrfc750*.zip -d /usr/local/sap
-export SAPNWRFC_HOME=/usr/local/sap/nwrfc750
-echo 'export SAPNWRFC_HOME=/usr/local/sap/nwrfc750' >> ~/.bashrc
-```
-
-### 3 — Install agent dependencies
-
-```bash
-cd agent
-pip install -r requirements.txt   # includes pyrfc
-```
-
-### 4 — Setup the RFC user in SAP
-
-- **SE38** → create and execute program `ZSAPSCOPE_SETUP` (source: `docs/ZSAPSCOPE_SETUP.abap`)
-- **SU01** → create user `SAPSCOPE` following `docs/sap-rfc-user-setup.md`
-
-### 5 — Run the agent in dry-run mode
-
-```bash
-SAPSCOPE_BACKEND_URL=https://app.sapscope.com \
-SAPSCOPE_TOKEN=<token-from-admin-panel> \
-SAP_USER=SAPSCOPE \
-SAP_PASSWD=<password> \
-SAP_HOST=localhost \
-SAP_SYSNR=00 \
-SAP_CLIENT=001 \
-SAPSCOPE_SYSTEMS="NPL:00" \
-python -m agent --dry-run   # prints collected JSON, does not send
-```
-
-Remove `--dry-run` to send the snapshot to the backend and see it appear in the UI.
 
 ---
 
 ## Administration
 
-From the web interface (Admin tab, visible only for `is_admin` accounts):
+From the web interface (Admin tab — `is_admin` accounts only):
 
-- **Clients**: create an SAP scope, generate agent tokens, revoke tokens
-- **Users**: create consultant accounts, assign the clients visible to each consultant
+- **Clients**: create a SAP scope, generate agent tokens, revoke tokens
+- **Users**: create consultant accounts, assign client visibility per user
+- **Licence status**: check expiry date and active tier
 
 ---
 
 ## Environment variables
 
-| Variable              | Required | Description                                                  |
-|-----------------------|----------|--------------------------------------------------------------|
-| `DATABASE_URL`        | yes      | asyncpg PostgreSQL URL                                       |
-| `SAPSCOPE_JWT_SECRET` | yes      | JWT secret (min. 32 characters)                              |
-| `ANTHROPIC_API_KEY`   | yes      | Anthropic API key for analyses                               |
-| `LICENSE_KEY`         | self-hosted | Licence JWT signed by SAPscope                           |
-| `REGISTRATION_ENABLED`| no       | `true` (SaaS) / `false` (self-hosted). Default: `true`       |
-| `ALLOWED_ORIGINS`     | no       | Allowed CORS origins. Default: `https://app.sapscope.com`     |
-| `ENV`                 | no       | `development` enables SQL logs and `/docs`. Default: `production` |
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | yes | asyncpg PostgreSQL URL |
+| `SAPSCOPE_JWT_SECRET` | yes | JWT secret — min. 32 characters |
+| `ANTHROPIC_API_KEY` | yes | Anthropic API key for AI analyses |
+| `LICENSE_KEY` | yes | Licence JWT issued by SAPscope |
+| `REGISTRATION_ENABLED` | no | `true` = open registration. Default: `false` |
+| `ALLOWED_ORIGINS` | no | Allowed CORS origins |
+| `ENV` | no | `development` enables SQL logs and `/docs` |
+| `IS_LICENSE_SERVER` | no | `true` enables the licence server endpoints |
 
 ---
 
@@ -289,7 +264,17 @@ curl https://your-domain.com/healthz
 
 ---
 
+## Contributing
+
+Issues, feature requests and pull requests are welcome.  
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the [Roadmap](ROADMAP.md).
+
+Contact: [pro@luku.fr](mailto:pro@luku.fr)
+
+---
+
 ## Licence
 
-Proprietary software — © 2026 SAPscope. All rights reserved.
-Any redistribution or modification without written permission is prohibited.
+Source Available — © 2026 SAPscope (Lucas Lautrec)  
+Self-hosted deployment and reading are permitted. Redistribution or resale without written permission is prohibited.  
+See [LICENSE](LICENSE) for details.
