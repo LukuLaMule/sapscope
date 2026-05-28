@@ -1,5 +1,6 @@
 🇬🇧 English | 🇫🇷 [Français](README.fr.md)
 
+[![Website](https://img.shields.io/badge/website-sapscope.com-31c4d5?style=flat-square)](https://sapscope.com)
 [![GitHub stars](https://img.shields.io/github/stars/LukuLaMule/sapscope?style=flat-square)](https://github.com/LukuLaMule/sapscope/stargazers)
 [![CI](https://github.com/LukuLaMule/sapscope/actions/workflows/ci.yml/badge.svg)](https://github.com/LukuLaMule/sapscope/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Source%20Available-blue?style=flat-square)](LICENSE)
@@ -7,6 +8,8 @@
 [![Python](https://img.shields.io/badge/python-3.12-3776AB?style=flat-square&logo=python)](backend/)
 
 # SAPscope
+
+**[sapscope.com](https://sapscope.com)** · [GitHub](https://github.com/LukuLaMule/sapscope)
 
 > **AI-powered SAP landscape monitoring for Basis consultants.**  
 > RFC collection + automated diagnostics + PDF reports. Self-hosted. Deploy in 5 minutes.
