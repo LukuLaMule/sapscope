@@ -91,21 +91,15 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: GHCR_TOKEN,GHCR_USER
           script: |
-            # Authentification GHCR pour pouvoir puller les images privées
-            echo $GHCR_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
-
-            # Mise à jour du dépôt (nginx.conf, landing page, docker-compose.yml)
             cd /home/opc/Docker/sites/sapscope
+
+            # Mise à jour du dépôt
             git pull origin main
 
-            # Pull des nouvelles images et redémarrage
-            docker compose pull backend frontend
-            docker compose up -d --no-build backend frontend
+            # Build et redémarrage (build local — pas besoin d'auth GHCR)
+            docker compose build backend frontend
+            docker compose up -d backend frontend
 
             # Nettoyage des anciennes images
             docker image prune -f
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GHCR_USER: ${{ github.actor }}
